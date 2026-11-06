@@ -41,6 +41,15 @@ internal static class ZoneTestHooks
         return v != null && v.IsValid() && TrollFrozenWatch.IsFrozenZdo(v.GetZDO());
     }
 
+    /// Item 3: is the point `dx`,`dz` metres from the player inside a base area (the game's PlayerBase effect area - workbench, and the Troll Hub's copy of it, where wild creatures do not spawn)?
+    /// Expected outcome: true inside the area.
+    [TestHook("stt.baseAreaAt")]
+    private static bool BaseAreaAt(float dx, float dz)
+    {
+        Player p = Player.m_localPlayer;
+        return p != null && EffectArea.IsPointInsideArea(p.transform.position + new Vector3(dx, 0f, dz), EffectArea.Type.PlayerBase, 0f);
+    }
+
     /// Zones TrollZones keeps now. Expected outcome: the count (0 = nothing kept).
     [TestHook("stt.keptZones")]
     private static int KeptZones()

@@ -1,0 +1,20 @@
+{
+    "name":  "hub-no-spawn-area",
+    "timeout":  60,
+    "description":  "Item 3 (user 2026-11-06: same as the workbench, just set this range): the Troll Hub carries a copy of the workbench's PlayerBase effect area with NoSpawnRadius (50 m), so no wild creature spawns near it. The hub stands 25 m ahead of the player; a point 45 m behind it (inside 50 m) is inside the base area, a point 70 m behind it is outside.",
+    "steps":  [
+                  { "do":  "use", "block":  "start", "args":  { "slippers":  false, "hub":  true } },
+                  { "do":  "wait", "seconds":  3, "label":  "the game builds the hub object from its ZDO" },
+                  {
+                      "do":  "wait",
+                      "until":  { "check":  "hook", "name":  "stt.baseAreaAt", "args":  { "dx":  0, "dz":  25 }, "expect":  true },
+                      "timeout":  15,
+                      "label":  "the hub's own spot is inside a base area"
+                  },
+                  { "do":  "hook", "name":  "stt.baseAreaAt", "args":  { "dx":  0, "dz":  70 }, "expect":  true, "label":  "45 m beyond the hub: inside the 50 m area" },
+                  { "do":  "hook", "name":  "stt.baseAreaAt", "args":  { "dx":  0, "dz":  95 }, "expect":  false, "label":  "70 m beyond the hub: outside" }
+              ],
+    "asserts":  [
+                    { "check":  "noErrors", "source":  "SteveTheTroll" }
+                ]
+}

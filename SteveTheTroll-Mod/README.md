@@ -167,6 +167,7 @@ Removing a hub with the hammer gives back what it cost.
 - Trolls go to their hub when you log out or take the slippers off, unload there and heal there like at the bed.
 - A troll uses the hub you assigned in the **Troll Hub** tab (F6), or the nearest one within 1000 m (
   `[TrollHub] AutoAssign`).
+- No wild creatures spawn within 50 m of a hub, the same protected base area a workbench gives (`[TrollHub] NoSpawnRadius`, 0 = off, restart after a change).
 - Each hub has a sign (HUB 1, 2, 3 ...). Rename and style it with the pen in the tab or with E on the sign.
 - A troll with a hub does not farm further than 950 m from it. If it ends up more than 1000 m away (and you have not
   told it to

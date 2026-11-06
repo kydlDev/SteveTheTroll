@@ -3,6 +3,7 @@ using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using KydlCore.Common;
+using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Hubs.Domain;
 using SteveTheTroll.Features.Trolls.Backpack.Infrastructure;
 using SteveTheTroll.Integrations.Unity;
@@ -93,6 +94,7 @@ internal static class HubPrefab
 
         int lanterns = AddLanterns(go);
         bool sign = AddSign(go);
+        bool noSpawn = AddNoSpawnArea(go, HubRules.NoSpawnRadius(ModSettings.HubNoSpawnRadius.Value));
         go.AddComponent<TrollHubPiece>();
         Piece piece = go.AddComponent<Piece>();
         piece.m_name = "Troll Hub";
@@ -120,7 +122,7 @@ internal static class HubPrefab
         PieceManager.Instance.AddPiece(new CustomPiece(go, false, cfg));
         ModLog.Info("HubPrefab: " + HubData.PrefabName + " built: " + parts + " of " + HubData.Parts.Length +
                     " part(s), " + cols + " collider(s), " + missing + " missing, " + lanterns + " lantern(s), sign " +
-                    sign);
+                    sign + ", no-spawn area " + noSpawn);
         ModLog.Check("HubPrefab: parts", parts, HubData.Parts.Length, 0, "");
     }
 
@@ -145,6 +147,54 @@ internal static class HubPrefab
         }
 
         return n;
+    }
+
+    /// User 2026-11-06 ("similar to workbench, can literally copy the workbench method, just set this range"): the game's workbench keeps wild creatures from spawning around it with an
+    /// EffectArea of type PlayerBase (a trigger sphere child). That child is copied under the hub and its sphere set to `radius` metres. Expected outcome: true when the area exists.
+    private static bool AddNoSpawnArea(GameObject hub, float radius)
+    {
+        if (radius <= 0f)
+        {
+            ModLog.Info("HubPrefab: NoSpawnRadius 0 - no no-spawn area around the hub");
+            return false;
+        }
+
+        GameObject bench = PrefabManager.Instance.GetPrefab("piece_workbench");
+        EffectArea source = null;
+        if (bench != null)
+        {
+            foreach (EffectArea a in bench.GetComponentsInChildren<EffectArea>(true))
+            {
+                if ((a.m_type & EffectArea.Type.PlayerBase) != 0)
+                {
+                    source = a;
+                    break;
+                }
+            }
+        }
+
+        if (source == null)
+        {
+            ModLog.Warn("HubPrefab: the workbench's PlayerBase effect area was not found - no no-spawn area on the hub");
+            return false;
+        }
+
+        GameObject copy = Object.Instantiate(source.gameObject, hub.transform);
+        copy.name = "hub_no_spawn_area";
+        copy.transform.localPosition = Vector3.zero;
+        copy.transform.localRotation = Quaternion.identity;
+        copy.transform.localScale = Vector3.one;
+        SphereCollider sphere = copy.GetComponent<SphereCollider>();
+        if (sphere == null)
+        {
+            ModLog.Warn("HubPrefab: the workbench's PlayerBase effect area has no sphere collider - no no-spawn area on the hub");
+            Object.DestroyImmediate(copy);
+            return false;
+        }
+
+        sphere.radius = radius;
+        ModLog.Info("HubPrefab: no-spawn area " + radius.ToString("F0") + " m (copy of the workbench's PlayerBase area, type " + source.m_type + ")");
+        return true;
     }
 
     private static Sprite IconOf(string pieceName)

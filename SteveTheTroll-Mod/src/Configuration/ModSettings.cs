@@ -202,6 +202,9 @@ internal static class ModSettings
     public static readonly Tunable<bool> ZoneClaimNearBand = new("TrollZones", "ClaimNearBand", false,
         "D-142: claim unowned objects also in kept zones the game already lists as near. OFF since the user tests of 2026-10-31 (the furthest troll still farmed, also with a 35 m radius); switch ON if a troll near the player stops harvesting.");
 
+    public static readonly Tunable<float> HubNoSpawnRadius = new("TrollHub", "NoSpawnRadius", 50f, 0f, 150f,
+        "User 2026-11-06: no wild creature spawns within this many metres of a Troll Hub - the same base area a workbench has (the game's PlayerBase effect area), so raids behave as at a workbench. 0 = off. Read when the game starts (restart after a change); pieces already built get the new value after a restart too.");
+
     public static readonly Tunable<float> HubSignFontSize = new("TrollHub", "SignFontSize", 20f, 5f, 100f,
         "D-135: font size of the Troll Hub sign (user: 20 after the second test; F7 changes it live); the letters stay on one horizontal line, the board grows with the name.");
 

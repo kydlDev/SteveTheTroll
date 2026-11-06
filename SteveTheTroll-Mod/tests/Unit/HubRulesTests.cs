@@ -100,4 +100,9 @@ public class HubRulesTests
             }
         }
     }
+
+    // user 2026-11-06: the hub's no-spawn area (the workbench's base area) - 0 = off, clamped to 0..150 m
+    [TestCase(50f, 50f)] [TestCase(0f, 0f)] [TestCase(-3f, 0f)] [TestCase(150f, 150f)] [TestCase(999f, 150f)] [TestCase(float.NaN, 0f)]
+    public void NoSpawnRadius_IsClamped(float configured, float expected)
+    { Assert.That(HubRules.NoSpawnRadius(configured), Is.EqualTo(expected)); }
 }

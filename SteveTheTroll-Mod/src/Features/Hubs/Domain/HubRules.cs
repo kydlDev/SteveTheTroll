@@ -13,6 +13,14 @@ namespace SteveTheTroll.Features.Hubs.Domain;
 /// </summary>
 internal static class HubRules
 {
+    /// The no-spawn area around a hub (the workbench's PlayerBase area, user 2026-11-06): the configured metres, 0 = none, never negative, never above MaxNoSpawn. Expected outcome: 0 .. MaxNoSpawn.
+    internal const float MaxNoSpawn = 150f;
+
+    internal static float NoSpawnRadius(float configured)
+    {
+        return configured <= 0f || float.IsNaN(configured) ? 0f : configured > MaxNoSpawn ? MaxNoSpawn : configured;
+    }
+
     internal const int MaxHubs = 10;
 
     internal const float MinSpacing = 1000f,
