@@ -149,6 +149,8 @@ internal static class TrollFrozenWatch
             ModLog.Info("TrollFrozenWatch: " + TrollTaming.Tag(c) + " is loaded but nobody owns it (" + TrollOwnerDiag.Describe(z) + ") - this client claims it");
             z.SetOwner(ZDOMan.GetSessionID());
             owner = z.IsOwner();
+            // 2026-11-06 (full lab run 163541: the same line every 2 s for 20+ s, the claim never stuck - instruction-latency, backpack tests): is the claim itself refused, or does the game release it afterwards?
+            ModLog.Info("TrollFrozenWatch: " + TrollTaming.Tag(c) + " claim result - owner now " + z.GetOwner() + ", this client owns it " + owner + ", persistent " + z.Persistent + ", ZDO sector " + z.GetSector() + ", player zone " + ZoneSystem.GetZone(Player.m_localPlayer.transform.position));
         }
 
         bool travelling = z.GetInt(TravelKey, 0) == 1;

@@ -112,7 +112,11 @@ internal static class TrollIdle
                 if (full && why != null && (!WhySaid.TryGetValue(id, out said) || Time.time - said > 30f))
                 {
                     WhySaid[id] = Time.time;
-                    ModLog.Info("TrollIdle: " + Shown(c) + " has a full backpack but is not sent to the depot: " + why);
+                    MonsterAI wai = c.GetComponent<MonsterAI>();
+                    Character wt = wai != null ? wai.GetTargetCreature() : null;
+                    // 2026-11-06 (cliff tests: "fighting" with nothing in the log - any target creature counts): name it, with its distance and whether it is dead / tamed
+                    string who = why == IdleRules.FightReason && wt != null ? " (target " + wt.name + ", " + Vector3.Distance(wt.transform.position, c.transform.position).ToString("F0") + " m away, tamed " + wt.IsTamed() + ", dead " + wt.IsDead() + ")" : "";
+                    ModLog.Info("TrollIdle: " + Shown(c) + " has a full backpack but is not sent to the depot: " + why + who);
                 }
 
                 continue;

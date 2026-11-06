@@ -54,10 +54,11 @@
                       "name":  "stt.pack",
                       "args":  {
                                    "troll":  "troll",
-                                   "prefab":  "Wood",
+                                   "prefab":  "Flint",
                                    "count":  10
                                },
-                      "expect":  0
+                      "expect":  0,
+                      "label":  "a DIFFERENT item (Wood 7 + Wood 10 would merge into one stack of 17 - run 163541)"
                   },
                   {
                       "do":  "hook",
@@ -81,7 +82,7 @@
                       "name":  "stt.backpackCount",
                       "args":  {
                                    "troll":  "troll",
-                                   "prefab":  "Wood"
+                                   "prefab":  "Flint"
                                },
                       "expect":  10
                   },

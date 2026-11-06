@@ -327,6 +327,27 @@ internal static partial class TrollDepot
             DepotGround.Flatten(at, rot); // D-095: uneven spot -> the ground is levelled first
         }
 
+        // 2026-11-06 (lab runs 144859 / 152341: "depot built" twice at the same spot 10-14 s apart, 8 chest ZDOs on 4 places): the first depot's chests were no longer scene objects (the zone round the player unloads them), Room() found none, so a second frame went on top.
+        // Logged here so the log says it was a duplicate and how many chests already stand there as ZDOs.
+        int unseen = 0;
+        var known = new List<ZDO>();
+        int zi = 0, zg = 0;
+        while (!ZDOMan.instance.GetAllZDOsWithPrefabIterative(DepotData.ChestPrefab, known, ref zi) && zg++ < 10000)
+        {
+        }
+
+        foreach (ZDO z in known)
+        {
+            if (z.GetBool(FlagKey) && z.GetLong(OwnerKey) == owner && Flat(z.GetPosition() - at) < 2.5f && ZNetScene.instance.FindInstance(z) == null)
+            {
+                unseen++;
+            }
+        }
+
+        if (unseen > 0)
+        {
+            ModLog.Warn("TrollDepot: " + TrollTaming.Tag(troll) + " builds a depot at " + at.ToString("F1") + " although " + unseen + " depot chest(s) of this owner already exist there as saved objects that are not loaded (the player is too far) - a DUPLICATE, the old chests keep their items");
+        }
         if (Place(at, rot, owner) == null)
         {
             return false;

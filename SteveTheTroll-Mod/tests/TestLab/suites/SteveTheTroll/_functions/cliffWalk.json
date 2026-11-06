@@ -54,6 +54,7 @@
       },
       "label": "no tree, rock, stump or bush on the straight line (the ledge walk refuses solid things at chest height)"
     },
+    { "do": "hook", "name": "stt.clearMobs", "args": { "radius": 130 }, "label": "no wild creature near the cliff (run 164229: a troll 85 m away made the walker 'fighting', so it never started its unload trip)" },
     {
       "if": "{{up}}",
       "do": "hook",
