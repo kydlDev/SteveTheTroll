@@ -1,3 +1,4 @@
+using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using KydlCore.Common;
 using KydlCore.Features.Diagnostics.Contracts;
 using SteveTheTroll.Features.Trolls.Combat.Infrastructure;
@@ -44,6 +45,6 @@ internal sealed partial class TrollFarmer
                     ", owner here " + (view != null && view.IsValid() && view.IsOwner()) + ", kinematic " + (body != null && body.isKinematic) +
                     ", dead " + (me != null && me.IsDead()) + ", in attack " + (me != null && me.InAttack()) +
                     ", chase " + (GetComponent<TrollChase>() != null) + ", rage " + (GetComponent<TrollRage>() != null) + ", walk-back " + (GetComponent<TrollReturn>() != null) +
-                    ", position " + transform.position.ToString("F0"));
+                    ", position " + transform.position.ToString("F0") + ", " + TrollOwnerDiag.Describe(view != null && view.IsValid() ? view.GetZDO() : null));
     }
 }

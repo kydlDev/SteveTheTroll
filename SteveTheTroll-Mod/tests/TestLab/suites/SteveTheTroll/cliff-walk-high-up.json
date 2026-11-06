@@ -1,0 +1,38 @@
+{
+  "name": "cliff-walk-high-up",
+  "description": "2026-11-06 (user: other kinds of cliffs, a mountain too): a full troll walks home to a hub over a high cliff, up, by the whole recovery ladder (the game's path or the ledge walk) and unloads; the ledge counters are logged. Needs such a cliff within 120 m of the arena.",
+  "timeout": 150,
+  "steps": [
+    {
+      "do": "use",
+      "block": "start",
+      "args": {
+        "slippers": true,
+        "hub": false
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.resetLedgeStats",
+      "expect": true,
+      "label": "no ledge walk counted yet"
+    },
+    {
+      "do": "use",
+      "block": "cliffWalk",
+      "args": {
+        "kind": "high",
+        "radius": 120,
+        "up": true,
+        "down": false,
+        "forced": false
+      }
+    }
+  ],
+  "asserts": [
+    {
+      "check": "noErrors",
+      "source": "SteveTheTroll"
+    }
+  ]
+}

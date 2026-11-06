@@ -1,113 +1,38 @@
 {
-    "name":  "cliff-walk-down",
-    "timeout":  150,
-    "description":  "Item 5 (user 2026-11-06: also in every walk, and down / up cliffs in meadows): a full troll walks home to a hub on the other side of a 4 - 15 m terrain step and goes down over it (the shared recovery, a hub goal; the game's path may have no way over the step - then the ledge walk crosses). Needs a cliff within 120 m of the arena (stt.findCliff); fails with its text when the world has none.",
-    "steps":  [
-        {
-            "do":  "use",
-            "block":  "start",
-            "args":  {
-                "slippers":  true,
-                "hub":  false
-            }
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.findCliff",
-            "args":  {
-                "radius":  120
-            },
-            "contains":  " | ",
-            "label":  "a cliff exists in the loaded terrain near the arena"
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.teleportToCliff",
-            "args":  {
-                "up":  false
-            },
-            "label":  "the player stands next to the cliff"
-        },
-        {
-            "do":  "wait",
-            "seconds":  12,
-            "label":  "the zones around the cliff load"
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.spawnAtCliff",
-            "args":  {
-                "up":  false
-            },
-            "as":  "troll"
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.addHubAtCliff",
-            "label":  "the hub stands on the far side of the cliff"
-        },
-        {
-            "do":  "wait",
-            "seconds":  2
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.stepAside",
-            "args":  {
-                "dx":  10,
-                "dz":  0
-            },
-            "label":  "the player stays out of the troll's way"
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.followTroll",
-            "args":  {
-                "troll":  "troll"
-            }
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.fillBackpack",
-            "args":  {
-                "troll":  "troll"
-            }
-        },
-        {
-            "do":  "wait",
-            "until":  {
-                "check":  "hook",
-                "name":  "stt.returningToUnload",
-                "args":  {
-                    "troll":  "troll"
-                },
-                "expect":  true
-            },
-            "timeout":  10
-        },
-        {
-            "do":  "wait",
-            "until":  {
-                "check":  "hook",
-                "name":  "stt.followedBackpackAtMost",
-                "args":  {
-                    "stacks":  0
-                },
-                "expect":  true
-            },
-            "timeout":  100,
-            "label":  "within 100 s the troll crossed the cliff, reached the hub and unloaded"
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.cliffDistance",
-            "label":  "distance of the troll to the hub (diagnosis)"
-        }
-    ],
-    "asserts":  [
-        {
-            "check":  "noErrors",
-            "source":  "SteveTheTroll"
-        }
-    ]
+  "name": "cliff-walk-down",
+  "description": "Item 5 (user 2026-11-06: also in every walk, and down / up cliffs in meadows): a full troll walks home to a hub on the other side of a 4 - 15 m terrain step, down (the shared recovery, a hub goal; the game's path or the ledge walk). Needs a cliff within 120 m of the arena (stt.findCliffKind medium); fails with its text when the world has none.",
+  "timeout": 150,
+  "steps": [
+    {
+      "do": "use",
+      "block": "start",
+      "args": {
+        "slippers": true,
+        "hub": false
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.resetLedgeStats",
+      "expect": true,
+      "label": "no ledge walk counted yet"
+    },
+    {
+      "do": "use",
+      "block": "cliffWalk",
+      "args": {
+        "kind": "medium",
+        "radius": 120,
+        "up": false,
+        "down": true,
+        "forced": false
+      }
+    }
+  ],
+  "asserts": [
+    {
+      "check": "noErrors",
+      "source": "SteveTheTroll"
+    }
+  ]
 }

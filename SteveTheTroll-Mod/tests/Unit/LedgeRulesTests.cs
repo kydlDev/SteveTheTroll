@@ -21,6 +21,9 @@ public class LedgeRulesTests
     [TestCase(1.5f, 0f, 0f, true)] [TestCase(20f, 39.9f, 1.9f, false)] [TestCase(20f, 40f, 0f, true)] [TestCase(20f, 5f, 2f, true)]
     public void Done(float toGoal, float elapsed, float stalled, bool expected) { Assert.That(LedgeRules.Done(toGoal, elapsed, stalled), Is.EqualTo(expected)); }
 
+    [TestCase(1.5f, 0f, 0f, "arrived")] [TestCase(20f, 40f, 0f, "timeout")] [TestCase(20f, 5f, 2f, "stalled")] [TestCase(20f, 5f, 0.5f, "running")] [TestCase(1f, 50f, 5f, "arrived")]
+    public void Outcome(float toGoal, float elapsed, float stalled, string expected) { Assert.That(LedgeRules.Outcome(toGoal, elapsed, stalled), Is.EqualTo(expected)); }
+
     [Test] public void CliffAhead_LedgeWalkComesBeforeAnyDetour()
     {
         var m = new RecoveryMachine();

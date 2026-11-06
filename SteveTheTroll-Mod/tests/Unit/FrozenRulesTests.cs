@@ -7,6 +7,9 @@ namespace SteveTheTroll.Tests.Unit;
 [TestFixture]
 public class FrozenRulesTests
 {
+    [TestCase(0L, true)] [TestCase(1L, false)] [TestCase(709060242L, false)]
+    public void ShouldClaim_OnlyAnUnownedTroll(long ownerId, bool expected) { Assert.That(FrozenRules.ShouldClaim(ownerId), Is.EqualTo(expected)); }
+
     [TestCase(0f, false)] [TestCase(0.49f, false)] [TestCase(0.5f, true)] [TestCase(30f, true)]
     public void Moved(float metres, bool expected) { Assert.That(FrozenRules.Moved(metres), Is.EqualTo(expected)); }
 

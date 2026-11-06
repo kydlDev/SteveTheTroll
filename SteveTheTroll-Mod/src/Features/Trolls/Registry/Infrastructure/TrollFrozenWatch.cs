@@ -35,6 +35,9 @@ internal static class TrollFrozenWatch
     /// Test override (stt.forceTravelling): every own loaded troll counts as "should be travelling". Reset by stt.reset.
     internal static bool TestForceTravelling;
 
+    /// How many ownerless loaded own trolls this session's watch claimed (the farm-friend-detour tests read it).
+    internal static int OwnerClaims;
+
     /// Test hook support: is the troll with this ZDO frozen now? Expected outcome: true from the first rung on.
     internal static bool IsFrozenZdo(ZDO z)
     {
@@ -133,6 +136,14 @@ internal static class TrollFrozenWatch
         ZNetView view = ZNetScene.instance.FindInstance(z);
         Character c = view != null ? view.GetComponent<Character>() : null;
         bool owner = z.IsOwner();
+        if (c != null && !owner && FrozenRules.ShouldClaim(z.GetOwner()))
+        {
+            OwnerClaims++;
+            ModLog.Info("TrollFrozenWatch: " + TrollTaming.Tag(c) + " is loaded but nobody owns it (" + TrollOwnerDiag.Describe(z) + ") - this client claims it");
+            z.SetOwner(ZDOMan.GetSessionID());
+            owner = z.IsOwner();
+        }
+
         bool travelling = z.GetInt(TravelKey, 0) == 1;
         if (c != null && owner)
         {

@@ -195,6 +195,11 @@ internal sealed partial class TrollRecovery : MonoBehaviour
         ITrollCombat combat = _ctx.Capabilities.Combat;
         float now = Time.time;
         bool alive = combat != null && !combat.IsDead;
+        if (_forcedLedge && alive)
+        {
+            return ForcedLedge(dt, goal, goalObject);
+        }
+
         float d = 0f, stuck = 0f, sustained = 0f;
         bool legDone = false, rageable = false, headOn = false, cliffAhead = false, ledgeOk = false, ledgeDone = false;
         if (alive)

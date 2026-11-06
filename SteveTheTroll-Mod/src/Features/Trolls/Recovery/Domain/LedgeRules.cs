@@ -45,4 +45,20 @@ internal static class LedgeRules
     {
         return flatDistanceToGoal <= ArriveMetres || elapsedSeconds >= MaxSeconds || stalledSeconds >= StallSeconds;
     }
+
+    /// How a ledge walk ended, for the log and the test counters. Expected outcome: "arrived" within ArriveMetres of the goal, else "timeout" at MaxSeconds, else "stalled" at StallSeconds, else "running".
+    internal static string Outcome(float flatDistanceToGoal, float elapsedSeconds, float stalledSeconds)
+    {
+        if (flatDistanceToGoal <= ArriveMetres)
+        {
+            return "arrived";
+        }
+
+        if (elapsedSeconds >= MaxSeconds)
+        {
+            return "timeout";
+        }
+
+        return stalledSeconds >= StallSeconds ? "stalled" : "running";
+    }
 }

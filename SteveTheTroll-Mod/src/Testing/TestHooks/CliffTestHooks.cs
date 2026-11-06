@@ -1,5 +1,6 @@
 using System.Globalization;
 using KydlCore.Common;
+using SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Testing.TestHooks;
@@ -23,6 +24,63 @@ internal static class CliffTestHooks
     [TestHook("stt.findCliff")]
     private static string FindCliff(float radius)
     {
+        return Search(radius, 4f, 15f, 6f, 12f, true, 0f, 4f);
+    }
+
+    /// Like stt.findCliff for a KIND of cliff: "small" (2.5 - 4 m step), "medium" (4 - 15 m), "high" (9 - 15 m, steep), "mountain" (15 - 40 m rise over 15 - 45 m, a slope of at least 0.6, no flat ends).
+    /// Expected outcome: "bottom x,z | top x,z | height m" or "none ..." (the loaded terrain has no such cliff).
+    [TestHook("stt.findCliffKind")]
+    private static string FindCliffKind(float radius, string kind)
+    {
+        switch (kind)
+        {
+            case "small": return Search(radius, 2.5f, 4f, 3f, 6f, true, 0f, 4f);
+            case "high": return Search(radius, 9f, 15f, 6f, 12f, true, 0f, 4f);
+            case "mountain": return Search(radius, 15f, 40f, 15f, 45f, false, 0.6f, 8f);
+            default: return Search(radius, 4f, 15f, 6f, 12f, true, 0f, 4f);
+        }
+    }
+
+    /// The troll followed by stt.followTroll walks its next walk over the LEDGE WALK at once (TrollRecovery.TestForceLedge), so the walk itself is tested on any cliff. Expected outcome: true when it has a recovery to force.
+    [TestHook("stt.forceLedge")]
+    private static bool ForceLedge()
+    {
+        ZDO z = TestHooks.FollowedZdo();
+        ZNetView view = z != null && ZNetScene.instance != null ? ZNetScene.instance.FindInstance(z) : null;
+        TrollRecovery rec = view != null ? view.GetComponent<TrollRecovery>() : null;
+        if (rec == null)
+        {
+            return false;
+        }
+
+        rec.TestForceLedge();
+        return true;
+    }
+
+    /// Have at least `min` ledge walks arrived at their goal this session? Expected outcome: true once they have.
+    [TestHook("stt.ledgeArrived")]
+    private static bool LedgeArrivedAtLeast(int min)
+    {
+        return TrollRecovery.LedgeArrived >= min;
+    }
+
+    /// The ledge walk counters as text (diagnosis), e.g. "started 1, arrived 1, stalled 0, timed out 0". Expected outcome: the line.
+    [TestHook("stt.ledgeStats")]
+    private static string LedgeStatsText()
+    {
+        return TrollRecovery.LedgeStats();
+    }
+
+    /// Zeroes the ledge walk counters (a test starts with no walks counted). Expected outcome: true.
+    [TestHook("stt.resetLedgeStats")]
+    private static bool ResetLedgeStats()
+    {
+        TrollRecovery.LedgeStarted = TrollRecovery.LedgeArrived = TrollRecovery.LedgeStalledEnds = TrollRecovery.LedgeTimeouts = 0;
+        return true;
+    }
+
+    private static string Search(float radius, float minRise, float maxRise, float minRun, float maxRun, bool flatEnds, float minSlope, float gridStep)
+    {
         ZoneSystem zs = ZoneSystem.instance;
         Player p = Player.m_localPlayer;
         if (zs == null || p == null)
@@ -31,8 +89,8 @@ internal static class CliffTestHooks
         }
 
         Vector3 c = p.transform.position;
-        for (float x = -radius; x <= radius; x += 4f)
-        for (float z = -radius; z <= radius; z += 4f)
+        for (float x = -radius; x <= radius; x += gridStep)
+        for (float z = -radius; z <= radius; z += gridStep)
         {
             Vector3 a = c + new Vector3(x, 0f, z);
             if (!zs.IsZoneLoaded(ZoneSystem.GetZone(a)))
@@ -50,7 +108,7 @@ internal static class CliffTestHooks
             {
                 float ang = k * 45f * Mathf.Deg2Rad;
                 var dir = new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang));
-                for (float m = 6f; m <= 12f; m += 3f)
+                for (float m = minRun; m <= maxRun; m += Mathf.Max(3f, (maxRun - minRun) / 3f))
                 {
                     Vector3 b = a + dir * m;
                     if (!zs.IsZoneLoaded(ZoneSystem.GetZone(b)))
@@ -59,8 +117,8 @@ internal static class CliffTestHooks
                     }
 
                     float hb = zs.GetGroundHeight(b), rise = hb - ha;
-                    if (Mathf.Abs(rise) < 4f || Mathf.Abs(rise) > 15f || hb < zs.m_waterLevel + 1f || Mathf.Abs(zs.GetGroundHeight(b + dir * 2f) - hb) > 1.5f
-                        || Mathf.Abs(zs.GetGroundHeight(a - dir * 2f) - ha) > 1.5f)
+                    if (Mathf.Abs(rise) < minRise || Mathf.Abs(rise) > maxRise || Mathf.Abs(rise) / m < minSlope || hb < zs.m_waterLevel + 1f
+                        || (flatEnds && (Mathf.Abs(zs.GetGroundHeight(b + dir * 2f) - hb) > 1.5f || Mathf.Abs(zs.GetGroundHeight(a - dir * 2f) - ha) > 1.5f)))
                     {
                         continue;
                     }

@@ -1,0 +1,151 @@
+{
+  "description": "2026-11-06: a full troll walks home to a hub on the far side of a cliff of the given `kind` (small / medium / high / mountain), `up` or down. Finds the cliff in the loaded terrain, takes the player and the troll there, builds the hub on the far side, fills the backpack and waits for the unload. With `forced` the troll is sent over the LEDGE WALK at once (stt.forceLedge) and the walk must arrive. Leaves the troll as tag `troll`; the ledge counters are logged as the last step.",
+  "params": {
+    "kind": "medium",
+    "radius": 120,
+    "up": true,
+    "down": false,
+    "forced": false
+  },
+  "steps": [
+    {
+      "do": "hook",
+      "name": "stt.findCliffKind",
+      "args": {
+        "radius": "{{radius}}",
+        "kind": "{{kind}}"
+      },
+      "contains": " | ",
+      "label": "a {{kind}} cliff exists in the loaded terrain near the arena"
+    },
+    {
+      "if": "{{up}}",
+      "do": "hook",
+      "name": "stt.teleportToCliff",
+      "args": {
+        "up": true
+      },
+      "label": "the player stands next to the cliff (up)"
+    },
+    {
+      "if": "{{down}}",
+      "do": "hook",
+      "name": "stt.teleportToCliff",
+      "args": {
+        "up": false
+      },
+      "label": "the player stands next to the cliff (down)"
+    },
+    {
+      "do": "wait",
+      "seconds": 12,
+      "label": "the zones around the cliff load"
+    },
+    {
+      "if": "{{up}}",
+      "do": "hook",
+      "name": "stt.spawnAtCliff",
+      "args": {
+        "up": true
+      },
+      "as": "troll"
+    },
+    {
+      "if": "{{down}}",
+      "do": "hook",
+      "name": "stt.spawnAtCliff",
+      "args": {
+        "up": false
+      },
+      "as": "troll"
+    },
+    {
+      "do": "hook",
+      "name": "stt.addHubAtCliff",
+      "label": "the hub stands on the far side of the cliff"
+    },
+    {
+      "do": "wait",
+      "seconds": 2
+    },
+    {
+      "do": "hook",
+      "name": "stt.stepAside",
+      "args": {
+        "dx": 10,
+        "dz": 0
+      },
+      "label": "the player stays out of the troll's way"
+    },
+    {
+      "do": "hook",
+      "name": "stt.followTroll",
+      "args": {
+        "troll": "troll"
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.fillBackpack",
+      "args": {
+        "troll": "troll"
+      }
+    },
+    {
+      "do": "wait",
+      "until": {
+        "check": "hook",
+        "name": "stt.returningToUnload",
+        "args": {
+          "troll": "troll"
+        },
+        "expect": true
+      },
+      "timeout": 10
+    },
+    {
+      "if": "{{forced}}",
+      "do": "hook",
+      "name": "stt.forceLedge",
+      "expect": true,
+      "label": "the troll walks the rest of its way over the ledge walk"
+    },
+    {
+      "if": "{{forced}}",
+      "do": "wait",
+      "until": {
+        "check": "hook",
+        "name": "stt.ledgeArrived",
+        "args": {
+          "min": 1
+        },
+        "expect": true
+      },
+      "timeout": 45,
+      "label": "a ledge walk arrived at its goal"
+    },
+    {
+      "do": "wait",
+      "until": {
+        "check": "hook",
+        "name": "stt.followedBackpackAtMost",
+        "args": {
+          "stacks": 0
+        },
+        "expect": true
+      },
+      "timeout": 100,
+      "label": "within 100 s the troll crossed the cliff, reached the hub and unloaded"
+    },
+    {
+      "do": "hook",
+      "name": "stt.cliffDistance",
+      "label": "distance of the troll to the hub (diagnosis)"
+    },
+    {
+      "do": "hook",
+      "name": "stt.ledgeStats",
+      "label": "ledge walk counters (diagnosis)"
+    }
+  ]
+}

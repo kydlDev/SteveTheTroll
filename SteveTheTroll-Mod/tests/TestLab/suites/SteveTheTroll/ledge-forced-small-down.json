@@ -1,0 +1,66 @@
+{
+  "name": "ledge-forced-small-down",
+  "description": "2026-11-06 (user: prove the cliff walk from the logs, other kinds of cliffs, a mountain too): the troll is FORCED over the ledge walk (stt.forceLedge) on a small cliff, down - the walk itself arrives within 1.5 m of the hub and the log says RESULT arrived. Needs such a cliff within 120 m of the arena (stt.findCliffKind); fails with its text when the loaded world has none.",
+  "timeout": 150,
+  "steps": [
+    {
+      "do": "use",
+      "block": "start",
+      "args": {
+        "slippers": true,
+        "hub": false
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.resetLedgeStats",
+      "expect": true,
+      "label": "no ledge walk counted yet"
+    },
+    {
+      "do": "use",
+      "block": "cliffWalk",
+      "args": {
+        "kind": "small",
+        "radius": 120,
+        "up": false,
+        "down": true,
+        "forced": true
+      }
+    }
+  ],
+  "asserts": [
+    {
+      "check": "logContains",
+      "source": "SteveTheTroll",
+      "text": "ledge walk over",
+      "expect": true,
+      "label": "the log shows the ledge walk ending"
+    },
+    {
+      "check": "logContains",
+      "source": "SteveTheTroll",
+      "text": "RESULT arrived",
+      "expect": true,
+      "label": "the log says the ledge walk ARRIVED (not stalled, not timed out)"
+    },
+    {
+      "check": "logContains",
+      "source": "SteveTheTroll",
+      "text": "RESULT stalled",
+      "expect": false,
+      "label": "no ledge walk stalled"
+    },
+    {
+      "check": "logContains",
+      "source": "SteveTheTroll",
+      "text": "RESULT timeout",
+      "expect": false,
+      "label": "no ledge walk timed out"
+    },
+    {
+      "check": "noErrors",
+      "source": "SteveTheTroll"
+    }
+  ]
+}

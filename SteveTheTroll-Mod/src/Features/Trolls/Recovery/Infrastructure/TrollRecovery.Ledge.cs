@@ -14,8 +14,56 @@ namespace SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
 internal sealed partial class TrollRecovery
 {
     private static readonly RaycastHit[] LedgeHits = new RaycastHit[8];
+    private string _lastBlocker = "";
     private Vector3 _ledgeStart, _ledgeLast;
     private float _ledgeBegan, _ledgeStalled;
+    private bool _forcedLedge, _forcedStarted;
+
+    /// Counters of every ledge walk of this session (the cliff tests read them): started, and how each one ended.
+    internal static int LedgeStarted, LedgeArrived, LedgeStalledEnds, LedgeTimeouts;
+
+    /// The counters as one line. Expected outcome: "started n, arrived n, stalled n, timed out n".
+    internal static string LedgeStats()
+    {
+        return "started " + LedgeStarted + ", arrived " + LedgeArrived + ", stalled " + LedgeStalledEnds + ", timed out " + LedgeTimeouts;
+    }
+
+    /// Test hook support: the next walk of this troll goes over the ledge walk at once (no waiting for the troll to be stuck), so the walk itself can be tested on any cliff.
+    internal void TestForceLedge()
+    {
+        _forcedLedge = true;
+        _forcedStarted = false;
+    }
+
+    // The forced ledge walk of TestForceLedge: it replaces the whole ladder until it ends. Expected outcome: true = it drove the troll this frame.
+    private bool ForcedLedge(float dt, Vector3 goal, GameObject goalObject)
+    {
+        _goal = goal;
+        _goalObject = goalObject;
+        _lastTick = Time.time;
+        _d = Flat(goal);
+        ITrollMovement mv = _ctx.Capabilities.Movement;
+        if (mv == null)
+        {
+            return false;
+        }
+
+        if (!_forcedStarted)
+        {
+            _forcedStarted = true;
+            OnStartLedge();
+        }
+
+        if (LedgeDone(dt))
+        {
+            OnEndLedge();
+            _forcedLedge = false;
+            _forcedStarted = false;
+            return false;
+        }
+
+        return LedgeStep(dt, mv);
+    }
 
     /// What the terrain ahead of a stuck troll looks like: `cliff` = it rises / falls by LedgeRules.CliffRise within CliffProbeMetres on the line to the goal, `ok` = a ledge walk
     /// to the goal may start (zones loaded, goal within the metres and height limits). Expected outcome: both false when the ground is unknown.
@@ -30,6 +78,13 @@ internal sealed partial class TrollRecovery
         float flat = to.magnitude;
         if (zs == null || flat < 0.5f || !zs.IsZoneLoaded(ZoneSystem.GetZone(p)) || !zs.IsZoneLoaded(ZoneSystem.GetZone(_goal)))
         {
+            string key = "TrollRecovery.ledgefacts." + TrollTaming.Tag(this);
+            if (ModLog.IsDue(key, 2d))
+            {
+                ModLog.Every(key, 2d, TrollTaming.Tag(this) + " ledge facts: not judged - " + (zs == null ? "no zone system" : "zone here loaded " + zs.IsZoneLoaded(ZoneSystem.GetZone(p)) +
+                                                                                                                   ", zone of the goal loaded " + zs.IsZoneLoaded(ZoneSystem.GetZone(_goal))) + ", " + flat.ToString("F1") + " m flat to the goal");
+            }
+
             return;
         }
 
@@ -51,7 +106,15 @@ internal sealed partial class TrollRecovery
         }
 
         cliff = LedgeRules.IsCliff(worst);
-        ok = LedgeRules.Possible(flat, zs.GetGroundHeight(_goal) - h0);
+        float toGoalHeight = zs.GetGroundHeight(_goal) - h0;
+        ok = LedgeRules.Possible(flat, toGoalHeight);
+        string factsKey = "TrollRecovery.ledgefacts." + TrollTaming.Tag(this);
+        if (ModLog.IsDue(factsKey, 2d))
+        {
+            ModLog.Every(factsKey, 2d, TrollTaming.Tag(this) + " ledge facts: the ground changes " + worst.ToString("F1") + " m within " + (int)LedgeRules.CliffProbeMetres + " m ahead (cliff from " +
+                                       LedgeRules.CliffRise.ToString("F1") + " m) = cliff " + cliff + ", goal " + flat.ToString("F1") + " m flat and " + toGoalHeight.ToString("F1") +
+                                       " m higher (ledge walk possible within " + LedgeRules.MaxFlatMetres.ToString("F0") + " m / " + LedgeRules.MaxHeightDifference.ToString("F0") + " m) = " + ok);
+        }
     }
 
     private bool LedgeDone(float dt)
@@ -69,6 +132,7 @@ internal sealed partial class TrollRecovery
         _ledgeLast = _ledgeStart;
         _ledgeBegan = Time.time;
         _ledgeStalled = 0f;
+        LedgeStarted++;
         ModLog.Decision("TrollRecovery.ledge", "start",
                         TrollTaming.Tag(this) + " at " + _ledgeStart.ToString("F0") + ", goal " + _goal.ToString("F0") + ", " + _d.ToString("F1") + " m to go, stuck " +
                         _meter.StuckSeconds.ToString("F1") + " s, detours done " + M.DetoursDone);
@@ -77,8 +141,23 @@ internal sealed partial class TrollRecovery
 
     private void OnEndLedge()
     {
-        ModLog.Info("TrollRecovery: " + TrollTaming.Tag(this) + " ledge walk over after " + Flat2(_ledgeStart).ToString("F1") + " m and " + (Time.time - _ledgeBegan).ToString("F1") +
-                    " s - " + _d.ToString("F1") + " m from its goal, height change " + (transform.position.y - _ledgeStart.y).ToString("F1") + " m");
+        float left = Flat(_goal), elapsed = Time.time - _ledgeBegan;
+        string outcome = LedgeRules.Outcome(left, elapsed, _ledgeStalled);
+        if (outcome == "arrived")
+        {
+            LedgeArrived++;
+        }
+        else if (outcome == "timeout")
+        {
+            LedgeTimeouts++;
+        }
+        else
+        {
+            LedgeStalledEnds++;
+        }
+
+        ModLog.Info("TrollRecovery: " + TrollTaming.Tag(this) + " ledge walk over after " + Flat2(_ledgeStart).ToString("F1") + " m and " + elapsed.ToString("F1") +
+                    " s - " + left.ToString("F1") + " m from its goal, height change " + (transform.position.y - _ledgeStart.y).ToString("F1") + " m - RESULT " + outcome + " (" + LedgeStats() + ")");
         _meter.Reset(_d);
     }
 
@@ -99,8 +178,16 @@ internal sealed partial class TrollRecovery
         Vector3 dir = flat / d;
         Vector3 next = pos + dir * step;
         mv.LookAt(next);
-        if (!zs.IsZoneLoaded(ZoneSystem.GetZone(next)) || Blocked(pos, next))
+        bool zoneLoaded = zs.IsZoneLoaded(ZoneSystem.GetZone(next));
+        if (!zoneLoaded || Blocked(pos, next))
         {
+            string key = "TrollRecovery.ledgestep." + TrollTaming.Tag(this);
+            if (ModLog.IsDue(key, 1d))
+            {
+                ModLog.Every(key, 1d, TrollTaming.Tag(this) + " ledge step refused at " + pos.ToString("F1") + " towards " + next.ToString("F1") + ": " +
+                                      (zoneLoaded ? "something solid at chest height is in the way (" + _lastBlocker + ")" : "the zone ahead is not loaded"));
+            }
+
             return true; // no move this frame: the stall counter of LedgeDone ends the walk
         }
 
@@ -135,6 +222,7 @@ internal sealed partial class TrollRecovery
                 continue;
             }
 
+            _lastBlocker = c.name + " (" + LayerMask.LayerToName(c.gameObject.layer) + ") " + LedgeHits[i].distance.ToString("F1") + " m ahead";
             return true;
         }
 

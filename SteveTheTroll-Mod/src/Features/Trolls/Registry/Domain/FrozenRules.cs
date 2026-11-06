@@ -51,4 +51,11 @@ internal static class FrozenRules
     {
         return Math.Max(0f, Math.Min(CatchUpMetres, distanceToDestination));
     }
+
+    /// 2026-11-06 (farm-friend-detour): a loaded own troll that NOBODY owns (owner id 0) is claimed by this client - the farming step, the walk home and the guard all need the owner, so nothing drives it otherwise.
+    /// Expected outcome: true only for owner id 0 (another peer's troll is left alone).
+    internal static bool ShouldClaim(long ownerId)
+    {
+        return ownerId == 0L;
+    }
 }
