@@ -9,7 +9,7 @@ with up to 5 trolls at your side.
 
 ## Why install it
 - A new companion system: tamed trolls that are stronger than the wild ones, never hurt your house or your ship, and defend you.
-- Automatic resource gathering: wood, stone, ore and scrap collected for you, including things a normal axe or pickaxe cannot break
+- Automatic resource gathering: wood, ore and scrap collected for you, including things a normal axe or pickaxe cannot break
   (Yggdrasil shoots, ancient and scorched trees, Timberwood, giant remains, petrified Gammeltrolls).
 - Trolls that scale to how you play: one near you with the slippers, up to 5 with the full costume, 15 living in total.
 - Hubs for far-away bases: trolls work, unload and heal at a hub up to 1000 m from your bed.

@@ -79,6 +79,23 @@ internal static class CliffTestHooks
         return true;
     }
 
+    // No built piece, rock or trunk at chest height along the line (the ledge walk refuses those steps, so such a cliff cannot prove anything).
+    private static bool ChestClear(ZoneSystem zs, Vector3 a, Vector3 b)
+    {
+        int mask = LayerMask.GetMask("Default", "static_solid", "Default_small", "piece", "vehicle");
+        float len = Vector3.Distance(a, b);
+        for (float t = 0f; t <= len; t += 1.2f)
+        {
+            Vector3 q = Vector3.Lerp(a, b, len > 0f ? t / len : 0f);
+            if (Physics.CheckSphere(new Vector3(q.x, zs.GetGroundHeight(q) + 1.2f, q.z), 1f, mask))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private static string Search(float radius, float minRise, float maxRise, float minRun, float maxRun, bool flatEnds, float minSlope, float gridStep)
     {
         ZoneSystem zs = ZoneSystem.instance;
@@ -119,6 +136,11 @@ internal static class CliffTestHooks
                     float hb = zs.GetGroundHeight(b), rise = hb - ha;
                     if (Mathf.Abs(rise) < minRise || Mathf.Abs(rise) > maxRise || Mathf.Abs(rise) / m < minSlope || hb < zs.m_waterLevel + 1f
                         || (flatEnds && (Mathf.Abs(zs.GetGroundHeight(b + dir * 2f) - hb) > 1.5f || Mathf.Abs(zs.GetGroundHeight(a - dir * 2f) - ha) > 1.5f)))
+                    {
+                        continue;
+                    }
+
+                    if (!ChestClear(zs, a, b))
                     {
                         continue;
                     }

@@ -148,7 +148,7 @@
                       "do":  "hook",
                       "name":  "stt.followedConserved",
                       "expect":  true,
-                      "label":  "every Stone put in is in the backpack or a depot - nothing lost or made"
+                      "label":  "every Flint put in is in the backpack or a depot - nothing lost or made"
                   }
               ],
     "asserts":  [

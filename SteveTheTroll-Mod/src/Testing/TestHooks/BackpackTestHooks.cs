@@ -45,12 +45,12 @@ internal static class BackpackTestHooks
         Character c = troll.GetComponent<Character>();
         ZDO z = TrollTaming.Zdo(c);
         int added = 0;
-        ItemDrop.ItemData stone = ObjectDB.instance.GetItemPrefab("Stone").GetComponent<ItemDrop>().m_itemData;
+        ItemDrop.ItemData flint = ObjectDB.instance.GetItemPrefab("Flint").GetComponent<ItemDrop>().m_itemData;
         while (added < 500)
         {
-            ItemDrop.ItemData it = stone.Clone();
+            ItemDrop.ItemData it = flint.Clone();
             it.m_stack = 20;
-            it.m_dropPrefab = ObjectDB.instance.GetItemPrefab("Stone");
+            it.m_dropPrefab = ObjectDB.instance.GetItemPrefab("Flint");
             if (BackpackStore.TryAdd(z, it, null) < 0)
             {
                 break;

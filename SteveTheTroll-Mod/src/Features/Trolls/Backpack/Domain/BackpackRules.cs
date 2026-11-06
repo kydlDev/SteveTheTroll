@@ -31,6 +31,12 @@ internal static class BackpackRules
         return owner && !busy && !full;
     }
 
+    /// D-186 (user): stone and Grausten are far too abundant - they would fill a backpack at once - so the backpack never takes them (no pickup, no unload, no test). Expected outcome: false for them (by prefab or by the item's own name), true for anything else.
+    internal static bool Accepts(string prefabName, string sharedName = null)
+    {
+        return prefabName != "Stone" && prefabName != "Grausten" && sharedName != "$item_stone" && sharedName != "$item_grausten";
+    }
+
     /// A dropped item lies within the pickup range (squared flat-or-3D distances, m^2).
     internal static bool InRange(float distance2, float range2)
     {

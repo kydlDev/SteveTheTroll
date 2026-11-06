@@ -180,13 +180,13 @@ public class FarmingV2Tests
     [Test] public void Selection_SmallestRangeWins_ThenFocusOrder()
     {
         var ranges = new[] { 20f, 50f, 150f };
-        var goals = new[] { "Wood", "Stone" };
-        // Stone exists at 20 m, Wood only at 50 m: Stone within the quick range wins (same as the old nested loops)
-        var hit = TargetSelection.FirstHit(ranges, goals, (r, g) => (g == "Stone" && r >= 20f) || (g == "Wood" && r >= 50f));
+        var goals = new[] { "Wood", "Tin" };
+        // Tin exists at 20 m, Wood only at 50 m: Tin within the quick range wins (same as the old nested loops)
+        var hit = TargetSelection.FirstHit(ranges, goals, (r, g) => (g == "Tin" && r >= 20f) || (g == "Wood" && r >= 50f));
         using (Assert.EnterMultipleScope())
         {
             Assert.That(hit.IsSuccess, Is.True);
-            Assert.That(goals[hit.Value.GoalIndex], Is.EqualTo("Stone"));
+            Assert.That(goals[hit.Value.GoalIndex], Is.EqualTo("Tin"));
             Assert.That(hit.Value.RangeIndex, Is.EqualTo(0));
         }
         var both = TargetSelection.FirstHit(ranges, goals, (r, g) => r >= 50f);

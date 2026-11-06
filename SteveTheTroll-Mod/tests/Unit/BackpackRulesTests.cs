@@ -20,6 +20,12 @@ public class BackpackRulesTests
             Assert.That(read.Contains(2), Is.False, "chests after the first one with room are not read");
         }
     }
+    [TestCase("Stone", null)] [TestCase("Grausten", null)] [TestCase(null, "$item_stone")] [TestCase(null, "$item_grausten")]
+    public void Accepts_NeverStoneOrGrausten(string prefab, string shared) { Assert.That(BackpackRules.Accepts(prefab, shared), Is.False); }
+
+    [TestCase("Wood", "$item_wood")] [TestCase("CopperOre", null)] [TestCase(null, null)] [TestCase("Flint", "$item_flint")]
+    public void Accepts_OtherItems(string prefab, string shared) { Assert.That(BackpackRules.Accepts(prefab, shared), Is.True); }
+
     [Test] public void Full_NoReader_NotFull() { Assert.That(BackpackRules.Full(4, null), Is.False); }
     [Test] public void Collects_OnlyOwnerNotBusyNotFull()
     {

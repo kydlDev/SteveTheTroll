@@ -1,5 +1,5 @@
 {
-  "description": "D-174: the followed troll (tag `troll`) gets a full backpack, unloads everything within `timeout` s, and every Stone put in is in the backpack or a depot - nothing lost or made.",
+  "description": "D-174: the followed troll (tag `troll`) gets a full backpack, unloads everything within `timeout` s, and every Flint put in is in the backpack or a depot - nothing lost or made.",
   "params": { "troll": "troll", "timeout": 180 },
   "actions": [
     { "do": "hook", "name": "stt.followTroll", "args": { "troll": "{{troll}}" } },
@@ -9,6 +9,6 @@
     { "do": "hook", "name": "stt.followedState", "label": "followed troll (diagnosis)" }
   ],
   "asserts": [
-    { "check": "hook", "name": "stt.followedConserved", "expect": true, "label": "every Stone put in is in the backpack or a depot - nothing lost or made" }
+    { "check": "hook", "name": "stt.followedConserved", "expect": true, "label": "every Flint put in is in the backpack or a depot - nothing lost or made" }
   ]
 }

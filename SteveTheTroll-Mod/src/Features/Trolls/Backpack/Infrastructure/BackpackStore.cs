@@ -175,6 +175,11 @@ internal static class BackpackStore
     /// Puts the item (whole stack) into the first chest with room (owner of the troll's ZDO). Expected outcome: the chest index or -1.
     internal static int TryAdd(ZDO zdo, ItemDrop.ItemData item, Container store)
     {
+        if (item == null || !BackpackRules.Accepts(item.m_dropPrefab != null ? item.m_dropPrefab.name : null, item.m_shared != null ? item.m_shared.m_name : null))
+        {
+            return -1;
+        }
+
         for (int i = 0; i < ChestCount; i++)
         {
             Inventory inv = Read(zdo, i);

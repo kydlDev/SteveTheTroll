@@ -35,7 +35,7 @@
                       "args":  {
                                    "frame":  "depot",
                                    "index":  0,
-                                   "prefab":  "Stone",
+                                   "prefab":  "Flint",
                                    "count":  5
                                },
                       "expect":  true
