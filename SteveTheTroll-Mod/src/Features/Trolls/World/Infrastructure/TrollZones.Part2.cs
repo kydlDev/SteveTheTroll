@@ -65,6 +65,20 @@ internal static partial class TrollZones
             Within(centre, zone, sim.Near, sim.Classic, false));
     }
 
+    private static readonly Dictionary<ZDOID, string> LastKnown = new();
+
+    /// A tracked troll leaves the zone keeper's list: why (no ZDO any more / dead / no longer this player's) and where it was last seen with its owner then (hub-walk-back: "the ZDO is gone" said nothing
+    /// about when or why). Expected outcome: one line.
+    private static void LogGone(ZDOID id, ZDO z, long me)
+    {
+        string last;
+        LastKnown.TryGetValue(id, out last);
+        string why = z == null ? "its ZDO no longer exists (destroyed, or no object and no saved data left)" :
+            z.GetFloat(ZDOVars.s_health, 1f) <= 0f ? "it is dead" : "it no longer belongs to this player (tamed owner " + z.GetLong(TrollTaming.OwnerKey) + ", this player " + me + ")";
+        ModLog.Info("TrollZones: troll " + id + " dropped from the zone keeper - " + why + "; last known: " + (last ?? "never seen here") + (z != null ? "; ZDO now at " + z.GetPosition().ToString("F0") + ", owner " + z.GetOwner() : ""));
+        LastKnown.Remove(id);
+    }
+
     /// How many own trolls without an owner the zone tick claimed directly this session (tests read it).
     internal static int OwnTrollClaims;
 

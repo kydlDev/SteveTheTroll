@@ -15,6 +15,7 @@ internal sealed partial class TrollFarmer
 {
     private const float StepStallSeconds = 5f, StepStallLogSeconds = 10f;
     private float _lastStep = -1f, _nextStepStallLog;
+    private bool _stallLogged;
 
     private void Update()
     {
@@ -33,6 +34,7 @@ internal sealed partial class TrollFarmer
         }
 
         _nextStepStallLog = Time.time + StepStallLogSeconds;
+        _stallLogged = true;
         FlightRecorder.Dump("TrollFarmer: " + TrollTaming.Tag(this) + " has target " + _target.name + " but its farming step has not run for " +
                             (Time.time - _lastStep).ToString("F1") + " s (limit " + StepStallSeconds.ToString("F0") + " s)");
         MonsterAI ai = GetComponent<MonsterAI>();

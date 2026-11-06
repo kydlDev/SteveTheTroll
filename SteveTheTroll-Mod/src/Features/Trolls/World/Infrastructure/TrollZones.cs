@@ -278,11 +278,13 @@ internal static partial class TrollZones
             ZDO z = zm.GetZDO(id);
             if (z == null || z.GetFloat(ZDOVars.s_health, 1f) <= 0f || z.GetLong(TrollTaming.OwnerKey) != me)
             {
+                LogGone(id, z, me);
                 gone.Add(id);
                 continue;
             }
 
             Vector3 pos = z.GetPosition();
+            LastKnown[id] = pos.ToString("F0") + ", owner " + z.GetOwner() + ", health " + z.GetFloat(ZDOVars.s_health, 1f).ToString("F0");
             // 2026-11-06 (diagnostics review): an own troll NOBODY owns is claimed here, before the zone decision. The zone test below judges a whole 64 m zone and could skip a troll the game
             // had already released; the claim loop further down then never saw it.
             bool released = Domain.ZoneKeepRules.ShouldClaimOwnTroll(z.Persistent, z.HasOwner());

@@ -355,6 +355,12 @@ internal static partial class TestHooks
         return _followId;
     }
 
+    /// The registry id of the followed troll (stt.followTroll). Expected outcome: "" when none is followed.
+    internal static string FollowedId()
+    {
+        return _followId ?? "";
+    }
+
     internal static ZDO FollowedZdo()
     {
         return _follow != ZDOID.None ? ZDOMan.instance.GetZDO(_follow) : null;

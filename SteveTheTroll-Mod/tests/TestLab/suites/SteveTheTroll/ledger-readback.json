@@ -1,0 +1,116 @@
+{
+    "name": "ledger-readback",
+    "description": "NEXT_STEPS item 4 step 4 (read-back, user 2026-11-06: the file is tied to the world name AND uid): the troll ledger is written for a troll, a troll that is gone is reported missing by the read-back and kept in the file as missing, and a file of another world with the same name is ignored and then overwritten.",
+    "timeout": 60,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "slippers": true,
+                "hub": false
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.ledgerFolder",
+            "contains": "_",
+            "label": "the ledger folder is <world name>_<world uid>"
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 0,
+                "dz": 20
+            },
+            "as": "troll"
+        },
+        {
+            "do": "hook",
+            "name": "stt.followTroll",
+            "args": {
+                "troll": "troll"
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 2
+        },
+        {
+            "do": "hook",
+            "name": "stt.ledgerWrite",
+            "label": "the ledger is written (bytes; 0 = unchanged)"
+        },
+        {
+            "do": "hook",
+            "name": "stt.ledgerEntry",
+            "args": {
+                "missing": false
+            },
+            "expect": true,
+            "label": "the file has the troll, not missing"
+        },
+        {
+            "do": "hook",
+            "name": "stt.clearTrolls",
+            "label": "the troll is gone from the world without a death"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.ledgerReconcileFindsFollowed",
+            "label": "the read-back finds the troll of the file missing from the world",
+            "expect": true
+        },
+        {
+            "do": "hook",
+            "name": "stt.ledgerWrite",
+            "label": "written again with the missing flag"
+        },
+        {
+            "do": "hook",
+            "name": "stt.ledgerEntry",
+            "args": {
+                "missing": true
+            },
+            "expect": true,
+            "label": "the file keeps the troll as MISSING"
+        },
+        {
+            "do": "hook",
+            "name": "stt.ledgerForeign",
+            "expect": true,
+            "label": "the file now says it belongs to another world with the same name (uid + 1)"
+        },
+        {
+            "do": "hook",
+            "name": "stt.ledgerReconcile",
+            "expect": 0,
+            "label": "the read-back ignores a file of another world: nothing is reported missing"
+        }
+    ],
+    "asserts": [
+        {
+            "check": "logContains",
+            "source": "SteveTheTroll",
+            "text": "is not in this world now",
+            "expect": true,
+            "label": "the log names the missing troll"
+        },
+        {
+            "check": "logContains",
+            "source": "SteveTheTroll",
+            "text": "belongs to another world",
+            "expect": true,
+            "label": "the log says the foreign file was ignored"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
+}

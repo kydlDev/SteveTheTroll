@@ -1,3 +1,4 @@
+using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using System;
 using System.Collections.Generic;
 using KydlCore.Common;
@@ -366,6 +367,13 @@ internal sealed partial class TrollFarmer : MonoBehaviour
     /// false = fighting / done -> the game's AI runs.
     internal bool Step(MonsterAI ai, float dt)
     {
+        if (_stallLogged)
+        {
+            _stallLogged = false;
+            ModLog.Info("TrollFarmer: " + TrollTaming.Tag(this) + " farming step RESUMED after " + (Time.time - _lastStep).ToString("F1") + " s without one - target " + (_target != null ? _target.name : "none") +
+                        ", " + TrollOwnerDiag.Describe(GetComponent<ZNetView>() != null && GetComponent<ZNetView>().IsValid() ? GetComponent<ZNetView>().GetZDO() : null));
+        }
+
         _lastStep = Time.time; // the Part3 watchdog
         _ai = ai;
         _dt = dt;

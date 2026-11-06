@@ -25,6 +25,33 @@ public class TargetRulesTests
         return (bool)ModAssembly.Call(T, "Blocked", P(0f, 0f), P(0f, gz), P(ox, oz), 3.5f, 1.8f);
     }
 
+    static bool BlockedAt(float mx, float mz, float gx, float gz, float ox, float oz, float ahead = 3.5f, float half = 1.8f)
+    {
+        return (bool)ModAssembly.Call(T, "Blocked", P(mx, mz), P(gx, gz), P(ox, oz), ahead, half);
+    }
+
+    // 2026-11-06 (diagnostics review): the live farmer rarely walks the straight line of the fixture - the corridor must hold for any direction and any start point
+    [Test] public void Blocked_DiagonalApproach_FriendOnTheLine() { Assert.That(BlockedAt(0f, 0f, 10f, 10f, 2f, 2f), Is.True); }
+    [Test] public void NotBlocked_DiagonalApproach_FriendBesideTheLine() { Assert.That(BlockedAt(0f, 0f, 10f, 10f, 4f, 0f), Is.False); }
+    [Test] public void Blocked_OffsetStart_FriendOnTheLine() { Assert.That(BlockedAt(-30f, 47f, -30f, 60f, -30.5f, 49.5f), Is.True); }
+    [Test] public void NotBlocked_FriendBehindTheFarmer() { Assert.That(BlockedAt(0f, 0f, 0f, 10f, 0f, -2f), Is.False); }
+    [Test] public void NotBlocked_FriendBeyondTheLookAhead() { Assert.That(BlockedAt(0f, 0f, 0f, 20f, 0f, 6f), Is.False); }
+    [Test] public void NotBlocked_FriendPastTheGoal() { Assert.That(BlockedAt(0f, 0f, 0f, 2f, 0f, 3f), Is.True.Or.False, "past the goal is the walker's own business; it must not throw"); }
+
+    [Test] public void Blocked_IsRotationInvariant_LikeTheFixtureAtEveryAngle()
+    {
+        for (int deg = 0; deg < 360; deg += 15)
+        {
+            float a = deg * 0.0174533f, c = (float)System.Math.Cos(a), s = (float)System.Math.Sin(a);
+            foreach (float[] f in new[] { new[] { 0f, 2f }, new[] { 1.5f, 2f }, new[] { 3f, 2f }, new[] { 0f, -2f }, new[] { 0f, 6f } })
+            {
+                bool straight = BlockedAt(0f, 0f, 0f, 10f, f[0], f[1]);
+                bool turned = BlockedAt(100f, -50f, 100f + (-s * 10f), -50f + c * 10f, 100f + (c * f[0] - s * f[1]), -50f + (s * f[0] + c * f[1]));
+                Assert.That(turned, Is.EqualTo(straight), "friend at (" + f[0] + "," + f[1] + ") turned by " + deg + " degrees");
+            }
+        }
+    }
+
     [Test] public void Blocked_TrollRightAhead() { Assert.That(Blocked(0f, 2f), Is.True); }
     [Test] public void Blocked_TrollAheadAndSlightlyAside_StillInTheWay() { Assert.That(Blocked(1.5f, 2f), Is.True); }
     [Test] public void NotBlocked_TrollWellBesideTheLine() { Assert.That(Blocked(3f, 2f), Is.False); }

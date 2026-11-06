@@ -41,6 +41,7 @@
     <Compile Include="..\..\src\Features\Trolls\Movement\Domain\PathRules.cs" Link="Mod\PathRules.cs" />
     <Compile Include="..\..\src\Features\Trolls\World\Domain\ZoneKeepRules.cs" Link="Mod\ZoneKeepRules.cs" />
     <Compile Include="..\..\src\Features\Trolls\Registry\Domain\FrozenRules.cs" Link="Mod\FrozenRules.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Registry\Domain\LedgerRules.cs" Link="Mod\LedgerRules.cs" />
     <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\Obstruction.cs" Link="Mod\Obstruction.cs" />
     <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\Side.cs" Link="Mod\Side.cs" />
     <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\ProgressMeter.cs" Link="Mod\ProgressMeter.cs" />

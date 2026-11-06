@@ -90,6 +90,7 @@ internal static class HubText
         { "stevethetroll_hub_return", "{0} is {1} m from {2} - walks back to it ({3} m farm zone)." },
         { "stevethetroll_troll_stuck", "{0} seems stuck near {1} / {2} (no movement for {3} s) - trying to free it." },
         { "stevethetroll_stuck_short", "stuck" },
+        { "stevethetroll_ledger_missing", "{0} troll(s) from your last visit to this world are missing, e.g. {1} (last seen near {2} / {3})." },
         { "stevethetroll_hub_return_done", "{0} is back in the farm zone of {1}." },
         { "stevethetroll_hub_hover_edit", "rename" }
     };

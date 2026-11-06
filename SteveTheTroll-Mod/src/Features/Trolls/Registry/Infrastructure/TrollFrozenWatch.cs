@@ -129,6 +129,13 @@ internal static class TrollFrozenWatch
         ZDO z = zm.GetZDO(id);
         if (z == null || z.GetFloat(ZDOVars.s_health, 1f) <= 0f || z.GetLong(TrollTaming.OwnerKey) != me)
         {
+            Watch dropped;
+            if (Watches.TryGetValue(id, out dropped))
+            {
+                ModLog.Info("TrollFrozenWatch: troll " + id + " [" + dropped.SttId + "] leaves the watch - " + (z == null ? "its ZDO no longer exists (last known at " + dropped.Pos.ToString("F0") + ", stage " + dropped.Stage + ")" :
+                    z.GetFloat(ZDOVars.s_health, 1f) <= 0f ? "it is dead" : "it no longer belongs to this player"));
+            }
+
             Watches.Remove(id);
             return;
         }
