@@ -79,6 +79,7 @@ internal sealed partial class TrollFarmer : MonoBehaviour
     private bool _home, _announce, _saidNothing, _toSpot;
     private float _exploreHeading = float.NaN; // D-189: the direction a farmed-out troll walks on in (NaN = not exploring)
     private int _exploreSteps;
+    internal static int ExploreStepsTotal; // D-189: the lab reads it
     private Humanoid _me;
     private float _nextSearch, _nextAttack, _nextLog, _stepUntil, _nextFullCheck, _travelStart, _nextNothingLog;
     private FarmingPipeline _pipeline;

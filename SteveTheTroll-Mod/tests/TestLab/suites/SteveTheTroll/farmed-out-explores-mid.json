@@ -1,0 +1,38 @@
+{
+  "name": "farmed-out-explores-mid",
+  "description": "D-189 (user 2026-11-06: several ranges): farmed out with the search ranges 100 / 300 m - see _functions/farmedOut.json",
+  "timeout": 180,
+  "steps": [
+    {
+      "do": "use",
+      "block": "start",
+      "args": {
+        "clearTrolls": true,
+        "slippers": true,
+        "hub": true
+      }
+    },
+    {
+      "do": "use",
+      "block": "farmedOut",
+      "args": {
+        "max": 100,
+        "far": 300,
+        "clear": 300
+      }
+    }
+  ],
+  "asserts": [
+    {
+      "check": "logContains",
+      "source": "SteveTheTroll",
+      "text": "finds nothing",
+      "expect": true,
+      "label": "the log shows the troll found nothing in range (a far source or an exploration step followed)"
+    },
+    {
+      "check": "noErrors",
+      "source": "SteveTheTroll"
+    }
+  ]
+}

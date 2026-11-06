@@ -1,0 +1,102 @@
+{
+  "description": "D-189: the troll has a hub, the area within `clear` m is emptied of trees and rocks and the search ranges are set to `max` / `far` m: it must not stand idle - it walks to a far source it knows of or explores on (150 m steps, at most 950 m from the hub) - and it stays within the 950 m leash. Leaves the troll as tag `troll`.",
+  "params": {
+    "max": 50,
+    "far": 150,
+    "clear": 300
+  },
+  "steps": [
+    {
+      "do": "hook",
+      "name": "stt.farmRanges",
+      "args": {
+        "max": "{{max}}",
+        "far": "{{far}}"
+      },
+      "label": "the search ranges are {{max}} m / {{far}} m"
+    },
+    {
+      "do": "hook",
+      "name": "stt.clearAround",
+      "args": {
+        "radius": "{{clear}}"
+      },
+      "label": "no tree or rock within {{clear}} m of the player (the loaded area)"
+    },
+    {
+      "do": "hook",
+      "name": "stt.clearMobs",
+      "args": {
+        "radius": 80
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.spawnTroll",
+      "args": {
+        "dx": -12,
+        "dz": 12
+      },
+      "as": "troll"
+    },
+    {
+      "do": "hook",
+      "name": "stt.followTroll",
+      "args": {
+        "troll": "troll"
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.stepAside",
+      "args": {
+        "dx": 20,
+        "dz": 0
+      },
+      "label": "the player stays out of the troll's way"
+    },
+    {
+      "do": "hook",
+      "name": "stt.startFarm",
+      "args": {
+        "troll": "troll"
+      },
+      "expect": true,
+      "label": "the troll is told to farm"
+    },
+    {
+      "do": "wait",
+      "until": {
+        "check": "hook",
+        "name": "stt.followedPurposeful",
+        "expect": true
+      },
+      "timeout": 40,
+      "label": "with nothing in range the troll is walking to a source or exploring, not standing"
+    },
+    {
+      "do": "wait",
+      "seconds": 45
+    },
+    {
+      "do": "hook",
+      "name": "stt.followedPurposeful",
+      "expect": true,
+      "label": "45 s later it is still on its way (a source found, or the next exploration step)"
+    },
+    {
+      "do": "hook",
+      "name": "stt.exploreStats",
+      "label": "exploration steps (diagnosis)"
+    },
+    {
+      "do": "hook",
+      "name": "stt.followedWithinHubZone",
+      "args": {
+        "metres": 950
+      },
+      "expect": true,
+      "label": "it never leaves the 950 m leash round its hub"
+    }
+  ]
+}

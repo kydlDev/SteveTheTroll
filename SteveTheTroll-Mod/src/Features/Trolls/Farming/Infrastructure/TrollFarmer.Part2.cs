@@ -11,6 +11,7 @@ using SteveTheTroll.Features.Trolls.Core;
 using SteveTheTroll.Features.Trolls.Farming.Application;
 using SteveTheTroll.Features.Trolls.Farming.Domain;
 using SteveTheTroll.Features.Trolls.Farming.Execution;
+using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
@@ -335,9 +336,9 @@ internal sealed partial class TrollFarmer
     // (TrollZones keeps them), and the near search on the way takes over as soon as a source is in range. Only with a hub. Expected outcome: true = it walks to the next exploration point.
     private bool ExploreStep(HubInfo hub)
     {
-        if (hub == null || !IsMine())
+        if (hub == null || !IsMine() || !TrollHome.OwnerWears(GetComponent<Character>()))
         {
-            return false;
+            return false; // no hub, not this client's troll, or slippers off (the trolls walk back to the bed then)
         }
 
         Vector3 p = transform.position;
@@ -361,6 +362,7 @@ internal sealed partial class TrollFarmer
 
         _exploreHeading = used;
         _exploreSteps++;
+        ExploreStepsTotal++;
         Vector3 to = new Vector3(tx, p.y, tz);
         if (ZoneSystem.instance != null)
         {

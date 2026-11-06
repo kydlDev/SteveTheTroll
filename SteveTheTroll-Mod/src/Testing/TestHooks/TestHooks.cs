@@ -114,6 +114,7 @@ internal static partial class TestHooks
         ClearFarTrees();
         RecoveryTestHooks.ClearWalled(); // D-167: the walled tree of the recovery scenario
         FarmingTestHooks.ClearPlanted(); // D-170: the trees of farm-chops-tree
+        ExploreTestHooks.Reset(); // D-189: default farm ranges, no exploration steps
         int gone = 0;
         foreach (ZNetView v in Object.FindObjectsByType<ZNetView>(FindObjectsSortMode.None))
         {

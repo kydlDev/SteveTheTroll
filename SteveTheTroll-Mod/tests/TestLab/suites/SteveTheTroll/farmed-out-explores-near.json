@@ -1,0 +1,38 @@
+{
+  "name": "farmed-out-explores-near",
+  "description": "D-189 (user 2026-11-06: several ranges): farmed out with the search ranges 50 / 150 m - see _functions/farmedOut.json",
+  "timeout": 180,
+  "steps": [
+    {
+      "do": "use",
+      "block": "start",
+      "args": {
+        "clearTrolls": true,
+        "slippers": true,
+        "hub": true
+      }
+    },
+    {
+      "do": "use",
+      "block": "farmedOut",
+      "args": {
+        "max": 50,
+        "far": 150,
+        "clear": 300
+      }
+    }
+  ],
+  "asserts": [
+    {
+      "check": "logContains",
+      "source": "SteveTheTroll",
+      "text": "finds nothing",
+      "expect": true,
+      "label": "the log shows the troll found nothing in range (a far source or an exploration step followed)"
+    },
+    {
+      "check": "noErrors",
+      "source": "SteveTheTroll"
+    }
+  ]
+}
