@@ -10,6 +10,11 @@
   "steps": [
     {
       "do": "hook",
+      "name": "stt.resetLedgeStats",
+      "label": "the ledge counters start at 0 (they count the whole session)"
+    },
+    {
+      "do": "hook",
       "name": "stt.findCliffKind",
       "args": {
         "radius": "{{radius}}",
@@ -109,6 +114,20 @@
       "name": "stt.forceLedge",
       "expect": true,
       "label": "the troll walks the rest of its way over the ledge walk"
+    },
+    {
+      "if": "{{forced}}",
+      "do": "wait",
+      "until": {
+        "check": "hook",
+        "name": "stt.ledgeStarted",
+        "args": {
+          "min": 1
+        },
+        "expect": true
+      },
+      "timeout": 15,
+      "label": "the forced ledge walk STARTED (the troll's walk ticked its recovery); if not, the force did not take - not a ledge failure"
     },
     {
       "if": "{{forced}}",

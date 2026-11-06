@@ -34,6 +34,13 @@ internal static class FrozenRules
         return flatMetres >= MoveEpsilon;
     }
 
+    /// 2026-11-06 (T-214 B1, cliff-walk-high-down): a troll that is HELD (TrollHold: the player looks at it), in an attack or staggering stands still on purpose - it is not frozen, whatever it is travelling to.
+    /// Expected outcome: true only for a travelling troll that is none of those.
+    internal static bool ExpectsMovement(bool travelling, bool held, bool inAttack, bool staggering)
+    {
+        return travelling && !held && !inAttack && !staggering;
+    }
+
     /// The rung for a troll that has not moved for `stillSeconds`. A troll that is not meant to travel is never frozen. Expected outcome: None below 10 s.
     internal static FrozenStage StageFor(bool travelling, float stillSeconds)
     {

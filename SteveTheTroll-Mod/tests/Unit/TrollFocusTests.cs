@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SteveTheTroll.Features.Trolls.Backpack.Domain;
 using SteveTheTroll.Ui;
 
 namespace SteveTheTroll.Tests.Unit;
@@ -71,6 +72,8 @@ public class TrollFocusTests
         foreach (var g in TrollFocus.DefaultOrder) Assert.That(pick, Does.Contain(g.Item));
         Assert.That(pick, Does.Contain("BlackMetalScrap"));
         Assert.That(pick, Does.Not.Contain("Stone"), "only wood, ores and scrap");
+        Assert.That(pick, Does.Not.Contain("Grausten"), "too abundant, never in a backpack (D-186)");
+        foreach (string item in pick) Assert.That(BackpackRules.Accepts(item), Is.True, item + " is picked up, so the backpack must take it");
     }
 
     [Test]

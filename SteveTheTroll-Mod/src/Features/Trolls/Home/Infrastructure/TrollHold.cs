@@ -39,6 +39,20 @@ internal static class TrollHold
                (looked ? (Time.time - seen).ToString("F1") + " s ago" : "never") + ")";
     }
 
+    /// T-214 B1: is the troll held right now (the local player within range looked at it a moment ago)? Same answer as Describe. Expected outcome: true while it stands still on purpose.
+    internal static bool IsHolding(Character c)
+    {
+        Player near = Player.m_localPlayer;
+        if (near == null || c == null)
+        {
+            return false;
+        }
+
+        float seen;
+        bool looked = LastLook.TryGetValue(c.GetInstanceID(), out seen);
+        return HomeRules.Holds(ModSettings.HoldNearPlayerRange.Value, false, false, Vector3.Distance(near.transform.position, c.transform.position), looked, Time.time - seen, HoldGraceSeconds);
+    }
+
     /// Expected outcome: true = the troll stands still this AI step.
     internal static bool Holds(MonsterAI ai)
     {

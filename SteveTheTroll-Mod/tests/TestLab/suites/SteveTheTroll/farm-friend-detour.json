@@ -116,11 +116,14 @@
             "do": "wait",
             "until": {
                 "check": "hook",
-                "name": "stt.plantedUntouched",
-                "expect": 0
+                "name": "stt.plantedHitAtLeast",
+                "args": {
+                    "min": 1
+                },
+                "expect": true
             },
             "timeout": 45,
-            "label": "the farmer got past its friend and hit the tree"
+            "label": "the farmer got past its friend and hit the tree (hits counted by the hit patch, not by the tree's ZDO health)"
         },
         {
             "do": "hook",

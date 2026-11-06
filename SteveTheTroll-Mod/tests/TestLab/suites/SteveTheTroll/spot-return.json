@@ -126,7 +126,7 @@
                       "do":  "wait",
                       "until":  {
                                     "check":  "hook",
-                                    "name":  "stt.followedReachedSpot",
+                                    "name":  "stt.followedSpotOutcome",
                                     "args":  {
                                                  "metres":  15
                                              },
@@ -160,7 +160,7 @@
                     },
                     {
                         "check":  "hook",
-                        "name":  "stt.followedReachedSpot",
+                        "name":  "stt.followedSpotOutcome",
                         "args":  {
                                      "metres":  15
                                  },

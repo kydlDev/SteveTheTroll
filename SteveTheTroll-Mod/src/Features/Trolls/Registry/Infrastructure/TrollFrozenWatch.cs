@@ -211,7 +211,9 @@ internal static class TrollFrozenWatch
     private static bool IsTravelling(Character c)
     {
         TrollFarmer f = c.GetComponent<TrollFarmer>();
-        return TestForceTravelling || c.GetComponent<TrollReturn>() != null || (f != null && (f.Travelling || f.GoingHome));
+        bool travelling = TestForceTravelling || c.GetComponent<TrollReturn>() != null || (f != null && (f.Travelling || f.GoingHome));
+        // T-214 B1: standing still because the player looks at it (TrollHold), fighting or staggering is not a freeze
+        return FrozenRules.ExpectsMovement(travelling, TrollHold.IsHolding(c), c.InAttack(), c.IsStaggering());
     }
 
     private static void Climb(ZDO z, Character c, ZNetView view, Watch w, FrozenStage stage, Vector3 pos)
@@ -237,9 +239,11 @@ internal static class TrollFrozenWatch
             case FrozenStage.Rebuild:
                 if (view != null && view.IsValid())
                 {
+                    // T-214 B2: ZNetScene.Destroy(go) DESTROYS the ZDO of an owned object (the troll and its backpack were gone in cliff-walk-high-down) - only the instance may go; the ZDO stays and the game builds the troll again
+                    ZDO zdo = view.GetZDO();
                     view.ClaimOwnership();
-                    ZNetScene.instance.Destroy(view.gameObject);
-                    ModLog.Warn("TrollFrozenWatch: " + who + " rebuilt from its ZDO (frozen for " + still.ToString("F0") + " s)");
+                    bool dropped = DropInstanceKeepZdo(view);
+                    ModLog.Warn("TrollFrozenWatch: " + who + (dropped ? " rebuilt from its ZDO (frozen for " : " could NOT be rebuilt, left as it is (frozen for ") + still.ToString("F0") + " s); its ZDO " + (zdo != null && ZDOMan.instance.GetZDO(zdo.m_uid) != null ? "is still there" : "IS GONE"));
                 }
                 else
                 {
@@ -251,6 +255,22 @@ internal static class TrollFrozenWatch
                 ModLog.Warn("TrollFrozenWatch: " + who + " still frozen after " + still.ToString("F0") + " s - it is moved along its route");
                 break;
         }
+    }
+
+    /// Removes the troll's scene object but keeps its ZDO (position, inventory, owner, tame state): the view lets go of the ZDO, the scene forgets the instance, then only the GameObject is destroyed. Expected outcome: true when done; false (nothing changed) when the scene's instance table cannot be reached.
+    private static bool DropInstanceKeepZdo(ZNetView view)
+    {
+        ZDO zdo = view.GetZDO();
+        var instances = HarmonyLib.AccessTools.Field(typeof(ZNetScene), "m_instances")?.GetValue(ZNetScene.instance) as System.Collections.IDictionary;
+        if (zdo == null || instances == null)
+        {
+            return false;
+        }
+
+        view.ResetZDO();
+        instances.Remove(zdo);
+        Object.Destroy(view.gameObject);
+        return true;
     }
 
     private static void CatchUp(ZDO z, Character c, Watch w, Vector3 pos, long me)

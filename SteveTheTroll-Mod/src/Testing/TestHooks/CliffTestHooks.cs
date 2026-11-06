@@ -46,15 +46,30 @@ internal static class CliffTestHooks
     private static bool ForceLedge()
     {
         ZDO z = TestHooks.FollowedZdo();
-        ZNetView view = z != null && ZNetScene.instance != null ? ZNetScene.instance.FindInstance(z) : null;
-        TrollRecovery rec = view != null ? view.GetComponent<TrollRecovery>() : null;
-        if (rec == null)
+        if (z == null)
         {
+            ModLog.Info("TestHooks: forceLedge refused - no followed troll ZDO (stt.followTroll was not called or the troll is gone)");
             return false;
         }
 
+        ZNetView view = ZNetScene.instance != null ? ZNetScene.instance.FindInstance(z) : null;
+        if (view == null || !view.IsValid())
+        {
+            ModLog.Info("TestHooks: forceLedge refused - the followed troll " + z.m_uid + " has no loaded instance (owner " + z.GetOwner() + ", here " + z.IsOwner() + ")");
+            return false;
+        }
+
+        TrollRecovery rec = TrollRecovery.Of(view); // the same way the production walks get their recovery (TrollRecovery.Of creates it)
         rec.TestForceLedge();
+        ModLog.Info("TestHooks: forceLedge armed for " + z.m_uid + " (owner here " + z.IsOwner() + ") - the walk starts with the next Tick of the troll's walk; started so far: " + TrollRecovery.LedgeStats());
         return true;
+    }
+
+    /// Have at least `min` ledge walks STARTED this session (reset by stt.resetLedgeStats)? Expected outcome: true once they have.
+    [TestHook("stt.ledgeStarted")]
+    private static bool LedgeStartedAtLeast(int min)
+    {
+        return TrollRecovery.LedgeStarted >= min;
     }
 
     /// Have at least `min` ledge walks arrived at their goal this session? Expected outcome: true once they have.

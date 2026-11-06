@@ -208,6 +208,34 @@ internal static partial class TestHooks
         return d <= metres;
     }
 
+    /// D-187 (user: the way back to the remembered spot is BEST EFFORT - the troll may farm on the way, or give the far place up for 120 s): the followed troll either reached the remembered spot
+    /// (within `metres`) or the farmer explicitly gave that place up (FarmSpotMemory.IsBad, a logged decision). Expected outcome: true for either.
+    [TestHook("stt.followedSpotOutcome")]
+    private static bool FollowedSpotOutcome(float metres)
+    {
+        ZDO z = FollowedZdo();
+        if (z == null || _spotTarget == Vector3.zero)
+        {
+            return false;
+        }
+
+        if (HubGeometry.Flat(_spotTarget - z.GetPosition()) <= metres)
+        {
+            ModLog.Info("TestHooks: spot outcome - reached the remembered spot");
+            return true;
+        }
+
+        Character c = _followId.Length > 0 ? TrollRegistry.FindLoaded(_followId) : null;
+        TrollFarmer f = c != null ? c.GetComponent<TrollFarmer>() : null;
+        if (f != null && f.Spots != null && f.Spots.IsBad(_spotTarget))
+        {
+            ModLog.Info("TestHooks: spot outcome - the farmer gave the remembered place up (best effort)");
+            return true;
+        }
+
+        return false;
+    }
+
     /// D-175: the followed troll is loaded and has a farm job that is not a home / unload trip. Expected outcome: false while not loaded.
     [TestHook("stt.followedFarming")]
     private static bool FollowedFarming()

@@ -54,6 +54,11 @@ internal static class FarmingTestHooks
 
             TreeBase t = g.GetComponent<TreeBase>();
             ZNetView v = g.GetComponent<ZNetView>();
+            if (t == null || v == null || !v.IsValid())
+            {
+                ModLog.Info("FarmingTestHooks: plantedUntouched cannot read a planted tree (TreeBase " + (t != null) + ", ZNetView " + (v != null) + ", valid " + (v != null && v.IsValid()) + ") - counted as untouched; the hit counter stt.plantedHitAtLeast is the reliable measure");
+            }
+
             bool full = t == null || v == null || !v.IsValid() ||
                         v.GetZDO().GetFloat(ZDOVars.s_health, t.m_health) >= t.m_health - 0.01f;
             if (full)
@@ -76,6 +81,13 @@ internal static class FarmingTestHooks
     private static int PlantedHitByTroll()
     {
         return TreeDamageLog.TrollHitsOnPlanted;
+    }
+
+    /// T-214 A6: did a tamed creature hit the planted trees at least `min` times since stt.reset (counted by the hit patch, independent of the tree's own ZDO health)? Expected outcome: true once.
+    [TestHook("stt.plantedHitAtLeast")]
+    private static bool PlantedHitAtLeast(int min)
+    {
+        return TreeDamageLog.TrollHitsOnPlanted >= min;
     }
 
     /// Swings the troll's farmer started (StartAttack accepted). Expected outcome: -1 without a farmer.
