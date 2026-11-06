@@ -17,7 +17,7 @@ internal sealed partial class TrollRecovery
     private string _lastBlocker = "";
     private Vector3 _ledgeStart, _ledgeLast;
     private float _ledgeBegan, _ledgeStalled;
-    private bool _forcedLedge, _forcedStarted;
+    private bool _forcedLedge, _forcedStarted, _ledgeActive;
 
     /// Counters of every ledge walk of this session (the cliff tests read them): started, and how each one ended.
     internal static int LedgeStarted, LedgeArrived, LedgeStalledEnds, LedgeTimeouts;
@@ -132,6 +132,7 @@ internal sealed partial class TrollRecovery
         _ledgeLast = _ledgeStart;
         _ledgeBegan = Time.time;
         _ledgeStalled = 0f;
+        _ledgeActive = true;
         LedgeStarted++;
         ModLog.Decision("TrollRecovery.ledge", "start",
                         TrollTaming.Tag(this) + " at " + _ledgeStart.ToString("F0") + ", goal " + _goal.ToString("F0") + ", " + _d.ToString("F1") + " m to go, stuck " +
@@ -139,8 +140,28 @@ internal sealed partial class TrollRecovery
         ModLog.Info("TrollRecovery: " + TrollTaming.Tag(this) + " cannot reach its goal " + _d.ToString("F1") + " m away on the game's path - walks it over the ground itself (ledge walk, down / up a cliff)");
     }
 
+    /// T-214 (run 143626: the hub was within 25 m, the troll was "home" and unloaded, so the walk was never ticked again and its end was never counted): the caller says the troll REACHED
+    /// its destination while a ledge walk was running - that walk ends as "arrived". Expected outcome: true when a running ledge walk was ended.
+    private bool EndLedgeReached()
+    {
+        if (!_ledgeActive)
+        {
+            return false;
+        }
+
+        _ledgeActive = false;
+        _forcedLedge = false;
+        _forcedStarted = false;
+        float elapsed = Time.time - _ledgeBegan;
+        LedgeArrived++;
+        ModLog.Info("TrollRecovery: " + TrollTaming.Tag(this) + " ledge walk over after " + Flat2(_ledgeStart).ToString("F1") + " m and " + elapsed.ToString("F1") + " s - the walk reached its destination (" + Flat(_goal).ToString("F1") +
+                    " m from the goal point), height change " + (transform.position.y - _ledgeStart.y).ToString("F1") + " m - RESULT arrived (" + LedgeStats() + ")");
+        return true;
+    }
+
     private void OnEndLedge()
     {
+        _ledgeActive = false;
         float left = Flat(_goal), elapsed = Time.time - _ledgeBegan;
         string outcome = LedgeRules.Outcome(left, elapsed, _ledgeStalled);
         if (outcome == "arrived")

@@ -25,6 +25,14 @@
     },
     {
       "do": "hook",
+      "name": "stt.clearSources",
+      "args": {
+        "radius": "{{clear}}"
+      },
+      "label": "stumps, bushes and old logs too (clearAround leaves them)"
+    },
+    {
+      "do": "hook",
       "name": "stt.clearMobs",
       "args": {
         "radius": 80

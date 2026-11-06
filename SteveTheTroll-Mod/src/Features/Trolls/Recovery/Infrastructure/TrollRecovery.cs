@@ -169,6 +169,7 @@ internal sealed partial class TrollRecovery : MonoBehaviour
     /// The troll reached what it walked to: its failure counter starts again (spec). Expected outcome: 0 failed cycles.
     internal int Reached()
     {
+        EndLedgeReached();
         if (!_hasCtx || (!M.Dirty && Book.Failed(_troll, _ka, _kb) == 0))
         {
             return 0;
@@ -195,7 +196,7 @@ internal sealed partial class TrollRecovery : MonoBehaviour
         ITrollCombat combat = _ctx.Capabilities.Combat;
         float now = Time.time;
         bool alive = combat != null && !combat.IsDead;
-        if (_forcedLedge && alive)
+        if (_forcedLedge && alive && !canAbandon) // forced only on hub walks (a farm walk changes its goal every few seconds)
         {
             return ForcedLedge(dt, goal, goalObject);
         }

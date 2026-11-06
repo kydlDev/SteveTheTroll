@@ -43,6 +43,38 @@ internal static class ExploreTestHooks
         return TrollFarmer.ExploreStepsTotal >= min;
     }
 
+    /// Destroys every source the troll's farmer could target (trees, stumps, logs, rocks, bushes - what TrollFarming.Gather finds) within `radius` m of the player, in the loaded scene; stt.clearAround leaves
+    /// stumps, bushes and old logs (run 143626: the "farmed out" troll still found them). Expected outcome: how many were destroyed.
+    [TestHook("stt.clearSources")]
+    private static int ClearSources(float radius)
+    {
+        Player p = Player.m_localPlayer;
+        var list = new System.Collections.Generic.List<TrollFarming.Candidate>();
+        int n = 0;
+        for (int pass = 0; pass < 2; pass++)
+        {
+            TrollFarming.Gather(p.transform.position, radius, list);
+            foreach (TrollFarming.Candidate c in list)
+            {
+                if (c.G == null)
+                {
+                    continue;
+                }
+
+                ZNetView v = c.G.GetComponentInParent<ZNetView>();
+                if (v != null && v.IsValid())
+                {
+                    v.ClaimOwnership();
+                    ZNetScene.instance.Destroy(v.gameObject);
+                    n++;
+                }
+            }
+        }
+
+        ModLog.Info("ExploreTestHooks: " + n + " farm source(s) destroyed within " + radius.ToString("F0") + " m of the player");
+        return n;
+    }
+
     /// stt.reset: the default ranges and a zero counter. Expected outcome: nothing.
     internal static void Reset()
     {

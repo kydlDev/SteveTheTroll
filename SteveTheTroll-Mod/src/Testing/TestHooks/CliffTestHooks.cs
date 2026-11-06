@@ -8,14 +8,18 @@ namespace SteveTheTroll.Testing.TestHooks;
 /// <summary>Item 5: hooks for the ledge walk over a cliff. Every hook calls the mod's real code (TrollFarmer.StartTravel -> TrollRecovery) on a real troll and the real terrain.</summary>
 internal static class CliffTestHooks
 {
-    private static Vector3 _bottom, _top, _goal;
+    private static Vector3 _bottom, _top, _goal, _dir;
+
+    /// The hub stands this far BEYOND the cliff's far side: a full troll within 25 m of its hub counts as home and unloads without walking (run 143626: the 6 - 12 m cliffs were never crossed).
+    private const float HubBeyond = 32f;
 
     /// The hub of the player at the far side of the cliff (a ZDO, like stt.addHub): the full troll walks home to it, which is a walk of the shared recovery with a hub goal.
     /// Expected outcome: how many hubs are known now.
     [TestHook("stt.addHubAtCliff")]
     private static int AddHubAtCliff()
     {
-        Vector3 d = _goal - Player.m_localPlayer.transform.position;
+        Vector3 d = _goal + _dir * HubBeyond - Player.m_localPlayer.transform.position;
+        ModLog.Info("CliffTestHooks: hub " + HubBeyond.ToString("F0") + " m beyond the cliff's far side (cliff goal " + _goal.ToString("F0") + ")");
         return TestHooks.AddHub(1, d.x, d.z, "");
     }
 
@@ -195,6 +199,7 @@ internal static class CliffTestHooks
         _goal = up ? _top : _bottom;
         Vector3 dir = (_goal - from);
         dir.y = 0f;
+        _dir = dir.normalized;
         Vector3 at = from - dir.normalized * 1.5f;
         at.y = ZoneSystem.instance.GetGroundHeight(at) + 0.5f;
         return TestHooks.SpawnTrollAt(at);

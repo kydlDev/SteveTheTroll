@@ -47,6 +47,14 @@
       "label": "the zones around the cliff load"
     },
     {
+      "do": "hook",
+      "name": "stt.clearSources",
+      "args": {
+        "radius": 70
+      },
+      "label": "no tree, rock, stump or bush on the straight line (the ledge walk refuses solid things at chest height)"
+    },
+    {
       "if": "{{up}}",
       "do": "hook",
       "name": "stt.spawnAtCliff",
@@ -90,6 +98,13 @@
       }
     },
     {
+      "if": "{{forced}}",
+      "do": "hook",
+      "name": "stt.forceLedge",
+      "expect": true,
+      "label": "the troll's walk home is forced over the ledge walk (armed BEFORE the walk starts: a hub within 25 m is 'home' and never ticks the walk)"
+    },
+    {
       "do": "hook",
       "name": "stt.fillBackpack",
       "args": {
@@ -107,13 +122,6 @@
         "expect": true
       },
       "timeout": 10
-    },
-    {
-      "if": "{{forced}}",
-      "do": "hook",
-      "name": "stt.forceLedge",
-      "expect": true,
-      "label": "the troll walks the rest of its way over the ledge walk"
     },
     {
       "if": "{{forced}}",

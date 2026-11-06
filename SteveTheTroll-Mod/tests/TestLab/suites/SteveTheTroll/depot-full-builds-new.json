@@ -1,75 +1,75 @@
 ﻿{
-    "name":  "depot-full-builds-new",
-    "timeout":  240,
-    "description":  "D-174 (review): the only depot is full to the last slot; a full troll must build / use another depot, unload everything and conserve every item.",
-    "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  false,
-                                   "slippers":  true,
-                                   "hub":  true
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnDepot",
-                      "args":  {
-                                   "dx":  -10,
-                                   "dz":  40
-                               },
-                      "as":  "depot"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.depotFill",
-                      "args":  {
-                                   "frame":  "depot"
-                               },
-                      "label":  "the existing depot is full (enforced by the depotCount assert: a second depot is built only when the first is full)"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  -14,
-                                   "dz":  8
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.observe",
-                      "args":  {
-                                   "back":  15
-                               },
-                      "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  2
-                  },
-                  {
-                      "do":  "unloadAndConserve",
-                      "timeout":  180
-                  }
-              ],
-    "asserts":  [
-                    {
-                        "check":  "hook",
-                        "name":  "stt.depotCount",
-                        "min":  2,
-                        "label":  "a second depot was built"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.followedConserved",
-                        "expect":  true
-                    },
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+  "name": "depot-full-builds-new",
+  "timeout": 240,
+  "description": "D-174 (review): the only depot is full to the last slot; a full troll must build / use another depot, unload everything and conserve every item.",
+  "steps": [
+    {
+      "do": "use",
+      "block": "start",
+      "args": {
+        "clearTrolls": false,
+        "slippers": true,
+        "hub": true
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.spawnDepot",
+      "args": {
+        "dx": -10,
+        "dz": 40
+      },
+      "as": "depot"
+    },
+    {
+      "do": "hook",
+      "name": "stt.depotFill",
+      "args": {
+        "frame": "depot"
+      },
+      "label": "the existing depot is full (enforced by the depotCount assert: a second depot is built only when the first is full)"
+    },
+    {
+      "do": "hook",
+      "name": "stt.spawnTroll",
+      "args": {
+        "dx": -14,
+        "dz": 8
+      },
+      "as": "troll"
+    },
+    {
+      "do": "hook",
+      "name": "stt.observe",
+      "args": {
+        "back": 15
+      },
+      "label": "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
+    },
+    {
+      "do": "wait",
+      "seconds": 2
+    },
+    {
+      "do": "unloadAndConserve",
+      "timeout": 180
+    }
+  ],
+  "asserts": [
+    {
+      "check": "hook",
+      "name": "stt.depotCount",
+      "min": 2,
+      "label": "a second depot was built"
+    },
+    {
+      "check": "hook",
+      "name": "stt.followedConserved",
+      "expect": true
+    },
+    {
+      "check": "noErrors",
+      "source": "SteveTheTroll"
+    }
+  ]
 }

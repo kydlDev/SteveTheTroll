@@ -1,127 +1,131 @@
 ﻿{
-    "name":  "full-while-farming",
-    "description":  "A troll with an active farm job whose backpack fills up drops the job and unloads (D-159 regression)",
-    "timeout":  240,
-    "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  false,
-                                   "slippers":  true,
-                                   "hub":  true
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dz":  8,
-                                   "dx":  -14
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.observe",
-                      "args":  {
-                                   "back":  15
-                               },
-                      "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.startFarm",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  3
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.state",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "contains":  "farming",
-                      "label":  "has a farm job"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.followTroll",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.fillBackpack",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.returningToUnload",
-                                    "args":  {
-                                                 "troll":  "troll"
-                                             },
-                                    "expect":  true
-                                },
-                      "timeout":  30
-                  },
-                  {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.followedBackpackAtMost",
-                                    "args":  {
-                                                 "stacks":  20
-                                             },
-                                    "expect":  true
-                                },
-                      "timeout":  150
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  2
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.followedState",
-                      "label":  "followed troll (diagnosis)"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.followedConserved",
-                      "expect":  true,
-                      "label":  "every Wood put in is in the backpack or a depot - nothing lost"
-                  }
-              ],
-    "asserts":  [
-                    {
-                        "check":  "hook",
-                        "name":  "stt.followedConserved",
-                        "expect":  true,
-                        "label":  "items conserved"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.followedBackpackAtMost",
-                        "args":  {
-                                     "stacks":  20
-                                 },
-                        "expect":  true,
-                        "label":  "unloaded (a farming troll picks up drops again a moment after the unload - the Wood count proves the delivery)"
-                    },
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+  "name": "full-while-farming",
+  "description": "A troll with an active farm job whose backpack fills up drops the job and unloads (D-159 regression)",
+  "timeout": 240,
+  "steps": [
+    {
+      "do": "use",
+      "block": "start",
+      "args": {
+        "clearTrolls": false,
+        "slippers": true,
+        "hub": true
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.spawnTroll",
+      "args": {
+        "dz": 8,
+        "dx": -14
+      },
+      "as": "troll"
+    },
+    {
+      "do": "hook",
+      "name": "stt.observe",
+      "args": {
+        "back": 15
+      },
+      "label": "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
+    },
+    {
+      "do": "hook",
+      "name": "stt.startFarm",
+      "args": {
+        "troll": "troll"
+      }
+    },
+    {
+      "do": "wait",
+      "seconds": 3
+    },
+    {
+      "do": "hook",
+      "name": "stt.state",
+      "args": {
+        "troll": "troll"
+      },
+      "contains": "farming",
+      "label": "has a farm job"
+    },
+    {
+      "do": "hook",
+      "name": "stt.followTroll",
+      "args": {
+        "troll": "troll"
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.fillBackpack",
+      "args": {
+        "troll": "troll"
+      }
+    },
+    {
+      "do": "wait",
+      "until": {
+        "check": "hook",
+        "name": "stt.returningToUnload",
+        "args": {
+          "troll": "troll"
+        },
+        "expect": true
+      },
+      "timeout": 30
+    },
+    {
+      "do": "wait",
+      "until": {
+        "check": "hook",
+        "name": "stt.followedBackpackAtMost",
+        "args": {
+          "stacks": 20
+        },
+        "expect": true
+      },
+      "timeout": 150
+    },
+    {
+      "do": "wait",
+      "seconds": 2
+    },
+    {
+      "do": "hook",
+      "name": "stt.followedState",
+      "label": "followed troll (diagnosis)"
+    },
+    {
+      "do": "wait",
+      "until": {
+        "check": "hook",
+        "name": "stt.followedConserved",
+        "expect": true
+      },
+      "timeout": 25,
+      "label": "every Wood put in is in the backpack or a depot - nothing lost (read again for up to 25 s: the new depot chests load a moment after the unload)"
+    }
+  ],
+  "asserts": [
+    {
+      "check": "hook",
+      "name": "stt.followedConserved",
+      "expect": true,
+      "label": "items conserved"
+    },
+    {
+      "check": "hook",
+      "name": "stt.followedBackpackAtMost",
+      "args": {
+        "stacks": 20
+      },
+      "expect": true,
+      "label": "unloaded (a farming troll picks up drops again a moment after the unload - the Wood count proves the delivery)"
+    },
+    {
+      "check": "noErrors",
+      "source": "SteveTheTroll"
+    }
+  ]
 }
