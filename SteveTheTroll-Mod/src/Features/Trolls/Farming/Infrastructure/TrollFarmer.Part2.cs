@@ -14,6 +14,7 @@ using SteveTheTroll.Features.Trolls.Farming.Execution;
 using SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
+using SteveTheTroll.Features.Trolls.World.Infrastructure;
 using SteveTheTroll.Presentation.Notifications;
 using SteveTheTroll.Ui;
 using UnityEngine;
@@ -264,6 +265,14 @@ internal sealed partial class TrollFarmer
             }
 
             Travelling = false;
+            if (!float.IsNaN(_exploreHeading))
+            {
+                ModLog.Info("TrollFarmer: " + TrollTaming.Tag(this) + " found a source after exploring " + _exploreSteps + " step(s)");
+            }
+
+            _exploreHeading = float.NaN;
+            _exploreSteps = 0;
+            _saidNothing = false;
             Spots.Remember(_target.transform.position);
             FarmReservations.Hold(_target, Me);
             ModLog.Info("TrollFarmer: " + TrollTaming.Tag(this) + " farms " + item +
@@ -296,6 +305,11 @@ internal sealed partial class TrollFarmer
             return;
         }
 
+        if (ExploreStep(hub))
+        {
+            return;
+        }
+
         CurrentItem = "";
         _announce = false;
         _nextSearch = Time.time + NothingWaitSeconds;
@@ -308,15 +322,56 @@ internal sealed partial class TrollFarmer
                         NothingWaitSeconds.ToString("0") + " s");
         }
 
-        if (IsMine() && !Auto &&
-            !_saidNothing) // D-062: a troll that went farming on its own does not report "nothing found" every search; an ordered one says it once
+        // D-189 (user: the message says 950 m and suggests planting trees / moving the hub): once per farmed-out period, for ordered and automatic trolls alike
+        if (IsMine() && !_saidNothing)
         {
             _saidNothing = true;
-            Notify.Show(
-                Loc.T("stevethetroll_farm_nothing", Shown(),
-                    Mathf.Max(ModSettings.FarmMaxRange.Value, ModSettings.FarmLongRange.Value).ToString("0")),
+            Notify.Show(Loc.T("stevethetroll_farm_nothing", Shown(), (hub != null ? HubRules.FarmLeash : Mathf.Max(ModSettings.FarmMaxRange.Value, ModSettings.FarmLongRange.Value)).ToString("0")),
                 Notify.Kind.Farm);
         }
+    }
+
+    // D-189 (user 2026-11-06): nothing within the near and long range -> the troll walks on (150 m at a time along its heading, turning at the 950 m leash round its hub), the zones load around it
+    // (TrollZones keeps them), and the near search on the way takes over as soon as a source is in range. Only with a hub. Expected outcome: true = it walks to the next exploration point.
+    private bool ExploreStep(HubInfo hub)
+    {
+        if (hub == null || !IsMine())
+        {
+            return false;
+        }
+
+        Vector3 p = transform.position;
+        if (float.IsNaN(_exploreHeading))
+        {
+            Vector3 fwd = transform.forward;
+            _exploreHeading = ExploreRules.StartHeading(p.x, p.z, hub.Pos.x, hub.Pos.z, Mathf.Atan2(fwd.z, fwd.x) * Mathf.Rad2Deg);
+            _exploreSteps = 0;
+        }
+
+        float tx, tz, used;
+        if (!ExploreRules.Next(p.x, p.z, hub.Pos.x, hub.Pos.z, _exploreHeading, HubRules.FarmLeash, (x, z) => Spots.IsBad(new Vector3(x, p.y, z)), out tx, out tz, out used))
+        {
+            if (Time.time >= _nextNothingLog)
+            {
+                ModLog.Info("TrollFarmer: " + TrollTaming.Tag(this) + " explored " + _exploreSteps + " step(s) and every direction up to " + HubRules.FarmLeash.ToString("0") + " m from the hub is spent");
+            }
+
+            return false;
+        }
+
+        _exploreHeading = used;
+        _exploreSteps++;
+        Vector3 to = new Vector3(tx, p.y, tz);
+        if (ZoneSystem.instance != null)
+        {
+            to.y = ZoneSystem.instance.GetGroundHeight(to);
+        }
+
+        TrollZones.KeepAround(to);
+        ModLog.Info("TrollFarmer: " + TrollTaming.Tag(this) + " finds nothing to farm - explores on (step " + _exploreSteps + ", heading " + used.ToString("F0") + " deg) to " + to.ToString("F0") + ", " + HubGeometry.Flat(to - hub.Pos).ToString("F0") + " m from the hub");
+        CurrentItem = "";
+        StartTravel(to);
+        return Travelling;
     }
 
     // D-163: the long-range search. Expected outcome: true = the troll now walks to a far source.

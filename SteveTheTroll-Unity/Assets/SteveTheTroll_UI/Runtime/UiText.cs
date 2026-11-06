@@ -183,7 +183,7 @@ internal static class UiText
         { "stevethetroll_depot_nospot", "{0} found no place for a troll depot near {1}." },
         { "stevethetroll_hover_stay", "Stay" },
         { "stevethetroll_farm_auto", "{0} got no orders and goes farming {1}." },
-        { "stevethetroll_farm_nothing", "{0} found nothing to farm within {1} m and waits." },
+        { "stevethetroll_farm_nothing", "{0} found nothing left to farm within {1} m of the hub and waits. Plant trees for the trolls to farm, or build a new hub somewhere else." },
         { "stevethetroll_dest_bed", "your bed" },
         { "stevethetroll_farm_home", "{0} is at {1} and waits." },
         { "stevethetroll_under_attack", "{0} is under attack. Attacking back." },
