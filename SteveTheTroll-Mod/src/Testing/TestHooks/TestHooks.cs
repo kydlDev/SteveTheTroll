@@ -355,7 +355,7 @@ internal static partial class TestHooks
         return _followId;
     }
 
-    private static ZDO FollowedZdo()
+    internal static ZDO FollowedZdo()
     {
         return _follow != ZDOID.None ? ZDOMan.instance.GetZDO(_follow) : null;
     }

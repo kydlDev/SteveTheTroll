@@ -184,16 +184,20 @@ internal static class HubPrefab
         copy.transform.localPosition = Vector3.zero;
         copy.transform.localRotation = Quaternion.identity;
         copy.transform.localScale = Vector3.one;
-        SphereCollider sphere = copy.GetComponent<SphereCollider>();
-        if (sphere == null)
+        // The workbench's area is a trigger of some shape (test run 20261106-112543: no SphereCollider on it). EffectArea only needs A trigger collider on its object,
+        // so whatever the copy came with is replaced by one sphere of the wanted radius.
+        string had = "";
+        foreach (Collider old in copy.GetComponents<Collider>())
         {
-            ModLog.Warn("HubPrefab: the workbench's PlayerBase effect area has no sphere collider - no no-spawn area on the hub");
-            Object.DestroyImmediate(copy);
-            return false;
+            had += old.GetType().Name + " ";
+            Object.DestroyImmediate(old);
         }
 
+        var sphere = copy.AddComponent<SphereCollider>();
+        sphere.isTrigger = true;
         sphere.radius = radius;
-        ModLog.Info("HubPrefab: no-spawn area " + radius.ToString("F0") + " m (copy of the workbench's PlayerBase area, type " + source.m_type + ")");
+        ModLog.Info("HubPrefab: no-spawn area " + radius.ToString("F0") + " m (copy of the workbench's PlayerBase area, type " + source.m_type + ", its own collider: " +
+                    (had.Length > 0 ? had.Trim() : "none") + ", layer " + LayerMask.LayerToName(copy.layer) + ")");
         return true;
     }
 

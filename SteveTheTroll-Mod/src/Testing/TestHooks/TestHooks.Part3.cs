@@ -280,7 +280,7 @@ internal static partial class TestHooks
 
     /// A hub of the player at a place relative to the player (no building: only its ZDO, which is all the registry reads).
     [TestHook("stt.addHub")]
-    private static int AddHub(int number, float dx, float dz, string owner)
+    internal static int AddHub(int number, float dx, float dz, string owner)
     {
         Player p = Player.m_localPlayer;
         long who = owner == "other" ? Me + 777 : Me;

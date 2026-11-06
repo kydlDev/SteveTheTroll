@@ -10,7 +10,7 @@ using UnityEngine;
 namespace SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 
 /// <summary>
-///     NEXT_STEPS item 4, step 4: the troll ledger, BepInEx/config/SteveTheTroll/&lt;world&gt;/trolls.json - every own troll with its last known place, health and whether it is
+///     NEXT_STEPS item 4, step 4: the troll ledger, BepInEx/config/SteveTheTroll/&lt;world name&gt;_&lt;world uid&gt;/trolls.json - every own troll with its last known place, health and whether it is
 ///     frozen, written by the client that plays the troll's owner. It is evidence for ghost entries and frozen trolls (the file survives a crash and a relog) and complements
 ///     the frozen-troll watch. Written every WriteSeconds, and only when the content changed. Never throws: a failed write is logged once per minute.
 /// </summary>
@@ -42,7 +42,7 @@ internal static class TrollLedger
                 return false;
             }
 
-            string dir = Path.Combine(Path.Combine(Paths.ConfigPath, "SteveTheTroll"), Safe(ZNet.instance.GetWorldName()));
+            string dir = Path.Combine(Path.Combine(Paths.ConfigPath, "SteveTheTroll"), WorldFolder());
             Directory.CreateDirectory(dir);
             File.WriteAllText(Path.Combine(dir, "trolls.json"), json, new UTF8Encoding(false));
             _last = json;
@@ -56,10 +56,18 @@ internal static class TrollLedger
         }
     }
 
+    /// The folder name of this world: its name AND the game's unique world id (ZNet.GetWorldUID), so two worlds that share a name never read each other's trolls
+    /// (user 2026-11-06). Expected outcome: "Name_UID", e.g. "Valheim_8372649182736".
+    internal static string WorldFolder()
+    {
+        return Safe(ZNet.instance.GetWorldName()) + "_" + ZNet.instance.GetWorldUID();
+    }
+
     /// The ledger text for the list. Expected outcome: a JSON object with one entry per troll (id, name, place, health, loaded, frozen, dead).
     internal static string Build(System.Collections.Generic.IList<TrollInfo> trolls)
     {
-        var sb = new StringBuilder("{\n  \"player\": ").Append(Player.m_localPlayer != null ? Player.m_localPlayer.GetPlayerID() : 0L).Append(",\n  \"trolls\": [");
+        var sb = new StringBuilder("{\n  \"world\": \"").Append(Esc(ZNet.instance != null ? ZNet.instance.GetWorldName() : "")).Append("\",\n  \"worldUid\": ")
+            .Append(ZNet.instance != null ? ZNet.instance.GetWorldUID() : 0L).Append(",\n  \"player\": ").Append(Player.m_localPlayer != null ? Player.m_localPlayer.GetPlayerID() : 0L).Append(",\n  \"trolls\": [");
         for (int i = 0; i < trolls.Count; i++)
         {
             TrollInfo t = trolls[i];

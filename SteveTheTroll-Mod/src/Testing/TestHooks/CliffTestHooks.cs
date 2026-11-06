@@ -1,6 +1,5 @@
 using System.Globalization;
 using KydlCore.Common;
-using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Testing.TestHooks;
@@ -9,6 +8,15 @@ namespace SteveTheTroll.Testing.TestHooks;
 internal static class CliffTestHooks
 {
     private static Vector3 _bottom, _top, _goal;
+
+    /// The hub of the player at the far side of the cliff (a ZDO, like stt.addHub): the full troll walks home to it, which is a walk of the shared recovery with a hub goal.
+    /// Expected outcome: how many hubs are known now.
+    [TestHook("stt.addHubAtCliff")]
+    private static int AddHubAtCliff()
+    {
+        Vector3 d = _goal - Player.m_localPlayer.transform.position;
+        return TestHooks.AddHub(1, d.x, d.z, "");
+    }
 
     /// Looks for a cliff in the loaded terrain within `radius` m of the player: two points 6 - 12 m apart whose ground differs by 4 - 15 m, both on dry flat ground (the goal side too).
     /// Expected outcome: "bottom x,z | top x,z | height m" or "none".
@@ -69,6 +77,21 @@ internal static class CliffTestHooks
         return "none within " + radius.ToString("F0") + " m";
     }
 
+    /// The player teleports to a spot 8 m before the cliff stt.findCliff found (the game's own TeleportTo: the zones around the cliff load, so a troll spawned there stays).
+    /// Expected outcome: the place as text.
+    [TestHook("stt.teleportToCliff")]
+    private static string TeleportToCliff(bool up)
+    {
+        Player p = Player.m_localPlayer;
+        Vector3 from = up ? _bottom : _top, to = up ? _top : _bottom;
+        Vector3 dir = to - from;
+        dir.y = 0f;
+        Vector3 at = from - dir.normalized * 8f;
+        at.y = ZoneSystem.instance.GetGroundHeight(at) + 1f;
+        p.TeleportTo(at, p.transform.rotation, true);
+        return at.ToString("F0");
+    }
+
     /// A tamed troll at the foot (`up` = true: it must climb) or on the top (it must go down) of the cliff stt.findCliff found. Expected outcome: the troll.
     [TestHook("stt.spawnAtCliff")]
     private static GameObject SpawnAtCliff(bool up)
@@ -82,31 +105,18 @@ internal static class CliffTestHooks
         return TestHooks.SpawnTrollAt(at);
     }
 
-    /// The troll walks to the other side of the cliff the way a farming troll walks to a far place (TrollFarmer.StartTravel, which uses the shared recovery). Expected outcome: true when the walk started.
-    [TestHook("stt.cliffTravel")]
-    private static bool CliffTravel(GameObject troll)
+    /// Flat metres from the followed troll (stt.followTroll, by ZDO) to the far side of the cliff. Expected outcome: the distance (-1 = no followed troll).
+    [TestHook("stt.cliffDistance")]
+    private static int CliffDistance()
     {
-        TrollFarmer f = troll != null ? troll.GetComponent<TrollFarmer>() : null;
-        if (f == null)
+        ZDO z = TestHooks.FollowedZdo();
+        if (z == null)
         {
-            return false;
+            return -1;
         }
 
-        f.StartTravel(_goal);
-        return true;
-    }
-
-    /// The troll stands within 3 m (flat) of the other side of the cliff. Expected outcome: true on arrival.
-    [TestHook("stt.cliffArrived")]
-    private static bool CliffArrived(GameObject troll)
-    {
-        if (troll == null)
-        {
-            return false;
-        }
-
-        Vector3 d = troll.transform.position - _goal;
+        Vector3 d = z.GetPosition() - _goal;
         d.y = 0f;
-        return d.magnitude <= 3f;
+        return Mathf.RoundToInt(d.magnitude);
     }
 }

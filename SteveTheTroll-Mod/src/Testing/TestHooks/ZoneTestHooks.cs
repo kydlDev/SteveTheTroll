@@ -25,6 +25,14 @@ internal static class ZoneTestHooks
         return troll != null && TrollZones.IsZoneKept(troll.transform.position);
     }
 
+    /// Item 1: the zone of the troll stt.followTroll follows (by ZDO, so it works after the game removed the troll's object) is kept by TrollZones now. Expected outcome: true when kept.
+    [TestHook("stt.followedZoneKept")]
+    private static bool FollowedZoneKept()
+    {
+        ZDO z = TestHooks.FollowedZdo();
+        return z != null && TrollZones.IsZoneKept(z.GetPosition());
+    }
+
     /// Item 4: every own troll counts as "should be travelling" (the frozen-troll watch judges it), or back to the real rule. Expected outcome: the flag now in force.
     [TestHook("stt.forceTravelling")]
     private static bool ForceTravelling(bool on)
