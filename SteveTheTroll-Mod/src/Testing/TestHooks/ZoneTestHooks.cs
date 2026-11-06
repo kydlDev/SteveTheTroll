@@ -1,4 +1,5 @@
 using KydlCore.Common;
+using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.World.Infrastructure;
 using UnityEngine;
 
@@ -22,6 +23,22 @@ internal static class ZoneTestHooks
     private static bool TrollZoneKept(GameObject troll)
     {
         return troll != null && TrollZones.IsZoneKept(troll.transform.position);
+    }
+
+    /// Item 4: every own troll counts as "should be travelling" (the frozen-troll watch judges it), or back to the real rule. Expected outcome: the flag now in force.
+    [TestHook("stt.forceTravelling")]
+    private static bool ForceTravelling(bool on)
+    {
+        TrollFrozenWatch.TestForceTravelling = on;
+        return TrollFrozenWatch.TestForceTravelling;
+    }
+
+    /// Item 4: the frozen-troll watch counts this troll as frozen now. Expected outcome: true from the first rung of the ladder on.
+    [TestHook("stt.trollFrozen")]
+    private static bool TrollFrozen(GameObject troll)
+    {
+        ZNetView v = troll != null ? troll.GetComponent<ZNetView>() : null;
+        return v != null && v.IsValid() && TrollFrozenWatch.IsFrozenZdo(v.GetZDO());
     }
 
     /// Zones TrollZones keeps now. Expected outcome: the count (0 = nothing kept).

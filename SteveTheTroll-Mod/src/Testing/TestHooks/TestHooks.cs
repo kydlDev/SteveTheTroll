@@ -102,6 +102,7 @@ internal static partial class TestHooks
                 .ClearTrolls(); // D-174 (review): every test starts without test / arena trolls (17 tests never called stt.clearTrolls)
         SteveTheTroll.Features.Trolls.World.Infrastructure.TrollZones.TestNear = -1; // item 1: no simulation-distance override carries over
         SteveTheTroll.Features.Trolls.World.Infrastructure.TrollZones.TestTotal = -1;
+        SteveTheTroll.Features.Trolls.Registry.Infrastructure.TrollFrozenWatch.TestForceTravelling = false;
         Marks.Clear();
         _spotTarget = Vector3.zero;
         _followId = "";

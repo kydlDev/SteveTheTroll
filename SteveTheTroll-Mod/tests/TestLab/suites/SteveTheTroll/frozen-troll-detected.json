@@ -1,0 +1,30 @@
+{
+    "name":  "frozen-troll-detected",
+    "timeout":  90,
+    "description":  "NEXT_STEPS item 4: an own troll that should be travelling and has not moved for 10 s is detected as frozen by the always-on watch (checked outside the AI step): the flight recorder is dumped, the player is told and the troll counts as frozen (map pin highlight). It moves again and the freeze ends. The troll is held still with stt.freezeMob; stt.forceTravelling says it should be on its way.",
+    "steps":  [
+                  { "do":  "use", "block":  "start", "args":  { "slippers":  true, "hub":  true } },
+                  { "do":  "hook", "name":  "stt.spawnTroll", "args":  { "dx":  -14, "dz":  8 }, "as":  "troll" },
+                  { "do":  "wait", "seconds":  2 },
+                  { "do":  "hook", "name":  "stt.freezeMob", "args":  { "mob":  "troll" }, "expect":  true, "label":  "the troll stands still (held by the lab)" },
+                  { "do":  "hook", "name":  "stt.forceTravelling", "args":  { "on":  true }, "expect":  true, "label":  "the watch is told the troll should be travelling" },
+                  { "do":  "hook", "name":  "stt.trollFrozen", "args":  { "troll":  "troll" }, "expect":  false, "label":  "not frozen at once" },
+                  {
+                      "do":  "wait",
+                      "until":  { "check":  "hook", "name":  "stt.trollFrozen", "args":  { "troll":  "troll" }, "expect":  true },
+                      "timeout":  30,
+                      "label":  "within 30 s (limit 10 s + two checks) the watch counts the standing troll as frozen"
+                  },
+                  { "do":  "hook", "name":  "stt.forceTravelling", "args":  { "on":  false }, "expect":  false, "label":  "the troll no longer should travel" },
+                  {
+                      "do":  "wait",
+                      "until":  { "check":  "hook", "name":  "stt.trollFrozen", "args":  { "troll":  "troll" }, "expect":  false },
+                      "timeout":  10,
+                      "label":  "the freeze ends when the troll is not meant to travel any more"
+                  }
+              ],
+    "asserts":  [
+                    { "check":  "logContains", "source":  "SteveTheTroll", "text":  "has not moved for", "expect":  true, "label":  "the evidence was dumped (FlightRecorder.Dump) with the reason" },
+                    { "check":  "noErrors", "source":  "SteveTheTroll" }
+                ]
+}

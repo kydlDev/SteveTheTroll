@@ -114,6 +114,30 @@ internal static partial class TrollZones
         }
     }
 
+    /// The own trolls TrollZones tracks (seen loaded or found in the ZDO list), loaded or not. Expected outcome: never null.
+    internal static IEnumerable<ZDOID> TrackedTrolls => Trolls;
+
+    /// Item 4 (self-heal, first rung): pokes the zone at `position` and its 8 neighbours so the terrain stays loaded this second. Expected outcome: how many zones were poked.
+    internal static int KeepAround(Vector3 position)
+    {
+        ZoneSystem zs = ZoneSystem.instance;
+        if (zs == null || Poke == null)
+        {
+            return 0;
+        }
+
+        int n = 0;
+        for (int dx = -1; dx <= 1; dx++)
+        for (int dz = -1; dz <= 1; dz++)
+        {
+            PokeArgs[0] = ZoneSystem.GetZone(position + new Vector3(dx * ZoneSize, 0f, dz * ZoneSize));
+            Poke.Invoke(zs, PokeArgs);
+            n++;
+        }
+
+        return n;
+    }
+
     /// Is the zone at `position` one of the sectors kept now? Expected outcome: true when TrollZones pokes and simulates it.
     internal static bool IsZoneKept(Vector3 position)
     {

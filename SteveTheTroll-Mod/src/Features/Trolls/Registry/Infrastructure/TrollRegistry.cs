@@ -86,6 +86,8 @@ internal static partial class TrollRegistry
         }
 
         _next = Time.time + RefreshSeconds;
+        TrollFrozenWatch.Tick(); // item 4: always on, own 2 s timer
+        TrollLedger.Tick();
         return Refresh(false);
     }
 

@@ -64,6 +64,10 @@ internal static class TrollMapPins
             alive.Add(t.Id);
             var pos = new Vector3(t.X, t.Y, t.Z);
             string label = t.Shown(k => Loc.T(k));
+            if (TrollFrozenWatch.IsFrozen(t.Id))
+            {
+                label = "! " + label + " (" + Loc.T("stevethetroll_stuck_short") + ")"; // item 4: the pin of a frozen troll stands out
+            }
             Minimap.PinData pin;
             if (!Pins.TryGetValue(t.Id, out pin) || pin == null)
             {
