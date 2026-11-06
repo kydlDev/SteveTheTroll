@@ -34,7 +34,7 @@
                       "name":  "stt.pack",
                       "args":  {
                                    "troll":  "troll",
-                                   "prefab":  "Flint",
+                                   "prefab":  "Wood",
                                    "count":  7
                                },
                       "expect":  0
@@ -55,7 +55,7 @@
                       "name":  "stt.backpackCount",
                       "args":  {
                                    "troll":  "troll",
-                                   "prefab":  "Flint"
+                                   "prefab":  "Wood"
                                },
                       "expect":  7,
                       "label":  "the backpack data is intact while the other player may own it"
@@ -76,7 +76,7 @@
                       "name":  "stt.backpackCount",
                       "args":  {
                                    "troll":  "troll",
-                                   "prefab":  "Flint"
+                                   "prefab":  "Wood"
                                },
                       "expect":  7,
                       "label":  "the backpack data is intact after the claim"

@@ -43,7 +43,7 @@
                       "name":  "stt.pack",
                       "args":  {
                                    "troll":  "troll",
-                                   "prefab":  "Flint",
+                                   "prefab":  "Wood",
                                    "count":  7
                                },
                       "expect":  0,
@@ -72,7 +72,7 @@
                       "name":  "stt.backpackCount",
                       "args":  {
                                    "troll":  "troll",
-                                   "prefab":  "Flint"
+                                   "prefab":  "Wood"
                                },
                       "expect":  7
                   },
@@ -107,7 +107,7 @@
                       "name":  "stt.backpackCount",
                       "args":  {
                                    "troll":  "troll",
-                                   "prefab":  "Flint"
+                                   "prefab":  "Wood"
                                },
                       "expect":  0
                   }

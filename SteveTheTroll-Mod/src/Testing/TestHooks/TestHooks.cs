@@ -42,7 +42,7 @@ internal static partial class TestHooks
     // owner's depots gained since stt.followTroll (read from the depot chests' ZDOs, so it works with the depot area unloaded too).
     private static string _followId = "";
     private static ZDOID _follow = ZDOID.None;
-    private static int _depotFlintAtFollow;
+    private static int _depotWoodAtFollow;
     private static readonly Dictionary<ZDOID, int> Filled = new();
 
     // ---- long-range farming and the remembered spot (user 2026-10-31) -------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ internal static partial class TestHooks
         _followId = "";
         _follow = ZDOID.None;
         Filled.Clear();
-        _depotFlintAtFollow = 0;
+        _depotWoodAtFollow = 0;
         Game.instance.GetPlayerProfile().SetCustomSpawnPoint(p.transform.position);
         ClearHubs();
         ClearFarTrees();
@@ -308,13 +308,13 @@ internal static partial class TestHooks
         return BackpackStore.TryAdd(z, Item(prefab, count), null);
     }
 
-    /// Fills every slot of the backpack with Flint stacks. Returns the number of stacks.
+    /// Fills every slot of the backpack with Wood stacks. Returns the number of stacks.
     [TestHook("stt.fillBackpack")]
     private static int FillBackpack(GameObject troll)
     {
         ZDO z = TrollTaming.Zdo(troll.GetComponent<Character>());
         int n = 0;
-        while (n < 500 && BackpackStore.TryAdd(z, Item("Flint", 20), null) >= 0)
+        while (n < 500 && BackpackStore.TryAdd(z, Item("Wood", 20), null) >= 0)
         {
             n++;
         }
@@ -349,9 +349,9 @@ internal static partial class TestHooks
         _followId = TrollRegistry.IdOf(c);
         ZDO z = TrollTaming.Zdo(c);
         _follow = z != null ? z.m_uid : ZDOID.None;
-        _depotFlintAtFollow = DepotQuantity("Flint");
+        _depotWoodAtFollow = DepotQuantity("Wood");
         ModLog.Info("TestHooks: following troll " + _followId + " (ZDO " + _follow + "), depots hold " +
-                    _depotFlintAtFollow + " Flint now");
+                    _depotWoodAtFollow + " Wood now");
         return _followId;
     }
 
@@ -404,7 +404,7 @@ internal static partial class TestHooks
         return s;
     }
 
-    /// D-174: nothing was lost or made: Flint put in by stt.fillBackpack = Flint still in the backpack + Flint the owner's depots gained since stt.followTroll.
+    /// D-174: nothing was lost (a farming troll may add more Wood): Wood put in by stt.fillBackpack <= Wood still in the backpack + Wood the owner's depots gained since stt.followTroll.
     /// Expected outcome: true when conserved (the numbers are logged either way).
     [TestHook("stt.followedConserved")]
     private static bool FollowedConserved()
@@ -422,16 +422,16 @@ internal static partial class TestHooks
         {
             foreach (ItemDrop.ItemData it in BackpackStore.Read(z, i).GetAllItems())
             {
-                if (it.m_dropPrefab != null && it.m_dropPrefab.name == "Flint")
+                if (it.m_dropPrefab != null && it.m_dropPrefab.name == "Wood")
                 {
                     inPack += it.m_stack;
                 }
             }
         }
 
-        int gained = DepotQuantity("Flint") - _depotFlintAtFollow;
-        ModLog.Info("TestHooks: conservation - filled " + filled + " Flint, backpack " + inPack + ", depots gained " +
-                    gained + (filled == inPack + gained ? " - conserved" : " - MISMATCH"));
-        return filled > 0 && filled == inPack + gained;
+        int gained = DepotQuantity("Wood") - _depotWoodAtFollow;
+        ModLog.Info("TestHooks: conservation - filled " + filled + " Wood, backpack " + inPack + ", depots gained " +
+                    gained + (filled <= inPack + gained ? " - conserved" : " - MISMATCH"));
+        return filled > 0 && filled <= inPack + gained;
     }
 }
