@@ -10,8 +10,8 @@ internal static class CliffTestHooks
 {
     private static Vector3 _bottom, _top, _goal, _dir;
 
-    /// The hub stands this far BEYOND the cliff's far side: a full troll within 25 m of its hub counts as home and unloads without walking (run 143626: the 6 - 12 m cliffs were never crossed).
-    private const float HubBeyond = 32f;
+    /// The hub stands this far BEYOND the cliff's far side: a full troll within 50 m of its hub (TrollDepot.MaxFromBed) counts as home and unloads without walking (run 143626: the 6 - 12 m cliffs were never crossed).
+    private const float HubBeyond = 70f;
 
     /// The hub of the player at the far side of the cliff (a ZDO, like stt.addHub): the full troll walks home to it, which is a walk of the shared recovery with a hub goal.
     /// Expected outcome: how many hubs are known now.
