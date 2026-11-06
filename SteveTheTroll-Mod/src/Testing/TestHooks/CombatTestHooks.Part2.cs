@@ -167,8 +167,35 @@ internal static partial class CombatTestHooks
             n++;
         }
 
+        n += ClearUnloadedMade();
         ModLog.Info("CombatTestHooks: " + n + " tamed troll(s) removed before the test (test-made or within " +
                     ArenaClearMetres + " m of the arena), " + kept + " kept");
+        return n;
+    }
+
+    /// Item 1: a test-made troll that is NOT loaded (it froze or was left in a zone nobody simulates) is removed by its ZDO, so one stuck troll cannot poison later tests.
+    /// Expected outcome: how many unloaded test-made troll ZDOs were removed.
+    private static int ClearUnloadedMade()
+    {
+        var all = new List<ZDO>();
+        int index = 0;
+        while (!ZDOMan.instance.GetAllZDOsWithPrefabIterative(TrollTaming.TrollPrefab, all, ref index))
+        {
+        }
+
+        int n = 0;
+        foreach (ZDO z in all)
+        {
+            if (!TestHooks.MadeByTest(z.m_uid) || ZNetScene.instance.FindInstance(z) != null)
+            {
+                continue;
+            }
+
+            z.SetOwner(ZDOMan.GetSessionID());
+            ZDOMan.instance.DestroyZDO(z);
+            n++;
+        }
+
         return n;
     }
 

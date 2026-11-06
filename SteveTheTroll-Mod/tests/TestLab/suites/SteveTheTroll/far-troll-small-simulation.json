@@ -1,0 +1,23 @@
+{
+    "name":  "far-troll-small-simulation",
+    "timeout":  120,
+    "description":  "NEXT_STEPS item 1: at low graphics settings the game simulates only near 1 / total 3 zones. A far own troll 2 zones from the player (inside the old active-area test, outside the near-1 band) must still have its zone kept by TrollZones, so it does not freeze. The simulation distance is overridden for TrollZones only (stt.zonesSimulation) - the lab never touches the graphics settings.",
+    "steps":  [
+                  { "do":  "use", "block":  "start", "args":  { "slippers":  true, "hub":  false } },
+                  { "do":  "hook", "name":  "stt.zonesSimulation", "args":  { "near":  1, "total":  3 }, "expect":  1, "label":  "TrollZones sees a small simulation area (near 1, total 3)" },
+                  { "do":  "hook", "name":  "stt.spawnTroll", "args":  { "dx":  0, "dz":  16 }, "as":  "troll" },
+                  { "do":  "wait", "seconds":  2 },
+                  { "do":  "hook", "name":  "stt.moveTrollFar", "args":  { "troll":  "troll", "dx":  0, "dz":  140 }, "label":  "the troll walks 2 zones away, out of the near-1 band" },
+                  {
+                      "do":  "wait",
+                      "until":  { "check":  "hook", "name":  "stt.trollZoneKept", "args":  { "troll":  "troll" }, "expect":  true },
+                      "timeout":  15,
+                      "label":  "TrollZones keeps the zone of the far troll although the game's near band no longer covers it"
+                  },
+                  { "do":  "wait", "until":  { "check":  "hook", "name":  "stt.keptZones", "min":  1 }, "timeout":  5, "label":  "at least one zone is kept" },
+                  { "do":  "hook", "name":  "stt.zonesSimulation", "args":  { "near":  -1, "total":  -1 }, "expect":  -1, "label":  "the override is switched off again" }
+              ],
+    "asserts":  [
+                    { "check":  "noErrors", "source":  "SteveTheTroll" }
+                ]
+}

@@ -57,6 +57,14 @@ internal static partial class TrollZones
         return ZoneSystem.instance.ZonesWithinRadius(centre, zone, radius, ghost);
     }
 
+    /// Does the game itself simulate this zone: inside its active area AND inside the synced near band (smaller at low graphics settings). Expected outcome: true = leave it to the game.
+    private static bool GameRuns(Vector2s zone, Vector3 refPos, Vector2s centre, Sim sim)
+    {
+        return Domain.ZoneKeepRules.GameRunsZone(
+            ZNetScene.InActiveArea(ZoneSystem.GetZonePos(zone), refPos),
+            Within(centre, zone, sim.Near, sim.Classic, false));
+    }
+
     /// Is `at` within sqrt(reach2) metres (flat) of a far troll of this tick? Expected outcome: true when a troll can reach it.
     private static bool NearTroll(Vector3 at, float reach2)
     {
@@ -190,7 +198,7 @@ internal static partial class TrollZones
             {
                 Clock.Reset();
                 Clock.Start();
-                SimulationDistance sim = ZNet.instance.GetSyncedSimulationDistance();
+                Sim sim = ReadSim();
                 Vector2s centre = ZoneSystem.GetZone(ZNet.instance.GetReferencePosition());
                 int notLoaded = 0,
                     nearZones = 0,
@@ -201,14 +209,14 @@ internal static partial class TrollZones
                 // the zone's band is decided on every call (the player moves between ticks); only the search is cached
                 foreach (ZoneObjects zo in Cached)
                 {
-                    if (Within(centre, zo.Zone, sim.NearSimulationDistance, sim.IsClassic, false))
+                    if (Within(centre, zo.Zone, sim.Near, sim.Classic, false))
                     {
                         nearZones++;
                         continue;
                     }
 
                     List<ZDO> list;
-                    if (Within(centre, zo.Zone, sim.TotalSimulationDistance, sim.IsClassic, true))
+                    if (Within(centre, zo.Zone, sim.Total, sim.Classic, true))
                     {
                         farZones++;
                         list = zo.NotDistant;
@@ -252,8 +260,8 @@ internal static partial class TrollZones
                 if (Time.time >= _nextLog)
                 {
                     _nextLog = Time.time + 5f;
-                    ModLog.Verbose("TrollZones: CreateObjects - simulation near " + sim.NearSimulationDistance +
-                                   " / total " + sim.TotalSimulationDistance + (sim.IsClassic ? " classic" : "")
+                    ModLog.Verbose("TrollZones: CreateObjects - simulation near " + sim.Near +
+                                   " / total " + sim.Total + (sim.Classic ? " classic" : "")
                                    + ", game listed " + before + " ZDO(s); kept zones " + Cached.Count + ": " +
                                    nearZones + " already in the game's near list, " + farZones +
                                    " in its far band (Distant ZDOs left to the game), "

@@ -85,6 +85,41 @@ internal static partial class TrollZones
     private static float _next;
     private static int _lastKept = -1;
 
+    /// Test override (stt.zonesSimulation): the game's simulation distance as a small graphics setting would make it (-1 = the game's real values).
+    /// Applies to this class's view only - the lab never changes the graphics settings.
+    internal static int TestNear = -1, TestTotal = -1;
+
+    /// The game's synced simulation distance (or the test override, as a classic square band). Expected outcome: near / total in zones.
+    private static Sim ReadSim()
+    {
+        if (TestNear >= 0)
+        {
+            return new Sim(TestNear, TestTotal >= TestNear ? TestTotal : TestNear + 2, true);
+        }
+
+        SimulationDistance g = ZNet.instance.GetSyncedSimulationDistance();
+        return new Sim(g.NearSimulationDistance, g.TotalSimulationDistance, g.IsClassic);
+    }
+
+    private readonly struct Sim
+    {
+        internal readonly int Near, Total;
+        internal readonly bool Classic;
+
+        internal Sim(int near, int total, bool classic)
+        {
+            Near = near;
+            Total = total;
+            Classic = classic;
+        }
+    }
+
+    /// Is the zone at `position` one of the sectors kept now? Expected outcome: true when TrollZones pokes and simulates it.
+    internal static bool IsZoneKept(Vector3 position)
+    {
+        return KeptSet.Contains(ZoneSystem.GetZone(position));
+    }
+
     /// Sectors kept now (for the in-game check and the log).
     internal static int KeptCount => Kept.Count;
 
@@ -209,6 +244,9 @@ internal static partial class TrollZones
         long me = p.GetPlayerID();
         Vector3 refPos = ZNet.instance != null ? ZNet.instance.GetReferencePosition() : p.transform.position;
         float r = ModSettings.TrollZoneRadius.Value;
+        // Item 1: the game's ACTUAL simulation band decides what it runs (low graphics: near 1 instead of 2)
+        Sim sim = ReadSim();
+        Vector2s centre = ZoneSystem.GetZone(refPos);
         var gone = new List<ZDOID>();
         foreach (ZDOID id in Trolls)
         {
@@ -220,7 +258,7 @@ internal static partial class TrollZones
             }
 
             Vector3 pos = z.GetPosition();
-            if (ZNetScene.InActiveArea(ZoneSystem.GetZonePos(ZoneSystem.GetZone(pos)), refPos))
+            if (GameRuns(ZoneSystem.GetZone(pos), refPos, centre, sim))
             {
                 continue; // the game runs it anyway
             }
@@ -233,7 +271,7 @@ internal static partial class TrollZones
                 Vector3 c = ZoneSystem.GetZonePos(zone);
                 float ex = Mathf.Max(Mathf.Abs(pos.x - c.x) - ZoneSize / 2f, 0f),
                     ez = Mathf.Max(Mathf.Abs(pos.z - c.z) - ZoneSize / 2f, 0f);
-                if (ex * ex + ez * ez > r * r || KeptSet.Contains(zone) || ZNetScene.InActiveArea(c, refPos))
+                if (ex * ex + ez * ez > r * r || KeptSet.Contains(zone) || GameRuns(zone, refPos, centre, sim))
                 {
                     continue;
                 }
@@ -275,8 +313,6 @@ internal static partial class TrollZones
         }
 
         CacheSeen.Clear();
-        SimulationDistance sim = ZNet.instance.GetSyncedSimulationDistance();
-        Vector2s centre = ZoneSystem.GetZone(refPos);
         bool claimNear = ModSettings.ZoneClaimNearBand.Value;
         float claimReach = r + ClaimMargin, claimReach2 = claimReach * claimReach;
         bool zoneLog = debug && Time.time >= _nextZoneLog;
@@ -290,8 +326,8 @@ internal static partial class TrollZones
         foreach (Vector2s zone in Kept)
         {
             string band = !debug && claimNear ? null :
-                Within(centre, zone, sim.NearSimulationDistance, sim.IsClassic, false) ? "near" :
-                Within(centre, zone, sim.TotalSimulationDistance, sim.IsClassic, true) ? "far" : "beyond";
+                Within(centre, zone, sim.Near, sim.Classic, false) ? "near" :
+                Within(centre, zone, sim.Total, sim.Classic, true) ? "far" : "beyond";
             int zoneUnowned = 0, zoneClaimed = 0;
             if (Poke != null)
             {
@@ -406,7 +442,7 @@ internal static partial class TrollZones
         if (zoneLog)
         {
             ModLog.Verbose("TrollZones: per kept zone (band = the game's simulation band; near " +
-                           sim.NearSimulationDistance + ", total " + sim.TotalSimulationDistance +
+                           sim.Near + ", total " + sim.Total +
                            " zones; claim in the near band " + (claimNear ? "ON" : "OFF (test)") + ")" + _zoneLines);
         }
 
