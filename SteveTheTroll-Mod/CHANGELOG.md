@@ -5,6 +5,7 @@
 - Fixed: with lower graphics settings, a troll far away from you no longer stops moving. The mod now follows the game's own simulation distance and keeps every zone the game does not run around your far trolls.
 - New: no wild creature spawns within 50 m of a Troll Hub, the same protected base area a workbench gives (config `[TrollHub] NoSpawnRadius`, 0 = off, applies after a restart).
 - A troll that stands still on its way somewhere is now noticed after 10 s: you get a message, its map pin shows "stuck", and the mod tries to free it (keeps its area loaded, rebuilds it, then moves it along its way). The trolls are also listed in `BepInEx/config/SteveTheTroll/<world>/trolls.json`.
+- Trolls now walk down and up cliffs: when the game finds no path to a tree, rock, far farm place or the way home, the troll walks the straight line itself over the terrain (up to 80 m, up to 40 m height difference) instead of giving the target up. It works in every walk a troll makes, not only on the way home.
 - A troll no longer stands guard over a creature it cannot hit inside the bed no-hit zone; it goes back to farming after 5 s.
 - Added a flight recorder to the diagnostics: when a troll stalls, the facts of every troll are saved to a file next to the log (needs KydlCore 1.0.1).
 

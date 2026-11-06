@@ -45,6 +45,7 @@
     <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\Side.cs" Link="Mod\Side.cs" />
     <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\ProgressMeter.cs" Link="Mod\ProgressMeter.cs" />
     <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\RecoveryMachine.cs" Link="Mod\RecoveryMachine.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\LedgeRules.cs" Link="Mod\LedgeRules.cs" />
     <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\RecoveryBook.cs" Link="Mod\RecoveryBook.cs" />
     <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\RecoveryStage.cs" Link="Mod\RecoveryStage.cs" />
     <!-- D-169 Recovery V2: typed input / decision, the pipeline and the executor (game-free) + the capability contracts the executor checks -->

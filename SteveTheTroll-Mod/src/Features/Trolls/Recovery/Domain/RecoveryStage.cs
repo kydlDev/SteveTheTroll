@@ -5,7 +5,10 @@ internal enum RecoveryStage
 {
     Travel,
     Rage,
-    Leg
+    Leg,
+
+    /// Item 5: the assisted walk over a cliff (last rung, or first when the ground ahead is a cliff).
+    Ledge
 }
 
 /// <summary>D-167: what the game side has to do now (RecoveryDecision.Command; RecoveryExecutor maps each to its action).</summary>
@@ -16,6 +19,10 @@ internal enum RecoveryCmd
     EndRage,
     StartLeg,
     EndLeg,
+
+    /// Item 5: the ledge walk starts / ends.
+    StartLedge,
+    EndLedge,
     CycleFailed,
     CycleReset
 }

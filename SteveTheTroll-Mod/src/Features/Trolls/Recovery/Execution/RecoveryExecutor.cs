@@ -18,11 +18,14 @@ internal sealed class RecoveryExecutor
 
     private readonly ITrollOwnership _owner;
     private readonly Action<RecoveryDecision> _startLeg;
-    private readonly Action _startRage, _endRage, _endLeg, _cycleFailed, _cycleReset;
+    private readonly Action _startRage, _endRage, _endLeg, _cycleFailed, _cycleReset, _startLedge, _endLedge;
 
     internal RecoveryExecutor(ITrollOwnership owner, Action startRage, Action endRage,
-        Action<RecoveryDecision> startLeg, Action endLeg, Action cycleFailed, Action cycleReset)
+        Action<RecoveryDecision> startLeg, Action endLeg, Action cycleFailed, Action cycleReset, Action startLedge = null,
+        Action endLedge = null)
     {
+        _startLedge = startLedge;
+        _endLedge = endLedge;
         _owner = owner;
         _startRage = startRage;
         _endRage = endRage;
@@ -67,6 +70,8 @@ internal sealed class RecoveryExecutor
                 _startLeg(d);
                 return _startLeg != null;
             case RecoveryCmd.EndLeg: return Invoke(_endLeg);
+            case RecoveryCmd.StartLedge: return Invoke(_startLedge);
+            case RecoveryCmd.EndLedge: return Invoke(_endLedge);
             case RecoveryCmd.CycleFailed: return Invoke(_cycleFailed);
             case RecoveryCmd.CycleReset: return Invoke(_cycleReset);
             default: return d.Command == RecoveryCmd.None;

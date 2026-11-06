@@ -97,6 +97,8 @@ soon, and the depot is cleaned up once you have emptied it.
 
 ### Stuck trolls
 
+When the game finds no path (a cliff in a meadow, up or down), the last step of that recovery is the ledge walk: the troll walks the straight line to its goal itself over the ground, for up to 80 m and 40 m of height difference. It applies to every walk (tree, rock, far place, hub).
+
 A troll that makes no progress towards what it walks to (a tree, a far farm place or its hub) for 3 seconds works its
 way out:
 

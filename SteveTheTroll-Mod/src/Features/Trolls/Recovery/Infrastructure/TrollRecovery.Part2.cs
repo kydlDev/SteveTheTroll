@@ -250,6 +250,11 @@ internal sealed partial class TrollRecovery
             return M.Stage == RecoveryStage.Leg;
         }
 
+        if (M.Stage == RecoveryStage.Ledge)
+        {
+            return LedgeStep(dt, mv); // item 5
+        }
+
         if (M.Stage != RecoveryStage.Rage)
         {
             return M.Stage == RecoveryStage.Rage;

@@ -51,7 +51,8 @@ internal sealed class RecoveryPipeline
 
     private OperationResponse<RecoveryDecision> Decide(RecoveryInput i)
     {
-        RecoveryCmd cmd = Machine.Step(i.Now, i.StuckSeconds, i.SustainedSeconds, i.Rageable, i.HeadOn, i.LegDone);
+        RecoveryCmd cmd = Machine.Step(i.Now, i.StuckSeconds, i.SustainedSeconds, i.Rageable, i.HeadOn, i.LegDone,
+            i.CliffAhead, i.LedgeOk, i.LedgeDone);
         return OperationResponse<RecoveryDecision>.Success(RecoveryDecision.Of(cmd, Machine));
     }
 }

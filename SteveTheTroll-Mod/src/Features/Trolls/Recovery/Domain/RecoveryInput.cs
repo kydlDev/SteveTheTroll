@@ -26,6 +26,15 @@ internal struct RecoveryInput
     /// The running detour leg is over (StuckRules.LegDone / HeadOnClear).
     internal bool LegDone { get; set; }
 
+    /// Item 5: the ground ahead on the line to the goal is a cliff (LedgeRules.IsCliff).
+    internal bool CliffAhead { get; set; }
+
+    /// Item 5: a ledge walk to the goal may start (LedgeRules.Possible) and the troll has not used one in this cycle.
+    internal bool LedgeOk { get; set; }
+
+    /// Item 5: the running ledge walk is over (LedgeRules.Done).
+    internal bool LedgeDone { get; set; }
+
     internal bool IsAlive { get; set; }
 
     /// This client owns the troll (only the owner decides and acts).

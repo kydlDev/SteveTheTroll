@@ -36,8 +36,11 @@ internal sealed class RecoveryMachine
 
     internal bool RightFirst { get; private set; }
 
+    /// Item 5: the ledge walk was used in this cycle (once per cycle).
+    internal bool LedgeUsed { get; private set; }
+
     /// Anything done in this cycle yet (a reset is only worth reporting then).
-    internal bool Dirty => Raged || DetoursDone > 0 || Stage != RecoveryStage.Travel;
+    internal bool Dirty => Raged || LedgeUsed || DetoursDone > 0 || Stage != RecoveryStage.Travel;
 
     /// The side of the leg that runs now (relative to the intended direction): the first leg of a detour goes to the first side, the second leg back the other way.
     internal Side LegSide
@@ -63,6 +66,7 @@ internal sealed class RecoveryMachine
     {
         Stage = RecoveryStage.Travel;
         Raged = false;
+        LedgeUsed = false;
         DetoursDone = 0;
         DetourNumber = 0;
         Leg = 0;
@@ -72,10 +76,19 @@ internal sealed class RecoveryMachine
 
     /// One frame. stuck = seconds without progress, sustained = seconds of continuous progress, rageable = the obstruction may be attacked, headOn = a troll faces me in my way,
     /// legDone = the running leg is over (StuckRules.LegDone / HeadOnClear). Expected outcome: the command the game side must execute (None most frames).
-    internal RecoveryCmd Step(float now, float stuck, float sustained, bool rageable, bool headOn, bool legDone)
+    internal RecoveryCmd Step(float now, float stuck, float sustained, bool rageable, bool headOn, bool legDone,
+        bool cliffAhead = false, bool ledgeOk = false, bool ledgeDone = false)
     {
         switch (Stage)
         {
+            case RecoveryStage.Ledge:
+                if (!ledgeDone)
+                {
+                    return RecoveryCmd.None;
+                }
+
+                Stage = RecoveryStage.Travel;
+                return RecoveryCmd.EndLedge;
             case RecoveryStage.Rage:
                 if (now - _stageStart < StuckRules.RageSeconds)
                 {
@@ -121,6 +134,15 @@ internal sealed class RecoveryMachine
             Stage = RecoveryStage.Rage;
             _stageStart = now;
             return RecoveryCmd.StartRage;
+        }
+
+        // Item 5: a cliff on the way is not a thing to turn around - the troll walks over it first; after both detours the ledge walk is the last rung before the cycle fails
+        if (ledgeOk && !LedgeUsed && (cliffAhead || DetoursDone >= 2))
+        {
+            LedgeUsed = true;
+            Stage = RecoveryStage.Ledge;
+            _stageStart = now;
+            return RecoveryCmd.StartLedge;
         }
 
         if (DetoursDone >= 2)

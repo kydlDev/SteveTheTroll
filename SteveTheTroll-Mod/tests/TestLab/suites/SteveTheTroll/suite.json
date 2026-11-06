@@ -97,6 +97,8 @@
                   "far-troll-small-simulation",
                   "frozen-troll-detected",
                   "hub-no-spawn-area",
+                  "cliff-walk-up",
+                  "cliff-walk-down",
                   "water-keep",
                   "instruction-latency",
                   "troll-arrival",

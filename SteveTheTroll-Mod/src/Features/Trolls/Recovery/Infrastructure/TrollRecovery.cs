@@ -103,7 +103,7 @@ internal sealed partial class TrollRecovery : MonoBehaviour
         _pipeline = new RecoveryPipeline();
         // the executor owns the delegates: bound once here (method groups), never per frame
         _executor = new RecoveryExecutor(_ctx, OnStartRage, OnEndRage, OnStartLeg, OnEndLeg, OnCycleFailed,
-            OnCycleReset);
+            OnCycleReset, OnStartLedge, OnEndLedge);
         ModLog.Verbose("TrollRecovery: " + TrollTaming.Tag(this) +
                        " set up (Architecture V2: pipeline + executor, capabilities complete " +
                        _ctx.Capabilities.Complete + ")");
@@ -196,7 +196,7 @@ internal sealed partial class TrollRecovery : MonoBehaviour
         float now = Time.time;
         bool alive = combat != null && !combat.IsDead;
         float d = 0f, stuck = 0f, sustained = 0f;
-        bool legDone = false, rageable = false, headOn = false;
+        bool legDone = false, rageable = false, headOn = false, cliffAhead = false, ledgeOk = false, ledgeDone = false;
         if (alive)
         {
             if (M.Stage != RecoveryStage.Travel && now - _lastTick > StaleSeconds)
@@ -228,6 +228,11 @@ internal sealed partial class TrollRecovery : MonoBehaviour
                 legDone = LegDone(dt);
             }
 
+            if (M.Stage == RecoveryStage.Ledge)
+            {
+                ledgeDone = LedgeDone(dt);
+            }
+
             if (M.Stage == RecoveryStage.Travel)
             {
                 _meter.Update(d, dt, expectMovement && !combat.InAttack && !combat.IsStaggering);
@@ -236,6 +241,7 @@ internal sealed partial class TrollRecovery : MonoBehaviour
             if (M.Stage == RecoveryStage.Travel && _meter.StuckSeconds >= StuckRules.StuckTrigger)
             {
                 Probe(out rageable, out headOn);
+                LedgeFacts(out cliffAhead, out ledgeOk); // item 5
             }
 
             stuck = _meter.StuckSeconds;
@@ -247,7 +253,7 @@ internal sealed partial class TrollRecovery : MonoBehaviour
             _pipeline.Evaluate(new RecoveryInput
             {
                 Now = now, StuckSeconds = stuck, SustainedSeconds = sustained, Rageable = rageable, HeadOn = headOn,
-                LegDone = legDone, IsAlive = alive, IsOwner = _ctx.IsOwner
+                LegDone = legDone, CliffAhead = cliffAhead, LedgeOk = ledgeOk, LedgeDone = ledgeDone, IsAlive = alive, IsOwner = _ctx.IsOwner
             });
         if (!response.IsSuccess)
         {
