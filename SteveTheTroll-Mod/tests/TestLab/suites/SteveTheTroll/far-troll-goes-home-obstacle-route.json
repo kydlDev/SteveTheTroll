@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "far-troll-goes-home-obstacle-route",
   "timeout": 360,
   "description": "D-174 (review): a full troll ~120 m from its hub with a 24 m line of player-built walls (two high) across its straight way - nothing it may break - must find a way round (the D-174 candidate search: 45 .. 135 degrees, up to 30 m), reach its hub and unload; no troll hit may reach a wall. The game's own path search may already route round the wall (run 174059: no detour was needed) - the test asserts the arrival, the delivery and that no wall was hit, not that a detour ran (the candidate search has its unit tests and recovery-walled-tree).",
@@ -118,6 +118,12 @@
       "do": "hook",
       "name": "stt.followedState",
       "label": "followed troll (diagnosis)"
+    },
+    {
+      "do": "wait",
+      "until": { "check": "hook", "name": "stt.nearDepot", "expect": true },
+      "timeout": 60,
+      "label": "the player stands near a depot chest so the chests are loaded scene objects (a far depot has none and reads 0: run 152341)"
     },
     {
       "do": "wait",

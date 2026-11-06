@@ -76,8 +76,17 @@ internal static partial class TestHooks
             }
 
             string data = z.GetString(ZDOVars.s_items);
+            ZNetView inst = ZNetScene.instance != null ? ZNetScene.instance.FindInstance(z) : null;
+            Container inner = inst != null ? inst.GetComponentInChildren<Container>() : null;
+            // 2026-11-06 (run 144859: 8 chests, all read 0 while the next test found 4800 Wood in them): one line per chest says whether it is empty because nothing was saved, or because it was never read
+            ModLog.Info("TestHooks: depot chest ZDO " + z.m_uid + " at " + z.GetPosition().ToString("F1") + ", saved items string " + data.Length + " chars, object loaded " + seen.Contains(z.m_uid) + ", owner " + z.GetOwner() + ", persistent " + z.Persistent + ", scene instance " + (inst != null ? "yes, Container " + (inner != null ? inner.GetInventory().GetAllItems().Count + " stack(s), " + inner.GetInventory().CountItems(shared) + " of it" : "none on it/children") : "no") + ", ZDO keys: items " + z.GetString(ZDOVars.s_items).Length + " / ZDO owner sector " + z.GetSector());
             if (data.Length == 0)
             {
+                if (inner != null)
+                {
+                    n += inner.GetInventory().CountItems(shared); // a live chest the scan above missed (Container below the ZNetView)
+                }
+
                 continue;
             }
 

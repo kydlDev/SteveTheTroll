@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "far-troll-goes-home-clear-route",
   "timeout": 420,
   "description": "D-174 (review): a full troll ~400 m from its hub on a known-dry, gentle route (stt.clearRoute picks it from world-generator heights) walks home across kept zones, reaches its ACTUAL hub, unloads, and every item is conserved. Isolates long-distance travel / zone transitions from terrain recovery.",
@@ -143,6 +143,12 @@
       "do": "hook",
       "name": "stt.followedState",
       "label": "followed troll (diagnosis)"
+    },
+    {
+      "do": "wait",
+      "until": { "check": "hook", "name": "stt.nearDepot", "expect": true },
+      "timeout": 60,
+      "label": "the player stands near a depot chest so the chests are loaded scene objects (a far depot has none and reads 0: run 152341)"
     },
     {
       "do": "wait",

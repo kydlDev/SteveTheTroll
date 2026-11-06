@@ -125,8 +125,13 @@ internal sealed partial class TrollFarmer
 
         Movement.Stop();
         Movement.LookAt(point);
-        if (_ctx.Capabilities.Combat.InAttack || Time.time < _nextAttack || !Movement.IsLookingAt(point, LookAngle))
+        bool inAttack = _ctx.Capabilities.Combat.InAttack, waiting = Time.time < _nextAttack, looking = Movement.IsLookingAt(point, LookAngle);
+        if (inAttack || waiting || !looking)
         {
+            // 2026-11-06 (run 144859: a troll stood 2.6 m from a stump for 30 s without one swing and no line said why): every reason that holds the swing back, with its value
+            ModLog.Every("TrollFarmer.swingGate." + GetInstanceID(), 3.0,
+                "TrollFarmer: " + TrollTaming.Tag(this) + " is at " + _target.name + " (" + d.ToString("F1") + " m, reach " + reach.ToString("F1") + " m) but does not swing: InAttack " + inAttack +
+                ", attack gap left " + Mathf.Max(0f, _nextAttack - Time.time).ToString("F2") + " s, looking at it " + looking + " (limit " + LookAngle.ToString("F0") + " deg), " + Attacks + " attack(s) so far, " + _ladder);
             return how == ApproachAction.AtTarget;
         }
 

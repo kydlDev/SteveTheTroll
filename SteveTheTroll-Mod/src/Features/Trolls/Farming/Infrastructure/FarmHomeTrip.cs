@@ -34,6 +34,8 @@ internal sealed class FarmHomeTrip
     private Vector3 _unloadAt;
     private bool _unloading;
     private float _unloadStart, _homeBest = float.MaxValue, _homeBestAt;
+    private bool _arrivalHome;
+    private float _nextArrivalLog;
 
     internal FarmHomeTrip(TrollFarmer farmer)
     {
@@ -92,8 +94,14 @@ internal sealed class FarmHomeTrip
         // D-097 (user: "as close as 15m from the bed, not right on top of the bed"): home = within HomeRadius, it waits there
         float home = ModSettings.HomeRadius.Value;
         bool there = d <= home + 1f || (_f.IsFull && d <= TrollDepot.MaxFromBed) || stuck;
-        ModLog.Decision("FarmHomeTrip.arrival", there ? "home" : "walk", TrollTaming.Tag(_f) + " is " + d.ToString("F1") + " m from the " + (atHub ? "hub" : "bed") + ", full " + _f.IsFull + ", counts as home within " + (home + 1f).ToString("F0") +
-                                                                          " m (full: " + TrollDepot.MaxFromBed.ToString("F0") + " m), stuck-home " + stuck); // T-214: why a troll walks or does not (a full troll within 25 m never walks)
+        if (there != _arrivalHome || Time.time >= _nextArrivalLog)
+        {
+            // 2026-11-06 (14-test cliff run: 2660 of these lines - the distance changes every step, so the repeat filter never matched): on a change of verdict, else every 5 s
+            _arrivalHome = there;
+            _nextArrivalLog = Time.time + 5f;
+            ModLog.Decision("FarmHomeTrip.arrival", there ? "home" : "walk", TrollTaming.Tag(_f) + " is " + d.ToString("F1") + " m from the " + (atHub ? "hub" : "bed") + ", full " + _f.IsFull + ", counts as home within " + (home + 1f).ToString("F0") +
+                                                                              " m (full: " + TrollDepot.MaxFromBed.ToString("F0") + " m), stuck-home " + stuck); // T-214: why a troll walks or does not (a full troll within 25 m never walks)
+        }
         if (!there)
         {
             // a far walk goes to a point 30 m ahead, renewed every step, and runs (D-164); D-167: stuck detection, rage and detours are TrollRecovery, a hub is never abandoned

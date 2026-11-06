@@ -43,6 +43,12 @@
     },
     {
       "do": "wait",
+      "until": { "check": "hook", "name": "stt.nearDepot", "expect": true },
+      "timeout": 60,
+      "label": "the player stands near a depot chest so the chests are loaded scene objects (a far depot has none and reads 0: run 152341)"
+    },
+    {
+      "do": "wait",
       "until": {
         "check": "hook",
         "name": "stt.followedConserved",
