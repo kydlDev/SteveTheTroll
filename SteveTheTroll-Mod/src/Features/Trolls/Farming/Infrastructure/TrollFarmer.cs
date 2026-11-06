@@ -388,8 +388,12 @@ internal sealed partial class TrollFarmer : MonoBehaviour
             OperationResponse<FarmAction> decision = _pipeline.Evaluate(input);
             if (!decision.IsSuccess)
             {
-                ModLog.Verbose("TrollFarmer: " + TrollTaming.Tag(this) + " farming " + decision.Status + " (" +
-                               decision.Reason + ") - the game's AI runs");
+                if (ModLog.IsDue("TrollFarmer.step." + GetInstanceID(), 5d))
+                {
+                    ModLog.Decision("TrollFarmer.step", "game AI runs",
+                                    TrollTaming.Tag(this) + ": farming " + decision.Status + ", " + decision.Reason);
+                    ModLog.Every("TrollFarmer.step." + GetInstanceID(), 5d, "step refused: " + decision.Status);
+                }
                 return decision.IsSuccess;
             }
 

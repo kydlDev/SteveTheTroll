@@ -227,8 +227,8 @@ internal static class TrollGuard
             return Forced.Count;
         }
 
-        ModLog.Verbose("TrollGuard: " + Forced.Count +
-                       " forced targets kept - cleared (stale entries of removed trolls)");
+        ModLog.Decision("TrollGuard.clearForced", "cleared",
+                        Forced.Count + " forced targets kept (stale entries of removed trolls), limit " + MaxForced);
         Forced.Clear();
         return Forced.Count;
     }
@@ -295,8 +295,8 @@ internal static class TrollGuard
             Vector3.Distance(t.transform.position, ai.transform.position) > KeepRange)
         {
             Forced.Remove(id);
-            ModLog.Verbose("TrollGuard: " + TrollTaming.Tag(ai) + " forced target gone (" +
-                           (t == null ? "removed" : t.IsDead() ? "dead" : "tamed / far") + ")");
+            ModLog.Decision("TrollGuard.forcedTarget", "released",
+                            TrollTaming.Tag(ai) + ": " + (t == null ? "removed" : t.IsDead() ? "dead" : "tamed / far"));
             return false;
         }
 

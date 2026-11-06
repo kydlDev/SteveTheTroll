@@ -215,8 +215,9 @@ internal sealed class TrollReturn : MonoBehaviour
         if (Time.time >= _nextLog)
         {
             _nextLog = Time.time + 30f;
-            ModLog.Verbose("TrollReturn: " + TrollTaming.Tag(c) + " " + d.ToString("F0") + " m from " + _hub.Name +
-                           ", walking back for " + (Time.time - _start).ToString("F0") + " s");
+            ModLog.Every("TrollReturn.walk." + c.GetInstanceID(), 30d,
+                         TrollTaming.Tag(c) + " " + d.ToString("F0") + " m from " + _hub.Name +
+                         ", walking back for " + (Time.time - _start).ToString("F0") + " s");
         }
 
         // A hub 1 km away is far outside the loaded area (the game's path search fails for it): walk to a point a short way ahead, a new one every step.
