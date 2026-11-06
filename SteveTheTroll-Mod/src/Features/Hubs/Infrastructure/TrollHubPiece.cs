@@ -28,6 +28,11 @@ internal class TrollHubPiece : MonoBehaviour
 
     private void Update()
     {
+        if (ModLog.IsDue("TrollHubPiece.status", 10d))
+        {
+            ModLog.Every("TrollHubPiece.status", 10d, "TrollHubPiece: " + name + " waiting for its creator, tried " + _tries.ToString("F1") + " s");
+        }
+
         if (_nview == null || !_nview.IsValid() || !_nview.IsOwner())
         {
             return;

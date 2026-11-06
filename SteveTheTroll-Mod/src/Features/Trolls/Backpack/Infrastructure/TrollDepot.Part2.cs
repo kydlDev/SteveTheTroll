@@ -257,6 +257,12 @@ internal static partial class TrollDepot
     /// D-159: an empty structure that could not be removed yet (window open, troll reservation, another frame above) is checked again every 5 s until it can go.
     internal static void Tick()
     {
+        if (Retry.Count > 0 && ModLog.IsDue("TrollDepot.retry", 10d))
+        {
+            ModLog.Every("TrollDepot.retry", 10d, "TrollDepot: " + Retry.Count + " empty structure(s) waiting to be removed, next check in " +
+                         System.Math.Max(0f, _nextRetry - Time.time).ToString("F1") + " s");
+        }
+
         if (Retry.Count == 0 || Time.time < _nextRetry)
         {
             return;

@@ -26,6 +26,12 @@ internal sealed class CostumeBareFeet : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (ModLog.IsDue("CostumeBareFeet.status", 10d))
+        {
+            ModLog.Every("CostumeBareFeet.status", 10d, "CostumeBareFeet: " + name + " body hidden " + (_body != null && _body.forceRenderingOff) +
+                         ", feet built " + (_feet != null) + ", failed " + _failed);
+        }
+
         if (_vis == null)
         {
             _vis = GetComponent<VisEquipment>();

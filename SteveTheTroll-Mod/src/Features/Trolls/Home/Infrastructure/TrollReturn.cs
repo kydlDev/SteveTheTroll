@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using KydlCore.Common;
+using KydlCore.Features.Diagnostics.Contracts;
 using KydlCore.Core;
 using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Hubs.Application;
@@ -121,6 +122,13 @@ internal sealed class TrollReturn : MonoBehaviour
             {
                 WhyLogged[key] = Time.time + 10f;
                 Character prey = ai.GetTargetCreature();
+                ModLog.Decision("TrollReturn.start", "no walk back", "troll " + TrollTaming.Tag(c) + ", " + d.ToString("F0") + " m from hub, owner here " +
+                                (view != null && view.IsValid() && view.IsOwner()) + ", follow order " + (ai.GetFollowTarget() != null) + ", pipeline ok " + start.IsSuccess);
+                if (!start.IsSuccess && view != null && view.IsValid() && view.IsOwner())
+                {
+                    FlightRecorder.Dump("TrollReturn: the start pipeline failed for " + TrollTaming.Tag(c) + " although this client owns it (" + d.ToString("F0") + " m from the hub)");
+                }
+
                 ModLog.Verbose("TrollReturn: " + TrollTaming.Tag(c) + " is " + d.ToString("F0") + " m from " + hub.Name + " but does not walk back - owner here " +
                             (view != null && view.IsValid() && view.IsOwner()) + ", follow order " + (ai.GetFollowTarget() != null) + ", arriving " +
                             (c.GetComponent<TrollArrival>() != null) + ", owner wears slippers " + TrollHome.OwnerWears(c) + ", AI target " +

@@ -161,6 +161,11 @@ internal sealed class HubSignMenu : ISignMenuHost
     /// Plugin.Update: Escape closes, so does the sign being gone.
     internal static void Tick()
     {
+        if (_open != null && ModLog.IsDue("HubSignMenu.status", 10d))
+        {
+            ModLog.Every("HubSignMenu.status", 10d, "HubSignMenu: the sign menu is open");
+        }
+
         HubSignMenu m = _open;
         if (m == null)
         {

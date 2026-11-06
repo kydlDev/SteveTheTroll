@@ -236,6 +236,7 @@ internal static partial class TrollRegistry
             }
 
             Read(c, t);
+            TrollFlight.Track(c, t.Shown(null) + " [" + id + "]");
             live++;
         }
 

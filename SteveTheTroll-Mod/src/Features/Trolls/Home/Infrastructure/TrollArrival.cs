@@ -23,6 +23,11 @@ internal sealed class TrollArrival : MonoBehaviour
 
     private void Update()
     {
+        if (ModLog.IsDue("TrollArrival.status", 5d))
+        {
+            ModLog.Every("TrollArrival.status", 5d, "TrollArrival: " + TrollTaming.Tag(this) + " walking to its player, " + (Time.time - _start).ToString("F1") + " s so far (gives up after " + GiveUpSeconds.ToString("F0") + " s)");
+        }
+
         if (Time.time < _next)
         {
             return;

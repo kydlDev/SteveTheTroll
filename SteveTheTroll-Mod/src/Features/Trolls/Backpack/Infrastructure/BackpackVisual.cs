@@ -79,6 +79,11 @@ internal sealed class BackpackVisual : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (ModLog.IsDue("BackpackVisual.status", 10d))
+        {
+            ModLog.Every("BackpackVisual.status", 10d, "BackpackVisual: " + name + " backpack root " + (_root != null ? "present" : "missing"));
+        }
+
         if (_root == null)
         {
             return;

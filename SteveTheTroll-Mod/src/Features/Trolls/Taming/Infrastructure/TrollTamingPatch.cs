@@ -90,6 +90,11 @@ internal static class TrollTamingPatch
     // One taming tick of one troll (this client owns its ZDO).
     private static void Tick(Tameable t)
     {
+        if (t != null && ModLog.IsDue("TrollTamingPatch.status", 10d))
+        {
+            ModLog.Every("TrollTamingPatch.status", 10d, "TrollTamingPatch: taming tick of " + t.name + ", tamed " + (TCharacter(t) != null && TCharacter(t).IsTamed()));
+        }
+
         ZNetView nview = TView(t);
         Character troll = TCharacter(t);
         if (nview == null || !nview.IsValid() || !nview.IsOwner() || troll == null || troll.IsDead())

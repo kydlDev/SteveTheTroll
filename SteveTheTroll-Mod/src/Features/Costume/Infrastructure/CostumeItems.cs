@@ -440,6 +440,12 @@ internal sealed class ClubPose : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (ModLog.IsDue("ClubPose.status", 10d))
+        {
+            ModLog.Every("ClubPose.status", 10d, "ClubPose: " + name + " outward " + _o.ToString("F0") + ", up " + _u.ToString("F0") + " deg, twist " +
+                         _t.ToString("F0") + " deg, slide " + _s.ToString("F2") + " m");
+        }
+
         float o = ModSettings.ClubOutward.Value,
             u = ModSettings.ClubUp.Value,
             t = ModSettings.ClubTwist.Value,

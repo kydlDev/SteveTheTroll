@@ -149,6 +149,7 @@ internal static partial class TrollRegistry
                 continue;
             }
 
+            TrollFlight.Untrack(FindLoaded(t.Id));
             Known.RemoveAt(i);
             PendingFocus.Remove(t.Id);
             removed++;

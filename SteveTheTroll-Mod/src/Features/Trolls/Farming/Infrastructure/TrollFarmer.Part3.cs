@@ -1,4 +1,5 @@
 using KydlCore.Common;
+using KydlCore.Features.Diagnostics.Contracts;
 using SteveTheTroll.Features.Trolls.Combat.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
@@ -16,6 +17,13 @@ internal sealed partial class TrollFarmer
 
     private void Update()
     {
+        if (_target != null && ModLog.IsDue("TrollFarmer.status." + GetInstanceID(), 5d))
+        {
+            ModLog.Every("TrollFarmer.status." + GetInstanceID(), 5d, "TrollFarmer: " + TrollTaming.Tag(this) + " target " + _target.name +
+                         ", last farming step " + (_lastStep < 0f ? "never" : (Time.time - _lastStep).ToString("F1") + " s ago") +
+                         ", position " + transform.position.ToString("F0"));
+        }
+
         // user 2026-11-05: debug log only; a pause the troll is meant to make (a fight, rage, the walk back to the hub) is not a stall
         if (_target == null || _lastStep < 0f || Time.time - _lastStep < StepStallSeconds || Time.time < _nextStepStallLog ||
             GetComponent<TrollChase>() != null || GetComponent<TrollRage>() != null || GetComponent<TrollReturn>() != null)
@@ -24,6 +32,8 @@ internal sealed partial class TrollFarmer
         }
 
         _nextStepStallLog = Time.time + StepStallLogSeconds;
+        FlightRecorder.Dump("TrollFarmer: " + TrollTaming.Tag(this) + " has target " + _target.name + " but its farming step has not run for " +
+                            (Time.time - _lastStep).ToString("F1") + " s (limit " + StepStallSeconds.ToString("F0") + " s)");
         MonsterAI ai = GetComponent<MonsterAI>();
         ZNetView view = GetComponent<ZNetView>();
         Rigidbody body = GetComponent<Rigidbody>();
