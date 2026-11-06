@@ -17,6 +17,15 @@ internal static class ZoneKeepRules
     }
 
     /// <summary>
+    ///     2026-11-06: an own troll ZDO that is persistent and has no owner is claimed by this client BEFORE the zone decision (the zone test judges a whole zone, the troll may be at its edge).
+    ///     Expected outcome: true only for a persistent troll without an owner.
+    /// </summary>
+    internal static bool ShouldClaimOwnTroll(bool persistent, bool hasOwner)
+    {
+        return persistent && !hasOwner;
+    }
+
+    /// <summary>
     ///     Classic (square) band: is the zone within `radius` zones of the centre (Chebyshev distance)? Expected outcome: the game's answer for a classic
     ///     simulation distance.
     /// </summary>

@@ -65,6 +65,44 @@ internal static partial class TrollZones
             Within(centre, zone, sim.Near, sim.Classic, false));
     }
 
+    /// How many own trolls without an owner the zone tick claimed directly this session (tests read it).
+    internal static int OwnTrollClaims;
+
+    /// One line per tracked troll every 3 s: what the zone tick decided and the facts behind it - the troll's position and distance, its zone and the zone's centre, the game's active-area answer for
+    /// the troll's OWN position and for the zone centre (they can differ), the near band, the synced simulation distance and the owner. Expected outcome: a line when due, nothing otherwise.
+    private static void LogTroll(ZDO z, Vector3 pos, Vector3 refPos, Vector2s centre, Sim sim, string decision)
+    {
+        string key = "TrollZones.troll." + z.m_uid;
+        if (!ModLog.IsDue(key, 3d))
+        {
+            return;
+        }
+
+        Vector2s zone = ZoneSystem.GetZone(pos);
+        Vector3 zc = ZoneSystem.GetZonePos(zone);
+        ModLog.Every(key, 3d, "TrollZones: troll " + z.m_uid + " decision " + decision + " - at " + pos.ToString("F0") + ", " +
+                              Vector2.Distance(new Vector2(pos.x, pos.z), new Vector2(refPos.x, refPos.z)).ToString("F0") + " m from the player, zone " + zone.x + "," + zone.y + " (centre " +
+                              zc.ToString("F0") + "), inside the game's active area: troll position " + ZNetScene.InActiveArea(pos, refPos) + " / zone centre " + ZNetScene.InActiveArea(zc, refPos) +
+                              ", near band " + Within(centre, zone, sim.Near, sim.Classic, false) + ", simulation near " + sim.Near + " total " + sim.Total + (sim.Classic ? " classic" : "") +
+                              ", owner " + z.GetOwner() + " (this client " + ZDOMan.GetSessionID() + ")");
+    }
+
+    /// Why the zone tick does nothing (every 10 s): no player, the world is not ready, the mod is off, the radius is 0, or the player wears no slippers. Expected outcome: a line when due.
+    private static void LogOff(Player p, ZDOMan zm, ZoneSystem zs)
+    {
+        if (!ModLog.IsDue("TrollZones.off", 10d))
+        {
+            return;
+        }
+
+        string why = p == null ? "no local player" :
+            zm == null || zs == null || ZNetScene.instance == null || ZNet.instance == null ? "the world is not ready" :
+            !ModSettings.On ? "the mod is switched off" :
+            ModSettings.TrollZoneRadius.Value <= 0f ? "TrollZoneRadius is 0" :
+            !TrollTaming.Wears(p) ? "the player wears no slippers (skip-because-slippers-off: far trolls are left to the game)" : "unknown";
+        ModLog.Every("TrollZones.off", 10d, "TrollZones: idle - " + why + ", " + Trolls.Count + " tracked troll(s)");
+    }
+
     /// Is `at` within sqrt(reach2) metres (flat) of a far troll of this tick? Expected outcome: true when a troll can reach it.
     private static bool NearTroll(Vector3 at, float reach2)
     {

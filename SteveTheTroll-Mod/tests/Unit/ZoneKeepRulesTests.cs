@@ -20,6 +20,20 @@ public class ZoneKeepRulesTests
         Assert.That(ZoneKeepRules.InClassicBand(dx, dz, radius), Is.EqualTo(expected));
     }
 
+    [TestCase(true, false, true)] [TestCase(true, true, false)] [TestCase(false, false, false)] [TestCase(false, true, false)]
+    public void OwnTrollWithoutOwner_IsClaimedBeforeTheZoneDecision(bool persistent, bool hasOwner, bool expected)
+    {
+        Assert.That(ZoneKeepRules.ShouldClaimOwnTroll(persistent, hasOwner), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ZoneCentreInsideButTrollReleased_StillClaimed()
+    {
+        // the zone is "run by the game" (active area and near band both true) yet the troll at its edge has no owner: the claim does not depend on that answer
+        Assert.That(ZoneKeepRules.GameRunsZone(true, true), Is.True);
+        Assert.That(ZoneKeepRules.ShouldClaimOwnTroll(true, false), Is.True);
+    }
+
     [Test]
     public void SmallSimulationDistance_LeavesTheZoneBetweenUnsimulatedWithoutTheFix()
     {

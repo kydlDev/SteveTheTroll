@@ -256,6 +256,7 @@ internal static partial class TrollZones
         if (p == null || zm == null || zs == null || ZNetScene.instance == null || ZNet.instance == null ||
             !ModSettings.On || ModSettings.TrollZoneRadius.Value <= 0f || !TrollTaming.Wears(p))
         {
+            LogOff(p, zm, zs);
             if (CachePool.Count > 0)
             {
                 CachePool.Clear();
@@ -282,7 +283,18 @@ internal static partial class TrollZones
             }
 
             Vector3 pos = z.GetPosition();
-            if (GameRuns(ZoneSystem.GetZone(pos), refPos, centre, sim))
+            // 2026-11-06 (diagnostics review): an own troll NOBODY owns is claimed here, before the zone decision. The zone test below judges a whole 64 m zone and could skip a troll the game
+            // had already released; the claim loop further down then never saw it.
+            bool released = Domain.ZoneKeepRules.ShouldClaimOwnTroll(z.Persistent, z.HasOwner());
+            if (released)
+            {
+                z.SetOwner(ZDOMan.GetSessionID());
+                OwnTrollClaims++;
+            }
+
+            bool native = GameRuns(ZoneSystem.GetZone(pos), refPos, centre, sim);
+            LogTroll(z, pos, refPos, centre, sim, released ? "claimed-own-troll (it had no owner)" : native ? "skip-native (the game runs its zone)" : "keep-zone (the game does not run its zone)");
+            if (native)
             {
                 continue; // the game runs it anyway
             }

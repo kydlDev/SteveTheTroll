@@ -1,99 +1,120 @@
-﻿{
-    "name":  "hub-walk-back",
-    "description":  "A troll past 1000 m from its hub with no follow order walks back into the 950 m farm zone and farms again (D-162)",
-    "timeout":  200,
-    "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  true,
-                                   "slippers":  true,
-                                   "hub":  false
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.addHub",
-                      "args":  {
-                                   "number":  1,
-                                   "dx":  0,
-                                   "dz":  1040
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  -30,
-                                   "dz":  10
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.observe",
-                      "args":  {
-                                   "back":  15
-                               },
-                      "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
-                  },
-                  {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.returnDistance",
-                                    "args":  {
-                                                 "troll":  "troll"
-                                             },
-                                    "min":  1001
-                                },
-                      "timeout":  1,
-                      "label":  "the only hub is about 1030 m from the troll (past the 1000 m reach; the troll stands about 32 m in front of the player so TrollHold, which pauses a troll the player looks at within 4 m, does not apply)"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.returnCheck",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "expect":  1,
-                      "label":  "no follow order: it walks back"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.returning",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "expect":  true
-                  },
-                  {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.returning",
-                                    "args":  {
-                                                 "troll":  "troll"
-                                             },
-                                    "expect":  false
-                                },
-                      "timeout":  120
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.state",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "contains":  "farming",
-                      "label":  "back in the zone: farms again"
-                  }
-              ],
-    "asserts":  [
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+{
+    "name": "hub-walk-back",
+    "description": "A troll past 1000 m from its hub with no follow order walks back into the 950 m farm zone and farms again (D-162)",
+    "timeout": 200,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": true,
+                "slippers": true,
+                "hub": false
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.addHub",
+            "args": {
+                "number": 1,
+                "dx": 0,
+                "dz": 1040
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": -30,
+                "dz": 10
+            },
+            "as": "troll"
+        },
+        {
+            "do": "hook",
+            "name": "stt.followTroll",
+            "args": {
+                "troll": "troll"
+            },
+            "label": "2026-11-06 (diagnostics review): the troll is followed by its ZDO from here on - its game object is destroyed and recreated on the long walk"
+        },
+        {
+            "do": "hook",
+            "name": "stt.observe",
+            "args": {
+                "back": 15
+            },
+            "label": "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
+        },
+        {
+            "do": "wait",
+            "until": {
+                "check": "hook",
+                "name": "stt.returnDistance",
+                "args": {
+                    "troll": "troll"
+                },
+                "min": 1001
+            },
+            "timeout": 1,
+            "label": "the only hub is about 1030 m from the troll (past the 1000 m reach; the troll stands about 32 m in front of the player so TrollHold, which pauses a troll the player looks at within 4 m, does not apply)"
+        },
+        {
+            "do": "hook",
+            "name": "stt.returnCheck",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 1,
+            "label": "no follow order: it walks back"
+        },
+        {
+            "do": "hook",
+            "name": "stt.returnCheck",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 1,
+            "label": "the walk back is still on (checked again by the idle check)"
+        },
+        {
+            "do": "wait",
+            "until": {
+                "check": "hook",
+                "name": "stt.followedWithinHubZone",
+                "args": {
+                    "metres": 950
+                },
+                "expect": true
+            },
+            "timeout": 120,
+            "label": "the troll (read by ZDO, whichever object it has) walked back into the 950 m farm zone of the hub"
+        },
+        {
+            "do": "hook",
+            "name": "stt.followedOwnership",
+            "label": "diagnosis: who owns the troll after the walk"
+        },
+        {
+            "do": "wait",
+            "until": {
+                "check": "hook",
+                "name": "stt.followedFarming",
+                "expect": true
+            },
+            "timeout": 30,
+            "label": "back in the zone: farms again (loaded, farming, not unloading)"
+        }
+    ],
+    "asserts": [
+        {
+            "check": "hook",
+            "name": "stt.ownTrollClaims",
+            "label": "diagnosis: own trolls without an owner claimed (any number is fine, it is logged)"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
 }

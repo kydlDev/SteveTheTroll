@@ -1,4 +1,6 @@
 using KydlCore.Common;
+using SteveTheTroll.Features.Hubs.Infrastructure;
+using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.World.Infrastructure;
 using UnityEngine;
@@ -56,6 +58,61 @@ internal static class ZoneTestHooks
     {
         Player p = Player.m_localPlayer;
         return p != null && EffectArea.IsPointInsideArea(p.transform.position + new Vector3(dx, 0f, dz), EffectArea.Type.PlayerBase, 0f);
+    }
+
+    /// How many own trolls without an owner were claimed directly (zone tick + frozen watch) this session. Expected outcome: the count.
+    [TestHook("stt.ownTrollClaims")]
+    private static int OwnTrollClaims()
+    {
+        return TrollZones.OwnTrollClaims + TrollFrozenWatch.OwnerClaims;
+    }
+
+    /// Who owns the followed troll and why (diagnosis): owner, zones, active-area answers, simulation distance. Expected outcome: one line.
+    [TestHook("stt.followedOwnership")]
+    private static string FollowedOwnership()
+    {
+        return TrollOwnerDiag.Describe(TestHooks.FollowedZdo());
+    }
+
+    /// Is the followed troll (by ZDO, whichever game object it has) at most `metres` flat from the nearest hub of the player? Expected outcome: false when its ZDO is gone or there is no hub.
+    [TestHook("stt.followedWithinHubZone")]
+    private static bool FollowedWithinHubZone(int metres)
+    {
+        ZDO z = TestHooks.FollowedZdo();
+        Player p = Player.m_localPlayer;
+        if (z == null || p == null)
+        {
+            return false;
+        }
+
+        HubRegistry.All(true);
+        float d;
+        return HubRegistry.Nearest(p.GetPlayerID(), z.GetPosition(), out d) != null && d <= metres;
+    }
+
+    /// Is the followed troll loaded and farming (a TrollFarmer that is not unloading)? Expected outcome: false when it is not loaded.
+    [TestHook("stt.followedFarming")]
+    private static bool FollowedFarming()
+    {
+        ZDO z = TestHooks.FollowedZdo();
+        ZNetView view = z != null && ZNetScene.instance != null ? ZNetScene.instance.FindInstance(z) : null;
+        TrollFarmer f = view != null ? view.GetComponent<TrollFarmer>() : null;
+        return f != null && !f.Unloading;
+    }
+
+    /// The friend-detour counters as text (diagnosis): "triggered n, sideways legs n, passed n". Expected outcome: the line.
+    [TestHook("stt.detourStats")]
+    private static string DetourStats()
+    {
+        return "triggered " + FarmFriendDetour.Triggers + ", sideways legs " + FarmFriendDetour.SidewaysDone + ", passed " + FarmFriendDetour.Passed;
+    }
+
+    /// Zeroes the friend-detour counters. Expected outcome: true.
+    [TestHook("stt.resetDetourStats")]
+    private static bool ResetDetourStats()
+    {
+        FarmFriendDetour.Triggers = FarmFriendDetour.SidewaysDone = FarmFriendDetour.Passed = 0;
+        return true;
     }
 
     /// Zones TrollZones keeps now. Expected outcome: the count (0 = nothing kept).

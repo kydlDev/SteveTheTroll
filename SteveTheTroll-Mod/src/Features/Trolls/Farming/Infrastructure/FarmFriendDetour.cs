@@ -17,6 +17,9 @@ internal sealed class FarmFriendDetour
     // 2026-11-05: two legs (TargetRules.SideStep, then Waypoint), each at most DetourSeconds; a leg ends early within ArriveMetres of its point
     private const float DetourSeconds = 1.5f, DetourCheckSeconds = 0.25f, LogSeconds = 10f, ArriveMetres = 0.8f;
     private int _detours;
+
+    /// Detours started / first (sideways) legs done / friends passed this session (the farm-friend-detour test logs them, so the log says whether the detour code ran at all).
+    internal static int Triggers, SidewaysDone, Passed;
     private Vector3 _detourTo, _secondLeg;
     private bool _onFirstLeg;
     private float _detourUntil, _nextCheck, _nextLog, _nextNearLog;
@@ -32,12 +35,16 @@ internal sealed class FarmFriendDetour
             if (_onFirstLeg && left.magnitude <= ArriveMetres)
             {
                 _onFirstLeg = false; // sideways step done: now parallel past the friend
+                SidewaysDone++;
+                ModLog.Info("TrollFarmer: " + TrollTaming.Tag(self.transform) + " detour: sideways leg done at " + self.transform.position.ToString("F1") + ", now past the friend (" + SidewaysDone + " sideways leg(s) done)");
                 _detourTo = _secondLeg;
                 _detourUntil = Time.time + DetourSeconds;
             }
             else if (!_onFirstLeg && left.magnitude <= ArriveMetres)
             {
                 _detourUntil = 0f; // past the friend: straight on to the goal
+                Passed++;
+                ModLog.Info("TrollFarmer: " + TrollTaming.Tag(self.transform) + " detour: past the friend at " + self.transform.position.ToString("F1") + ", straight on to " + goal.ToString("F1") + " (" + Passed + " passed)");
                 return false;
             }
 
@@ -87,6 +94,9 @@ internal sealed class FarmFriendDetour
             _onFirstLeg = true;
             _detourUntil = Time.time + DetourSeconds;
             _detours++;
+            Triggers++;
+            ModLog.Info("TrollFarmer: " + TrollTaming.Tag(self.transform) + " detour started (trigger " + Triggers + "): me " + p.ToString("F1") + ", goal " + goal.ToString("F1") + ", friend " + o.ToString("F1") +
+                        ", first leg to " + _detourTo.ToString("F1") + ", second leg to " + _secondLeg.ToString("F1"));
             if (Time.time >= _nextLog)
             {
                 _nextLog = Time.time + LogSeconds;
@@ -122,6 +132,6 @@ internal sealed class FarmFriendDetour
         float along = Vector3.Dot(rel, dir), beside = dir.x * rel.z - dir.z * rel.x;
         ModLog.Info("TrollFarmer: " + TrollTaming.Tag(self.transform) + " near " + TrollTaming.Tag(c) + " - " + along.ToString("F1") + " m ahead, " + beside.ToString("F1") +
                     " m beside the line to the goal (" + len.ToString("F1") + " m away; in the way when 0 .. " + TargetRules.Ahead + " m ahead and within " + TargetRules.HalfWidth +
-                    " m beside): " + (blocked ? "IN THE WAY" : "not in the way"));
+                    " m beside): " + (blocked ? "IN THE WAY" : "not in the way") + " [me " + p.ToString("F1") + ", goal " + goal.ToString("F1") + ", friend " + o.ToString("F1") + "]");
     }
 }
