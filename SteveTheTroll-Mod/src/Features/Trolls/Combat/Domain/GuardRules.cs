@@ -27,6 +27,13 @@ internal static class GuardRules
         return toTroll2 <= range2 || toOwner2 <= range2;
     }
 
+    /// A forced target the troll cannot chase (it or the creature stands in the bed no-hit zone) is given up once that has lasted `limit` seconds, so the troll goes back to
+    /// its farmer instead of being pinned to a creature it cannot hit. Expected outcome: true = release the target.
+    internal static bool ReleaseStuckTarget(bool cannotChase, float stuckSeconds, float limitSeconds)
+    {
+        return cannotChase && stuckSeconds >= limitSeconds;
+    }
+
     /// The index of the nearest distance (-1 for none). Expected outcome: the smallest value's index, the first one on a tie.
     internal static int Nearest(IList<float> distances)
     {

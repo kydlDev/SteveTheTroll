@@ -49,7 +49,7 @@ public class Plugin : BaseUnityPlugin
     // ModGuid never changes after the first release. ModVersion = manifest.json version_number = newest CHANGELOG heading (tests check it).
     public const string ModGuid = "com.kydldev.SteveTheTroll";
     public const string ModName = "SteveTheTroll";
-    public const string ModVersion = "2.0.0";
+    public const string ModVersion = "2.0.1";
 
     public const string BundleName = "stevethetroll";
 

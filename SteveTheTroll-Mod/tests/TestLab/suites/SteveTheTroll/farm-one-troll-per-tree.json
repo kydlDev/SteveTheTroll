@@ -3,116 +3,124 @@
     "description":  "D-151 / D-177: two farming trolls and one tree on cleared ground - never both on the same source (FarmReservations; the user: \"not have 2 that go for the same tree and one waits behind the first\")",
     "timeout":  120,
     "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  true,
-                                   "slippers":  true,
-                                   "hub":  true
-                               }
-                  },
-                  {
-                      "do":  "use",
-                      "block":  "openGround",
-                      "args":  {
-                                   "metres":  100,
-                                   "radius":  40
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.plantTree",
-                      "args":  {
-                                   "dx":  0,
-                                   "dz":  26
-                               },
-                      "as":  "tree"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  -8,
-                                   "dz":  16
-                               },
-                      "as":  "a"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  8,
-                                   "dz":  16
-                               },
-                      "as":  "b"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.observe",
-                      "args":  {
-                                   "back":  15
-                               },
-                      "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.startFarm",
-                      "args":  {
-                                   "troll":  "a"
-                               },
-                      "expect":  true
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.startFarm",
-                      "args":  {
-                                   "troll":  "b"
-                               },
-                      "expect":  true
-                  },
-                  {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.farmersOnOneSource",
-                                    "min":  1
-                                },
-                      "timeout":  15,
-                      "label":  "a troll works on a source"
-                  },
-                  {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.watchFarmers",
-                                    "args":  {
-                                                 "seconds":  12
-                                             },
-                                    "expect":  true
-                                },
-                      "timeout":  20,
-                      "label":  "watched for 12 s, every frame"
-                  }
-              ],
+        {
+            "do":  "use",
+            "block":  "start",
+            "args":  {
+                "clearTrolls":  true,
+                "slippers":  true,
+                "hub":  true
+            }
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.clearMobs",
+            "args":  {
+                "radius":  80
+            },
+            "label":  "no wild creature in the arena meadow to pin a guard target (the unarmed-farm flake)"
+        },
+        {
+            "do":  "use",
+            "block":  "openGround",
+            "args":  {
+                "metres":  100,
+                "radius":  40
+            }
+        },
+        {
+            "do":  "wait",
+            "seconds":  1
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.plantTree",
+            "args":  {
+                "dx":  0,
+                "dz":  26
+            },
+            "as":  "tree"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.spawnTroll",
+            "args":  {
+                "dx":  -8,
+                "dz":  16
+            },
+            "as":  "a"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.spawnTroll",
+            "args":  {
+                "dx":  8,
+                "dz":  16
+            },
+            "as":  "b"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.observe",
+            "args":  {
+                "back":  15
+            },
+            "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
+        },
+        {
+            "do":  "wait",
+            "seconds":  1
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.startFarm",
+            "args":  {
+                "troll":  "a"
+            },
+            "expect":  true
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.startFarm",
+            "args":  {
+                "troll":  "b"
+            },
+            "expect":  true
+        },
+        {
+            "do":  "wait",
+            "until":  {
+                "check":  "hook",
+                "name":  "stt.farmersOnOneSource",
+                "min":  1
+            },
+            "timeout":  15,
+            "label":  "a troll works on a source"
+        },
+        {
+            "do":  "wait",
+            "until":  {
+                "check":  "hook",
+                "name":  "stt.watchFarmers",
+                "args":  {
+                    "seconds":  12
+                },
+                "expect":  true
+            },
+            "timeout":  20,
+            "label":  "watched for 12 s, every frame"
+        }
+    ],
     "asserts":  [
-                    {
-                        "label":  "never 2 trolls on one source",
-                        "name":  "stt.farmersOnOneSourceMax",
-                        "expect":  1,
-                        "check":  "hook"
-                    },
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+        {
+            "label":  "never 2 trolls on one source",
+            "name":  "stt.farmersOnOneSourceMax",
+            "expect":  1,
+            "check":  "hook"
+        },
+        {
+            "check":  "noErrors",
+            "source":  "SteveTheTroll"
+        }
+    ]
 }

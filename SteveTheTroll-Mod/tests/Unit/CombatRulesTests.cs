@@ -17,6 +17,11 @@ public class CombatRulesTests
             Assert.That(GuardRules.Eligible(true, false, 1f, 1f, G2, K2, R2), Is.False);
         }
     }
+    // item 2: a target the troll cannot chase (bed no-hit zone) is released after the limit; one it can chase never is
+    [TestCase(true, 4.9f, false)] [TestCase(true, 5f, true)] [TestCase(true, 30f, true)] [TestCase(false, 30f, false)]
+    public void Guard_ReleasesATargetItCannotChase(bool cannotChase, float seconds, bool expected)
+    { Assert.That(GuardRules.ReleaseStuckTarget(cannotChase, seconds, 5f), Is.EqualTo(expected)); }
+
     [Test] public void Guard_TooFarFromTheTroll_D081() { Assert.That(GuardRules.Eligible(true, true, 31f * 31f, 1f, G2, K2, R2), Is.False); }
     [Test] public void Guard_NearTroll_OrNearOwner()
     {

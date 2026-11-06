@@ -3,80 +3,88 @@
     "description":  "D-170: the farming slice end to end - the troll walks to a tree (approach), swings (swing ladder through FarmingExecutor) and fells it",
     "timeout":  90,
     "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  true,
-                                   "slippers":  true,
-                                   "hub":  true
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.plantTree",
-                      "args":  {
-                                   "dx":  -20,
-                                   "dz":  20
-                               },
-                      "as":  "tree"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  -12,
-                                   "dz":  12
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.observe",
-                      "args":  {
-                                   "back":  15
-                               },
-                      "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.farmOn",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "source":  "tree"
-                               },
-                      "expect":  true,
-                      "label":  "the break order was taken"
-                  },
-                  {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.plantedUntouched",
-                                    "expect":  0
-                                },
-                      "timeout":  60
-                  }
-              ],
+        {
+            "do":  "use",
+            "block":  "start",
+            "args":  {
+                "clearTrolls":  true,
+                "slippers":  true,
+                "hub":  true
+            }
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.clearMobs",
+            "args":  {
+                "radius":  80
+            },
+            "label":  "no wild creature in the arena meadow to pin a guard target (the unarmed-farm flake)"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.plantTree",
+            "args":  {
+                "dx":  -20,
+                "dz":  20
+            },
+            "as":  "tree"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.spawnTroll",
+            "args":  {
+                "dx":  -12,
+                "dz":  12
+            },
+            "as":  "troll"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.observe",
+            "args":  {
+                "back":  15
+            },
+            "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.farmOn",
+            "args":  {
+                "troll":  "troll",
+                "source":  "tree"
+            },
+            "expect":  true,
+            "label":  "the break order was taken"
+        },
+        {
+            "do":  "wait",
+            "until":  {
+                "check":  "hook",
+                "name":  "stt.plantedUntouched",
+                "expect":  0
+            },
+            "timeout":  60
+        }
+    ],
     "asserts":  [
-                    {
-                        "check":  "hook",
-                        "name":  "stt.plantedUntouched",
-                        "expect":  0,
-                        "label":  "the tree was hit (damaged or felled)"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.farmAttacks",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "min":  1,
-                        "label":  "the farmer swung"
-                    },
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+        {
+            "check":  "hook",
+            "name":  "stt.plantedUntouched",
+            "expect":  0,
+            "label":  "the tree was hit (damaged or felled)"
+        },
+        {
+            "check":  "hook",
+            "name":  "stt.farmAttacks",
+            "args":  {
+                "troll":  "troll"
+            },
+            "min":  1,
+            "label":  "the farmer swung"
+        },
+        {
+            "check":  "noErrors",
+            "source":  "SteveTheTroll"
+        }
+    ]
 }

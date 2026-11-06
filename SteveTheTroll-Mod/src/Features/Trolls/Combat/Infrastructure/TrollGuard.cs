@@ -42,6 +42,11 @@ internal static class TrollGuard
     // the troll must fight, re-applied before each AI step (Keep) until it is dead, tamed or further than KeepRange.
     private static readonly Dictionary<int, Character> Forced = new();
     private static readonly List<Character> Attackers = new();
+
+    // Item 2: a forced target the troll cannot chase (bed no-hit zone) is released after ReleaseSeconds and not taken again for IgnoreSeconds.
+    private const float ReleaseSeconds = 5f, IgnoreSeconds = 60f;
+    private static readonly Dictionary<int, float> NoChaseSince = new();
+    private static readonly Dictionary<int, KeyValuePair<int, float>> Ignored = new(); // troll -> (creature instance id, until)
     private static float _next, _nextDropLog;
     private static int _dropped;
 
@@ -230,6 +235,8 @@ internal static class TrollGuard
         ModLog.Decision("TrollGuard.clearForced", "cleared",
                         Forced.Count + " forced targets kept (stale entries of removed trolls), limit " + MaxForced);
         Forced.Clear();
+        NoChaseSince.Clear();
+        Ignored.Clear();
         return Forced.Count;
     }
 
@@ -298,6 +305,32 @@ internal static class TrollGuard
             ModLog.Decision("TrollGuard.forcedTarget", "released",
                             TrollTaming.Tag(ai) + ": " + (t == null ? "removed" : t.IsDead() ? "dead" : "tamed / far"));
             return false;
+        }
+
+        bool cannotChase = TrollNoHit.InZone(ai.transform.position) || TrollNoHit.InZone(t.transform.position);
+        if (!cannotChase)
+        {
+            NoChaseSince.Remove(id);
+        }
+        else
+        {
+            float since;
+            if (!NoChaseSince.TryGetValue(id, out since))
+            {
+                NoChaseSince[id] = since = Time.time;
+            }
+
+            if (GuardRules.ReleaseStuckTarget(true, Time.time - since, ReleaseSeconds))
+            {
+                Forced.Remove(id);
+                NoChaseSince.Remove(id);
+                Ignored[id] = new KeyValuePair<int, float>(t.GetInstanceID(), Time.time + IgnoreSeconds);
+                Target(ai) = null;
+                ModLog.Decision("TrollGuard.forcedTarget", "released (cannot chase)",
+                                TrollTaming.Tag(ai) + ": " + t.name + " in the bed no-hit zone for " + (Time.time - since).ToString("F0") + " s, not taken again for " +
+                                IgnoreSeconds.ToString("F0") + " s");
+                return false;
+            }
         }
 
         if (Target(ai) != t)
@@ -382,6 +415,12 @@ internal static class TrollGuard
 
             // T-008e: slippers off -> it defends the player only during a raid; D-078: only while the troll is near the player; D-081 (TEST-034: a farming Steve ran 60 m back
             // home to a greydwarf that only aimed at the player): a creature that goes for the player is taken on only when it is near the troll. D-171: GuardRules decides.
+            KeyValuePair<int, float> ign;
+            if (Ignored.TryGetValue(troll.GetInstanceID(), out ign) && ign.Key == m.GetInstanceID() && Time.time < ign.Value)
+            {
+                continue; // released as unreachable (item 2): the troll farms on
+            }
+
             Vector3 mp = m.transform.position;
             if (!GuardRules.Eligible(defends, ownerNear, (mp - trollPos).sqrMagnitude, (mp - ownerPos).sqrMagnitude,
                     guard2, keep2, range2))

@@ -1,119 +1,127 @@
 ﻿{
     "name":  "farm-friend-detour",
-    "description":  "D-151 / D-177 / D-181: a tamed troll stands still on the line between a farming troll and its tree - the farmer gets past it (FarmFriendDetour steps around when it is in the way, or the farmer\u0027s own way already passes it) without pushing it, and hits the tree",
+    "description":  "D-151 / D-177 / D-181: a tamed troll stands still on the line between a farming troll and its tree - the farmer gets past it (FarmFriendDetour steps around when it is in the way, or the farmer's own way already passes it) without pushing it, and hits the tree",
     "timeout":  120,
     "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  true,
-                                   "slippers":  true,
-                                   "hub":  true
-                               }
-                  },
-                  {
-                      "do":  "use",
-                      "block":  "openGround",
-                      "args":  {
-                                   "metres":  100,
-                                   "radius":  40
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  0,
-                                   "dz":  25
-                               },
-                      "as":  "blocker"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.freezeMob",
-                      "args":  {
-                                   "mob":  "blocker"
-                               },
-                      "expect":  true,
-                      "label":  "the friend stands still (its AI is off)"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.plantTree",
-                      "args":  {
-                                   "dx":  0,
-                                   "dz":  34
-                               },
-                      "as":  "tree"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  0,
-                                   "dz":  16
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.observe",
-                      "args":  {
-                                   "back":  15
-                               },
-                      "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.mark",
-                      "args":  {
-                                   "troll":  "blocker"
-                               },
-                      "label":  "where the friend stands"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.farmOn",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "source":  "tree"
-                               },
-                      "expect":  true,
-                      "label":  "2026-11-05 (final gate run 3 / focus: \"start farming\" took a world Beech 43 m out, off the line - the friend was never passed): the farmer is ordered onto the planted tree, so the friend stands on its line every time"
-                  },
-                  {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.plantedUntouched",
-                                    "expect":  0
-                                },
-                      "timeout":  45,
-                      "label":  "the farmer got past its friend and hit the tree"
-                  }
-              ],
+        {
+            "do":  "use",
+            "block":  "start",
+            "args":  {
+                "clearTrolls":  true,
+                "slippers":  true,
+                "hub":  true
+            }
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.clearMobs",
+            "args":  {
+                "radius":  80
+            },
+            "label":  "no wild creature in the arena meadow to pin a guard target (the unarmed-farm flake)"
+        },
+        {
+            "do":  "use",
+            "block":  "openGround",
+            "args":  {
+                "metres":  100,
+                "radius":  40
+            }
+        },
+        {
+            "do":  "wait",
+            "seconds":  1
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.spawnTroll",
+            "args":  {
+                "dx":  0,
+                "dz":  25
+            },
+            "as":  "blocker"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.freezeMob",
+            "args":  {
+                "mob":  "blocker"
+            },
+            "expect":  true,
+            "label":  "the friend stands still (its AI is off)"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.plantTree",
+            "args":  {
+                "dx":  0,
+                "dz":  34
+            },
+            "as":  "tree"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.spawnTroll",
+            "args":  {
+                "dx":  0,
+                "dz":  16
+            },
+            "as":  "troll"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.observe",
+            "args":  {
+                "back":  15
+            },
+            "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
+        },
+        {
+            "do":  "wait",
+            "seconds":  1
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.mark",
+            "args":  {
+                "troll":  "blocker"
+            },
+            "label":  "where the friend stands"
+        },
+        {
+            "do":  "hook",
+            "name":  "stt.farmOn",
+            "args":  {
+                "troll":  "troll",
+                "source":  "tree"
+            },
+            "expect":  true,
+            "label":  "2026-11-05 (final gate run 3 / focus: \"start farming\" took a world Beech 43 m out, off the line - the friend was never passed): the farmer is ordered onto the planted tree, so the friend stands on its line every time"
+        },
+        {
+            "do":  "wait",
+            "until":  {
+                "check":  "hook",
+                "name":  "stt.plantedUntouched",
+                "expect":  0
+            },
+            "timeout":  45,
+            "label":  "the farmer got past its friend and hit the tree"
+        }
+    ],
     "asserts":  [
-                    {
-                        "check":  "hook",
-                        "name":  "stt.moved",
-                        "args":  {
-                                     "troll":  "blocker"
-                                 },
-                        "max":  1.5,
-                        "label":  "the friend was not pushed (user: \"not ... one waits behind the first\" / \"re-route next to it\"; fix12: the farmer pushed it up to the tree)"
-                    },
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+        {
+            "check":  "hook",
+            "name":  "stt.moved",
+            "args":  {
+                "troll":  "blocker"
+            },
+            "max":  1.5,
+            "label":  "the friend was not pushed (user: \"not ... one waits behind the first\" / \"re-route next to it\"; fix12: the farmer pushed it up to the tree)"
+        },
+        {
+            "check":  "noErrors",
+            "source":  "SteveTheTroll"
+        }
+    ]
 }
