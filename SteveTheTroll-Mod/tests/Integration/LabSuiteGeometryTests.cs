@@ -14,7 +14,7 @@ namespace SteveTheTroll.Tests.Integration;
 public class LabSuiteGeometryTests
 {
     const float MinFromPlayer = 16f;
-    static readonly string[] NearAllowed = { "defend-rage", "hold-look", "nohit-zone" };
+    static readonly string[] NearAllowed = { "defend-rage", "hold-look", "hold-keeps-zdo", "nohit-zone" };
     static readonly Regex Spawn = new Regex(@"""name""\s*:\s*""(stt\.spawnTroll(?:Near)?)""\s*,\s*""args""\s*:\s*\{(?<args>[^}]*)\}");
     static readonly Regex Dx = new Regex(@"""dx""\s*:\s*(-?[0-9.]+)"), Dz = new Regex(@"""dz""\s*:\s*(-?[0-9.]+)");
 

@@ -56,12 +56,12 @@ internal static class FarmingTestHooks
             ZNetView v = g.GetComponent<ZNetView>();
             if (t == null || v == null || !v.IsValid())
             {
-                ModLog.Info("FarmingTestHooks: plantedUntouched cannot read a planted tree (TreeBase " + (t != null) + ", ZNetView " + (v != null) + ", valid " + (v != null && v.IsValid()) + ") - counted as untouched; the hit counter stt.plantedHitAtLeast is the reliable measure");
+                // A measurement hook never passes when it cannot measure (PLAN D3): -1 matches no expected value, so the test fails with this reason in the log.
+                ModLog.Warn($"FarmingTestHooks: plantedUntouched cannot read a planted tree (TreeBase {t != null}, ZNetView {v != null}, valid {v != null && v.IsValid()}) - unknown (-1); the hit counter stt.plantedHitAtLeast is the other measure");
+                return -1;
             }
 
-            bool full = t == null || v == null || !v.IsValid() ||
-                        v.GetZDO().GetFloat(ZDOVars.s_health, t.m_health) >= t.m_health - 0.01f;
-            if (full)
+            if (v.GetZDO().GetFloat(ZDOVars.s_health, t.m_health) >= t.m_health - 0.01f)
             {
                 n++;
             }

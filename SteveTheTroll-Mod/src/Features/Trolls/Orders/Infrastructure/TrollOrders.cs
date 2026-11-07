@@ -1,3 +1,4 @@
+using SteveTheTroll.Features.Trolls.Contracts;
 using System;
 using System.Collections.Generic;
 using KydlCore.Common;
@@ -244,18 +245,22 @@ internal static class TrollOrders
                 return true;
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            ModLog.Warn($"TrollOrders: ZInput.GetKeyDown({key}) threw {e.GetType().FullName}: {e.Message} - falling back to UnityEngine.Input");
         }
 
+        bool down = false;
         try
         {
-            return Input.GetKeyDown(key);
+            down = Input.GetKeyDown(key);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return false;
+            ModLog.Warn($"TrollOrders: Input.GetKeyDown({key}) threw {e.GetType().FullName}: {e.Message} - the key counts as not pressed this frame");
         }
+
+        return down;
     }
 
     private static Character Nearest(Player p)
@@ -265,7 +270,7 @@ internal static class TrollOrders
         foreach (Character c in Character.GetAllCharacters())
         {
             if (c == null || c.IsDead() || !c.IsTamed() || !TrollTaming.IsTroll(c) ||
-                TrollTaming.Owner(c) != p.GetPlayerID())
+                TrollTaming.Owner(c) != p.GetPlayerID() || TrollRiding.Is(c))
             {
                 continue;
             }

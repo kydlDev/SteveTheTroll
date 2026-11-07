@@ -96,7 +96,7 @@ internal sealed class HubSignMenu : ISignMenuHost
         }
         catch (Exception e)
         {
-            ModLog.Warn("HubSignMenu: could not save the preferred style: " + e.Message);
+            ModLog.Warn($"HubSignMenu: could not save the preferred style, {e.GetType().FullName}: {e.Message}");
             return 0;
         }
     }
@@ -109,7 +109,7 @@ internal sealed class HubSignMenu : ISignMenuHost
         }
         catch (Exception e)
         {
-            ModLog.Warn("HubSignMenu: could not read the preferred style: " + e.Message);
+            ModLog.Warn($"HubSignMenu: could not read the preferred style, {e.GetType().FullName}: {e.Message}");
             return null;
         }
     }

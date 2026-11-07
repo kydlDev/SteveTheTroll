@@ -1,0 +1,35 @@
+{
+    "name":  "rebuild-keeps-zdo",
+    "timeout":  120,
+    "description":  "T-214 B2: the frozen-troll watch's last rung (Rebuild after 30 s) drops only the troll's scene object, never its ZDO: the same troll (same ZDO, same backpack) is built again by the game. Before the fix ZNetScene.Destroy deleted the ZDO of an owned object and the troll with its backpack was gone (cliff-walk-high-down). The troll is held still with stt.freezeMob; stt.forceTravelling says it should be on its way.",
+    "steps":  [
+                  { "do":  "use", "block":  "start", "args":  { "slippers":  true, "hub":  true } },
+                  { "do":  "hook", "name":  "stt.spawnTroll", "args":  { "dx":  -14, "dz":  8 }, "as":  "troll" },
+                  { "do":  "wait", "seconds":  2 },
+                  { "do":  "hook", "name":  "stt.pack", "args":  { "troll":  "troll", "prefab":  "Wood", "count":  7 }, "expect":  0 },
+                  { "do":  "hook", "name":  "stt.followTroll", "args":  { "troll":  "troll" } },
+                  { "do":  "hook", "name":  "stt.followedPackCount", "args":  { "prefab":  "Wood" }, "expect":  7, "label":  "the backpack holds the 7 Wood before the freeze" },
+                  { "do":  "hook", "name":  "stt.freezeMob", "args":  { "mob":  "troll" }, "expect":  true, "label":  "the troll stands still (held by the lab)" },
+                  { "do":  "hook", "name":  "stt.forceTravelling", "args":  { "on":  true }, "expect":  true, "label":  "the watch is told the troll should be travelling" },
+                  {
+                      "do":  "wait",
+                      "until":  { "check":  "logContains", "source":  "SteveTheTroll", "text":  "rebuilt from its ZDO", "expect":  true },
+                      "timeout":  75,
+                      "label":  "10 s reclaim + 30 s rebuild + two checks: the watch reaches the Rebuild rung"
+                  },
+                  { "do":  "hook", "name":  "stt.forceTravelling", "args":  { "on":  false }, "expect":  false, "label":  "the troll no longer should travel" },
+                  {
+                      "do":  "wait",
+                      "until":  { "check":  "hook", "name":  "stt.followedInstanceLoaded", "expect":  true },
+                      "timeout":  20,
+                      "label":  "the game builds the troll again from the kept ZDO"
+                  }
+              ],
+    "asserts":  [
+                    { "check":  "hook", "name":  "stt.followedZdoAlive", "expect":  true, "label":  "the ZDO survived the rebuild (same identity)" },
+                    { "check":  "hook", "name":  "stt.followedPackCount", "args":  { "prefab":  "Wood" }, "expect":  7, "label":  "the backpack survived the rebuild (7 Wood, read from the ZDO)" },
+                    { "check":  "logContains", "source":  "SteveTheTroll", "text":  "its ZDO is still there", "expect":  true, "label":  "the rebuild line says the ZDO is still there" },
+                    { "check":  "logContains", "source":  "SteveTheTroll", "text":  "ZDO IS GONE", "expect":  false, "label":  "no TrollFrozenWatch line says the ZDO is gone (the phrase is exact: HubMapPins also logs hubs that are gone)" },
+                    { "check":  "noErrors", "source":  "SteveTheTroll" }
+                ]
+}

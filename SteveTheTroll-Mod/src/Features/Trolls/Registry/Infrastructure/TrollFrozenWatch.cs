@@ -53,6 +53,9 @@ internal static class TrollFrozenWatch
     }
 
     /// Is this troll (our stt_id) frozen now? Expected outcome: true from the first rung on (the map pin shows it).
+    /// Set by the riding feature: true for a troll that must not be watched (it is ridden). Expected outcome: null = nothing excluded.
+    internal static System.Func<Character, bool> Excluded;
+
     internal static bool IsFrozen(string sttId)
     {
         return sttId != null && Frozen.Contains(sttId);
@@ -151,6 +154,13 @@ internal static class TrollFrozenWatch
             owner = z.IsOwner();
             // 2026-11-06 (full lab run 163541: the same line every 2 s for 20+ s, the claim never stuck - instruction-latency, backpack tests): is the claim itself refused, or does the game release it afterwards?
             ModLog.Info("TrollFrozenWatch: " + TrollTaming.Tag(c) + " claim result - owner now " + z.GetOwner() + ", this client owns it " + owner + ", persistent " + z.Persistent + ", ZDO sector " + z.GetSector() + ", player zone " + ZoneSystem.GetZone(Player.m_localPlayer.transform.position));
+        }
+
+        // T-213: a troll the player rides stands still on purpose while the AI is off - not frozen (it was rebuilt under the rider after 30 s and threw them off)
+        if (c != null && Excluded != null && Excluded(c))
+        {
+            Watches.Remove(id);
+            return;
         }
 
         bool travelling = z.GetInt(TravelKey, 0) == 1;

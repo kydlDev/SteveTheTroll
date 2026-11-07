@@ -37,6 +37,9 @@ internal static class LedgerRules
     }
 
     /// The file text for a world and its entries (one entry per line - Parse reads it back). Expected outcome: a JSON object with world, worldUid, player and trolls.
+    /// <summary>Upper bound for every ledger regex (Sonar S6444): the ledger is a few KB of our own text, so one second means pathological input.</summary>
+    private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(1);
+
     internal static string Format(string world, long worldUid, long player, IList<LedgerEntry> entries)
     {
         var sb = new StringBuilder("{\n  \"world\": \"").Append(Esc(world)).Append("\",\n  \"worldUid\": ").Append(worldUid.ToString(CultureInfo.InvariantCulture)).Append(",\n  \"player\": ")
@@ -58,7 +61,7 @@ internal static class LedgerRules
         return sb.Append("\n  ]\n}\n").ToString();
     }
 
-    /// Reads a ledger text. Expected outcome: the entries (empty for anything that is not a ledger - never throws); world / uid / player are what the header says (null / 0 when missing).
+    /// Reads a ledger text. Expected outcome: the entries (empty for anything that is not a ledger; throws only RegexMatchTimeoutException on pathological input - the caller logs it); world / uid / player are what the header says (null / 0 when missing).
     internal static List<LedgerEntry> Parse(string json, out string world, out long worldUid, out long player)
     {
         world = null;
@@ -70,13 +73,13 @@ internal static class LedgerRules
             return list;
         }
 
-        Match m = Regex.Match(json, "\"world\":\\s*\"((?:[^\"\\\\]|\\\\.)*)\"");
+        Match m = Regex.Match(json, "\"world\":\\s*\"((?:[^\"\\\\]|\\\\.)*)\"", RegexOptions.None, RegexTimeout);
         world = m.Success ? Unesc(m.Groups[1].Value) : null;
         worldUid = Long(json, "worldUid");
         player = Long(json, "player");
         foreach (string line in json.Split('\n'))
         {
-            Match id = Regex.Match(line, "\"id\":\\s*\"((?:[^\"\\\\]|\\\\.)*)\"");
+            Match id = Regex.Match(line, "\"id\":\\s*\"((?:[^\"\\\\]|\\\\.)*)\"", RegexOptions.None, RegexTimeout);
             if (!id.Success)
             {
                 continue;
@@ -189,26 +192,26 @@ internal static class LedgerRules
 
     private static long Long(string s, string key)
     {
-        Match m = Regex.Match(s, "\"" + key + "\":\\s*(-?\\d+)");
+        Match m = Regex.Match(s, "\"" + key + "\":\\s*(-?\\d+)", RegexOptions.None, RegexTimeout);
         long v;
         return m.Success && long.TryParse(m.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out v) ? v : 0L;
     }
 
     private static float Flt(string s, string key)
     {
-        Match m = Regex.Match(s, "\"" + key + "\":\\s*(-?[0-9.]+)");
+        Match m = Regex.Match(s, "\"" + key + "\":\\s*(-?[0-9.]+)", RegexOptions.None, RegexTimeout);
         float v;
         return m.Success && float.TryParse(m.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out v) ? v : 0f;
     }
 
     private static bool Flag(string s, string key)
     {
-        return Regex.IsMatch(s, "\"" + key + "\":\\s*true");
+        return Regex.IsMatch(s, "\"" + key + "\":\\s*true", RegexOptions.None, RegexTimeout);
     }
 
     private static string Str(string s, string key)
     {
-        Match m = Regex.Match(s, "\"" + key + "\":\\s*\"((?:[^\"\\\\]|\\\\.)*)\"");
+        Match m = Regex.Match(s, "\"" + key + "\":\\s*\"((?:[^\"\\\\]|\\\\.)*)\"", RegexOptions.None, RegexTimeout);
         return m.Success ? m.Groups[1].Value : "";
     }
 

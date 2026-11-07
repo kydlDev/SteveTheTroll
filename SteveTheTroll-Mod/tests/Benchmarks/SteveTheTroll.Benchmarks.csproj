@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Benchmarks of the game-free rules (Domain / Application / Execution layers). The files are linked like in the unit-test project, so the
+       benchmarks measure the very code the mod ships. Run (from this folder, Release only):
+       dotnet run -c Release, then the BenchmarkDotNet flags filter and job after a double dash; see the skill microbenchmarking; report: BenchmarkDotNet.Artifacts\results\*-report-github.md -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>SteveTheTroll.Benchmarks</AssemblyName>
+    <RootNamespace>SteveTheTroll.Benchmarks</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Kydl.Core (shared pure contracts): the mod's pure files use it -->
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\KydlCore\KydlCore-Mod\src\Shared\Core\**\*.cs" Link="Kydl\Core\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\Features\Trolls\Backpack\Domain\DepotPlanner.cs" Link="Mod\DepotPlanner.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Farming\Domain\ExploreRules.cs" Link="Mod\ExploreRules.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Farming\Domain\TargetSelection.cs" Link="Mod\TargetSelection.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Farming\Domain\GroundPoint.cs" Link="Mod\GroundPoint.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Farming\Domain\TargetRules.cs" Link="Mod\TargetRules.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\StuckRules.cs" Link="Mod\StuckRules.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\Side.cs" Link="Mod\Side.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\Obstruction.cs" Link="Mod\Obstruction.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Recovery\Domain\ProgressMeter.cs" Link="Mod\ProgressMeter.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Movement\Domain\PathRules.cs" Link="Mod\PathRules.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+</Project>

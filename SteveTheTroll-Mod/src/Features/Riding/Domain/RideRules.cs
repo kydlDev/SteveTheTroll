@@ -60,28 +60,16 @@ internal static class RideRules
     }
 
     /// The hover prompt is shown only when the key would do something. Expected outcome: true for Mount and Dismount.
-    internal static bool PromptVisible(MountVerdict v)
-    {
-        return v == MountVerdict.Mount || v == MountVerdict.Dismount;
-    }
+    internal static bool PromptVisible(MountVerdict v) => v == MountVerdict.Mount || v == MountVerdict.Dismount;
 
     /// Full backpack while ridden = the collecting list pauses until the backpack is empty again (no unload trip is possible). Expected outcome: true = do not look for sources.
-    internal static bool CollectingPaused(bool ridden, bool backpackFull)
-    {
-        return ridden && backpackFull;
-    }
+    internal static bool CollectingPaused(bool ridden, bool backpackFull) => ridden && backpackFull;
 
     /// Farm, guard and hub work are stopped on a ridden troll; the owner's other trolls still guard the rider. Expected outcome: true = the troll takes orders only from its rider.
-    internal static bool OrdersSuspended(bool ridden)
-    {
-        return ridden;
-    }
+    internal static bool OrdersSuspended(bool ridden) => ridden;
 
     /// The Mouse-4 troll order: a ridden troll ignores it, every other troll near the player follows it. Expected outcome: true = this troll follows the order.
-    internal static bool FollowsOrderKey(bool ridden)
-    {
-        return !ridden;
-    }
+    internal static bool FollowsOrderKey(bool ridden) => !ridden;
 
     /// A second tamed troll guards the rider (and the ridden troll) when either is attacked. Expected outcome: true = this troll engages the attacker.
     internal static bool GuardsTheRider(bool thisTrollRidden, bool riderOrMountAttacked, float distanceToRider, float guardRange)
@@ -91,22 +79,13 @@ internal static class RideRules
 
     /// Damage while ridden: a hit that reaches the player hurts the player (normally), a hit that only reaches the troll hurts only the troll. The player is never knocked off.
     /// Expected outcome: the damage goes to the one hit, nobody else.
-    internal static bool DamageHitsPlayer(bool hitReachedPlayer)
-    {
-        return hitReachedPlayer;
-    }
+    internal static bool DamageHitsPlayer(bool hitReachedPlayer) => hitReachedPlayer;
 
     /// Why a ride ended. Expected outcome: the halter + seat return to the inventory, except after death (tombstone) and the troll is free again.
-    internal static EndOutcome End(EndReason reason)
-    {
-        return reason == EndReason.PlayerDied ? EndOutcome.ItemToTombstone : EndOutcome.ItemToInventory;
-    }
+    internal static EndOutcome End(EndReason reason) => reason == EndReason.PlayerDied ? EndOutcome.ItemToTombstone : EndOutcome.ItemToInventory;
 
     /// On login with a mount file: the item is back in the inventory, the troll is sent to its hub and behaves as normal. Expected outcome: the recovery to run.
-    internal static LoginRecovery OnLogin(int storedTroll)
-    {
-        return storedTroll == 0 ? LoginRecovery.None : LoginRecovery.ItemBackAndTrollToHub;
-    }
+    internal static LoginRecovery OnLogin(int storedTroll) => storedTroll == 0 ? LoginRecovery.None : LoginRecovery.ItemBackAndTrollToHub;
 }
 
 public enum EndReason

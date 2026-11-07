@@ -3,6 +3,7 @@ using KydlCore.Common;
 using KydlCore.Core;
 using SteveTheTroll.Features.Costume.Infrastructure;
 using SteveTheTroll.Features.Hubs.Infrastructure;
+using SteveTheTroll.Features.Riding.Infrastructure;
 using SteveTheTroll.Features.Slippers.Infrastructure;
 using SteveTheTroll.Features.Trolls.Infrastructure;
 using SteveTheTroll.Presentation.Hub.Registration;
@@ -29,7 +30,7 @@ internal sealed class ModInstaller
     internal FeatureRegistry Features { get; }
 
     /// Expected outcome: true when the mod page is registered and every switched-on feature started.
-    internal bool Install(bool slippers, bool costume, bool trolls, bool hubs)
+    internal bool Install(bool slippers, bool costume, bool trolls, bool hubs, bool riding)
     {
         Current = this;
         bool page = HubTabs.RegisterModPage(_config);
@@ -37,7 +38,7 @@ internal sealed class ModInstaller
         foreach (IFeature f in new IFeature[]
                  {
                      new SlippersFeature(slippers), new CostumeFeature(costume), new TrollsFeature(trolls),
-                     new HubsFeature(hubs)
+                     new HubsFeature(hubs), new RidingFeature(riding)
                  })
         {
             OperationResponse<int> r = Features.Add(f);
@@ -51,8 +52,8 @@ internal sealed class ModInstaller
             }
         }
 
-        ModLog.Check("ModInstaller: features added", added, 4, 0, "");
-        return page && added == 4 && Refresh();
+        ModLog.Check("ModInstaller: features added", added, 5, 0, "");
+        return page && added == 5 && Refresh();
     }
 
     /// Starts / stops features whose switch changed. Expected outcome: true when every switch could be applied.

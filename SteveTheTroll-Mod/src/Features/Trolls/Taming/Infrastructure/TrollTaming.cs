@@ -34,6 +34,10 @@ internal static class TrollTaming
 
     private static readonly List<Character> Trolls = new();
 
+    /// <summary>Tameable's private network view: null until Tameable.Awake ran. Null here when the game has no such field (then GetText is called as before).</summary>
+    private static readonly AccessTools.FieldRef<Tameable, ZNetView> TameableView =
+        AccessTools.Field(typeof(Tameable), "m_nview") != null ? AccessTools.FieldRefAccess<Tameable, ZNetView>("m_nview") : null;
+
     /// The ONE place for "what is this troll called": its Tameable text (Steve 1), else the object name. Used by messages, orders and Tag.
     internal static string ShownName(Component any)
     {
@@ -41,12 +45,16 @@ internal static class TrollTaming
         string n = "";
         // D-148: Tameable.GetText throws a NullReferenceException while the troll is still in Character.Awake (the log lines of the max-health patch run there); that
         // exception aborted the troll's Awake - Steve 1 loaded without his club and stood still (test run 011447). Never throw out of a name lookup.
+        // 2026-11-07: the exception is AVOIDED, not caught - GetText reads Tameable.m_nview, which Tameable.Awake sets; until then the name is empty. (A caught NRE still
+        // lands in the log and fails GameProbe's common.no-null-reference rule: run agent24-rebuild2, a troll rebuilt from its ZDO.) The catch stays as a safety net only.
+        bool ready = t != null && (TameableView == null || TameableView(t) != null);
         try
         {
-            n = t != null ? t.GetText() : "";
+            n = ready ? t.GetText() : "";
         }
-        catch (NullReferenceException)
+        catch (NullReferenceException e)
         {
+            ModLog.VerboseWarn($"TrollTaming: Tameable.GetText threw {e.GetType().FullName}: {e.Message} (the troll is still in Awake) - using an empty name");
             n = "";
         }
 
@@ -75,9 +83,11 @@ internal static class TrollTaming
         {
             z = Zdo(any.GetComponent<Character>());
         }
-        catch (NullReferenceException)
+        catch (NullReferenceException ex)
         {
-        } // D-148: not ready yet (Awake)
+            // D-148: not ready yet (Awake)
+            ModLog.VerboseWarn($"TrollTaming: Zdo lookup threw {ex.GetType().FullName}: {ex.Message} (the troll is not ready yet) - no id in the tag");
+        }
 
         string shown = ShownName(any);
         string id = z != null ? z.GetString(TrollRegistry.IdKey) : "";

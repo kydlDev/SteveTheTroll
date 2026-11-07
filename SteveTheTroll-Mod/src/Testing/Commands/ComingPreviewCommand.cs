@@ -9,18 +9,18 @@ namespace SteveTheTroll.Testing.Commands;
 ///     first-tame message
 ///     (D-058, Notify.Big) without taming anything and without touching the first-tame flag. Default name: Spencer.
 /// </summary>
-internal sealed class ComingPreviewCommand : ConsoleCommand
+internal sealed class ComingPreviewCommand : SttCommand
 {
     public override string Name => "stt_coming";
 
     public override string Help =>
         "SteveTheTroll: show the big 'X is coming!' message of the first tamed troll (preview only)";
 
-    public override void Run(string[] args)
+    protected override void Execute(string[] args)
     {
         string who = args != null && args.Length > 0 && args[0].Length > 0 ? string.Join(" ", args) : "Spencer";
         bool shown = Notify.Big(Loc.T("stevethetroll_troll_coming", who), Notify.Kind.Good);
-        ModLog.Info("ComingPreviewCommand: '" + who + " is coming!' preview shown " + shown);
-        Console.instance.Print("stt_coming: " + (shown ? "shown" : "no player in the world"));
+        ModLog.Info($"ComingPreviewCommand: '{who} is coming!' preview shown {shown}");
+        Console.instance.Print($"stt_coming: {(shown ? "shown" : "no player in the world")}");
     }
 }

@@ -10,6 +10,8 @@
 - A troll you are looking at (standing still on purpose) is no longer treated as stuck.
 - A troll no longer stands guard over a creature it cannot hit inside the bed no-hit zone; it goes back to farming after 5 s.
 - Added a flight recorder to the diagnostics: when a troll stalls, the facts of every troll are saved to a file next to the log (needs KydlCore 1.0.1).
+- The developer console commands (`stt_...`, test helpers) now stay locked until you type `stt_unlock <word>`; the word is the new setting `[General] UnlockWord` in your config (empty = they stay locked). The `stt_freeze` / `stt_unfreeze` commands are gone.
+- Every error the mod catches is now written to the log with the exact exception type and what the mod did instead, so the next bug report names the exception.
 
 ## 2.0.0
 

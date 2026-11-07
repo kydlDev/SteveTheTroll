@@ -248,6 +248,13 @@ internal static partial class GapTestHooks
         TreeBase t = target.GetComponent<TreeBase>();
         Destructible ds = target.GetComponent<Destructible>();
         float full = t != null ? t.m_health : ds != null ? ds.m_health : 0f;
-        return Mathf.RoundToInt(v != null && v.IsValid() ? v.GetZDO().GetFloat(ZDOVars.s_health, full) : full);
+        if (v == null || !v.IsValid())
+        {
+            // A measurement hook never passes when it cannot measure (PLAN D3): -1 = unknown, not "the prefab's full health".
+            ModLog.Warn($"GapTestHooks: objectHealth cannot read {target.name} (ZNetView {v != null}, valid {v != null && v.IsValid()}) - unknown (-1)");
+            return -1;
+        }
+
+        return Mathf.RoundToInt(v.GetZDO().GetFloat(ZDOVars.s_health, full));
     }
 }

@@ -1,3 +1,4 @@
+using SteveTheTroll.Features.Trolls.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -88,7 +89,7 @@ internal static class TrollGuard
 
             if (c.IsTamed())
             {
-                if (!TrollTaming.IsTroll(c) || TrollTaming.Owner(c) != myId)
+                if (!TrollTaming.IsTroll(c) || TrollTaming.Owner(c) != myId || TrollRiding.Is(c))
                 {
                     continue;
                 }

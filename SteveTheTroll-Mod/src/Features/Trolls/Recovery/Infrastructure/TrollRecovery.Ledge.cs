@@ -17,7 +17,12 @@ internal sealed partial class TrollRecovery
     private string _lastBlocker = "";
     private Vector3 _ledgeStart, _ledgeLast;
     private float _ledgeBegan, _ledgeStalled;
-    private bool _forcedLedge, _forcedStarted, _ledgeActive;
+    private bool _forcedLedge, _forcedStarted, _ledgeActive, _ledgeFar;
+    private Vector3 _ledgeGoal;
+
+    /// 2026-11-06 (user: full trolls close to him did not walk home down a steep mountain path): where THIS ledge walk goes - the goal itself, or for a goal beyond LedgeRules.MaxFlatMetres a
+    /// point LedgeRules.FarWalkMetres ahead on the line (the game's path takes over from there).
+    private Vector3 LedgeGoal => _ledgeFar ? _ledgeGoal : _goal;
 
     /// Counters of every ledge walk of this session (the cliff tests read them): started, and how each one ended.
     internal static int LedgeStarted, LedgeArrived, LedgeStalledEnds, LedgeTimeouts;
@@ -76,7 +81,7 @@ internal sealed partial class TrollRecovery
         Vector3 to = _goal - p;
         to.y = 0f;
         float flat = to.magnitude;
-        if (zs == null || flat < 0.5f || !zs.IsZoneLoaded(ZoneSystem.GetZone(p)) || !zs.IsZoneLoaded(ZoneSystem.GetZone(_goal)))
+        if (zs == null || flat < 0.5f || !zs.IsZoneLoaded(ZoneSystem.GetZone(p)))
         {
             string key = "TrollRecovery.ledgefacts." + TrollTaming.Tag(this);
             if (ModLog.IsDue(key, 2d))
@@ -89,7 +94,7 @@ internal sealed partial class TrollRecovery
         }
 
         Vector3 dir = to / flat;
-        float h0 = zs.GetGroundHeight(p), worst = 0f;
+        float h0 = zs.GetGroundHeight(p), worst = 0f, steepestMetre = 0f, prevH = h0;
         for (int i = 1; i <= (int)LedgeRules.CliffProbeMetres; i++)
         {
             Vector3 q = p + dir * i;
@@ -98,7 +103,14 @@ internal sealed partial class TrollRecovery
                 break;
             }
 
-            float change = zs.GetGroundHeight(q) - h0;
+            float hq = zs.GetGroundHeight(q);
+            if (Mathf.Abs(hq - prevH) > Mathf.Abs(steepestMetre))
+            {
+                steepestMetre = hq - prevH;
+            }
+
+            prevH = hq;
+            float change = hq - h0;
             if (Mathf.Abs(change) > Mathf.Abs(worst))
             {
                 worst = change;
@@ -106,14 +118,23 @@ internal sealed partial class TrollRecovery
         }
 
         cliff = LedgeRules.IsCliff(worst);
-        float toGoalHeight = zs.GetGroundHeight(_goal) - h0;
-        ok = LedgeRules.Possible(flat, toGoalHeight);
+        // 2026-11-06 (lab run 171219, cliff-walk-mountain-down: "zone of the goal loaded False", the ledge was never judged and the troll stood at the cliff for 100 s while the hub was 72 m away in an unloaded zone):
+        // the troll only needs ITS OWN zone to see the cliff; the goal is a known position (a hub / chest / source ZDO), so its own height is used when the ground there is not loaded
+        bool goalLoaded = zs.IsZoneLoaded(ZoneSystem.GetZone(_goal));
+        float toGoalHeight = (goalLoaded ? zs.GetGroundHeight(_goal) : _goal.y) - h0;
+        ok = LedgeRules.IsFar(flat) || LedgeRules.Possible(flat, toGoalHeight);
         string factsKey = "TrollRecovery.ledgefacts." + TrollTaming.Tag(this);
         if (ModLog.IsDue(factsKey, 2d))
         {
-            ModLog.Every(factsKey, 2d, TrollTaming.Tag(this) + " ledge facts: the ground changes " + worst.ToString("F1") + " m within " + (int)LedgeRules.CliffProbeMetres + " m ahead (cliff from " +
+            // 2026-11-06 (user: "check the log, how steep was the cliff"): the slope in degrees, the steepest single metre, and WHICH rule allowed / refused the walk
+            string why = !cliff ? "NOT a cliff: the ground changes less than " + LedgeRules.CliffRise.ToString("F1") + " m within " + (int)LedgeRules.CliffProbeMetres + " m"
+                : ok ? (LedgeRules.IsFar(flat) ? "cliff, goal beyond " + LedgeRules.MaxFlatMetres.ToString("F0") + " m so the walk goes " + LedgeRules.FarWalkMetres.ToString("F0") + " m ahead only" : "cliff, goal within reach")
+                : "cliff but the goal is out of reach (" + flat.ToString("F0") + " m flat, " + toGoalHeight.ToString("F0") + " m height difference, limits " + LedgeRules.MaxFlatMetres.ToString("F0") + " m / " + LedgeRules.MaxHeightDifference.ToString("F0") + " m)";
+            ModLog.Every(factsKey, 2d, TrollTaming.Tag(this) + " ledge facts: SLOPE " + (Mathf.Atan2(Mathf.Abs(worst), LedgeRules.CliffProbeMetres) * Mathf.Rad2Deg).ToString("F0") + " deg over " + (int)LedgeRules.CliffProbeMetres +
+                                       " m, steepest metre " + steepestMetre.ToString("F1") + " m (" + (Mathf.Atan2(Mathf.Abs(steepestMetre), 1f) * Mathf.Rad2Deg).ToString("F0") + " deg), verdict: " + why + "; " +
+                                       "the ground changes " + worst.ToString("F1") + " m within " + (int)LedgeRules.CliffProbeMetres + " m ahead (cliff from " +
                                        LedgeRules.CliffRise.ToString("F1") + " m) = cliff " + cliff + ", goal " + flat.ToString("F1") + " m flat and " + toGoalHeight.ToString("F1") +
-                                       " m higher (ledge walk possible within " + LedgeRules.MaxFlatMetres.ToString("F0") + " m / " + LedgeRules.MaxHeightDifference.ToString("F0") + " m) = " + ok);
+                                       " m higher (goal height from " + (goalLoaded ? "the loaded ground" : "its known position, zone not loaded") + ", ledge walk possible within " + LedgeRules.MaxFlatMetres.ToString("F0") + " m / " + LedgeRules.MaxHeightDifference.ToString("F0") + " m) = " + ok);
         }
     }
 
@@ -123,7 +144,7 @@ internal sealed partial class TrollRecovery
         float moved = Vector3.Distance(new Vector3(pos.x, 0f, pos.z), new Vector3(_ledgeLast.x, 0f, _ledgeLast.z));
         _ledgeStalled = moved < LedgeRules.StallMetres * dt ? _ledgeStalled + dt : 0f;
         _ledgeLast = pos;
-        return LedgeRules.Done(Flat(_goal), Time.time - _ledgeBegan, _ledgeStalled);
+        return LedgeRules.Done(Flat(LedgeGoal), Time.time - _ledgeBegan, _ledgeStalled);
     }
 
     private void OnStartLedge()
@@ -133,6 +154,10 @@ internal sealed partial class TrollRecovery
         _ledgeBegan = Time.time;
         _ledgeStalled = 0f;
         _ledgeActive = true;
+        Vector3 toGoal = _goal - _ledgeStart;
+        toGoal.y = 0f;
+        _ledgeFar = LedgeRules.IsFar(toGoal.magnitude);
+        _ledgeGoal = _ledgeFar ? _ledgeStart + toGoal.normalized * LedgeRules.FarWalkMetres : _goal;
         LedgeStarted++;
         ModLog.Decision("TrollRecovery.ledge", "start",
                         TrollTaming.Tag(this) + " at " + _ledgeStart.ToString("F0") + ", goal " + _goal.ToString("F0") + ", " + _d.ToString("F1") + " m to go, stuck " +
@@ -162,7 +187,7 @@ internal sealed partial class TrollRecovery
     private void OnEndLedge()
     {
         _ledgeActive = false;
-        float left = Flat(_goal), elapsed = Time.time - _ledgeBegan;
+        float left = Flat(LedgeGoal), elapsed = Time.time - _ledgeBegan;
         string outcome = LedgeRules.Outcome(left, elapsed, _ledgeStalled);
         if (outcome == "arrived")
         {
@@ -187,7 +212,7 @@ internal sealed partial class TrollRecovery
     {
         ZoneSystem zs = ZoneSystem.instance;
         Vector3 pos = transform.position;
-        Vector3 flat = _goal - pos;
+        Vector3 flat = LedgeGoal - pos;
         flat.y = 0f;
         float d = flat.magnitude;
         float step = LedgeRules.StepMetres(dt, d);

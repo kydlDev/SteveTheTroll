@@ -417,9 +417,14 @@ internal static class RecoveryTestHooks
 
         TreeBase t = tree.GetComponent<TreeBase>();
         ZNetView v = tree.GetComponent<ZNetView>();
-        bool full = t == null || v == null || !v.IsValid() ||
-                    v.GetZDO().GetFloat(ZDOVars.s_health, t.m_health) >= t.m_health - 0.01f;
-        return full ? 1 : 0;
+        if (t == null || v == null || !v.IsValid())
+        {
+            // A measurement hook never passes when it cannot measure (PLAN D3): -1 is neither "stands" (1) nor "hit" (0).
+            ModLog.Warn($"RecoveryTestHooks: treeStands cannot read the tree (TreeBase {t != null}, ZNetView {v != null}, valid {v != null && v.IsValid()}) - unknown (-1)");
+            return -1;
+        }
+
+        return v.GetZDO().GetFloat(ZDOVars.s_health, t.m_health) >= t.m_health - 0.01f ? 1 : 0;
     }
 
     // Harmony hook: src/Integrations/Harmony/TestingPatches.cs, RecoveryTestHooks_CountWallHits (MIGRATION_DECISIONS A5)

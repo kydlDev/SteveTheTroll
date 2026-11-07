@@ -1,0 +1,53 @@
+﻿{
+    "name":  "ride-needs-halter",
+    "description":  "T-213: without the halter and seat in the inventory the alt key does not mount (verdict NoHalter, the game\u0027s own handling runs).",
+    "timeout":  60,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  16
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideVerdict",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "contains":  "NoHalter",
+                        "label":  "no halter = no mount"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideRidden",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "expect":  false,
+                        "label":  "nobody rides"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
+}

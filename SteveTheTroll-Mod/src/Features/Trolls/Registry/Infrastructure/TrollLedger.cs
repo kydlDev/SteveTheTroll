@@ -133,7 +133,8 @@ internal static class TrollLedger
         }
         catch (Exception e)
         {
-            why = "unreadable: " + e.GetType().Name + ": " + e.Message;
+            why = $"unreadable: {e.GetType().FullName}: {e.Message}";
+            ModLog.Warn($"TrollLedger: reading {path} threw {e.GetType().FullName}: {e.Message} - the file is ignored");
             return new List<LedgerEntry>();
         }
     }

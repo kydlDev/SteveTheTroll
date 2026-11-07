@@ -367,6 +367,49 @@ internal static partial class TestHooks
         return _follow != ZDOID.None ? ZDOMan.instance.GetZDO(_follow) : null;
     }
 
+    /// T-214 B1 / B2: the followed troll's ZDO still exists (its identity, owner, tame state and backpack live there). Expected outcome: true; false once the ZDO was destroyed.
+    [TestHook("stt.followedZdoAlive")]
+    private static bool FollowedZdoAlive()
+    {
+        bool alive = FollowedZdo() != null;
+        if (!alive)
+        {
+            ModLog.Warn($"TestHooks: the followed troll's ZDO ({_follow}) is GONE");
+        }
+
+        return alive;
+    }
+
+    /// T-214 B2: the followed troll has a scene object again (the game builds it from the kept ZDO after a rebuild). Expected outcome: true when loaded.
+    [TestHook("stt.followedInstanceLoaded")]
+    private static bool FollowedInstanceLoaded() => _followId != null && _followId.Length > 0 && TrollRegistry.FindLoaded(_followId) != null;
+
+    /// T-214 B2: `prefab` items in the followed troll's backpack, read from its ZDO (whichever GameObject it has). Expected outcome: the count; -1 when its ZDO is gone (never 0, so a lost troll cannot pass).
+    [TestHook("stt.followedPackCount")]
+    private static int FollowedPackCount(string prefab)
+    {
+        ZDO z = FollowedZdo();
+        if (z == null)
+        {
+            return -1;
+        }
+
+        string shared = ObjectDB.instance.GetItemPrefab(prefab).GetComponent<ItemDrop>().m_itemData.m_shared.m_name;
+        int n = 0;
+        for (int i = 0; i < BackpackStore.ChestCount; i++)
+        {
+            foreach (ItemDrop.ItemData it in BackpackStore.Read(z, i).GetAllItems())
+            {
+                if (it.m_shared.m_name == shared)
+                {
+                    n += it.m_stack;
+                }
+            }
+        }
+
+        return n;
+    }
+
     /// The followed troll holds at most `stacks` stacks (read from its ZDO, whichever GameObject it has). Expected outcome: false when its ZDO is gone.
     [TestHook("stt.followedBackpackAtMost")]
     private static bool FollowedBackpackAtMost(int stacks)

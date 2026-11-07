@@ -30,7 +30,7 @@ namespace SteveTheTroll.Testing.Commands;
 ///     (ModCache) plus the same text as build_dump.txt (the latest). The log names the player's coordinates, the centre,
 ///     the radius, the count and every piece.
 /// </summary>
-internal sealed class BuildDumpCommand : ConsoleCommand
+internal sealed class BuildDumpCommand : SttCommand
 {
     private const float DefaultRadius = 12f, MaxRadius = 40f, VerticalWindow = 30f;
     private static Vector3? _anchor;
@@ -40,7 +40,7 @@ internal sealed class BuildDumpCommand : ConsoleCommand
     public override string Help =>
         "SteveTheTroll: 'anchor' = remember this spot as capture centre, 'clear' = forget it, [radius m] = write the pieces and dropped items around the anchor (or you) to a new file";
 
-    public override void Run(string[] args)
+    protected override void Execute(string[] args)
     {
         Player p = Player.m_localPlayer;
         if (p == null)
@@ -53,8 +53,8 @@ internal sealed class BuildDumpCommand : ConsoleCommand
         if (first == "anchor")
         {
             _anchor = p.transform.position;
-            string text = "stt_dumpbuild: anchor set to " + _anchor.Value.ToString("F2");
-            ModLog.Info("BuildDump: " + text);
+            string text = $"stt_dumpbuild: anchor set to {_anchor.Value:F2}";
+            ModLog.Info($"BuildDump: {text}");
             Console.instance.Print(text);
             return;
         }
@@ -73,15 +73,11 @@ internal sealed class BuildDumpCommand : ConsoleCommand
         }
 
         radius = Mathf.Clamp(radius, 0.5f, MaxRadius);
-        Console.instance.Print("stt_dumpbuild: " +
-                               Dump(_anchor ?? p.transform.position, _anchor.HasValue, p.transform.position, radius));
+        Console.instance.Print($"stt_dumpbuild: {Dump(_anchor ?? p.transform.position, _anchor.HasValue, p.transform.position, radius)}");
     }
 
     /// The sort order of the file: prefab name, then x, y, z of the offset (strings of the written numbers, so equal text sorts equal).
-    internal static int Order(string a, string b)
-    {
-        return string.CompareOrdinal(a, b);
-    }
+    internal static int Order(string a, string b) => string.CompareOrdinal(a, b);
 
     /// Expected outcome: a text naming the file and the piece count (or why nothing was written).
     internal static string Dump(Vector3 centre, bool anchored, Vector3 player, float radius)
@@ -105,13 +101,10 @@ internal sealed class BuildDumpCommand : ConsoleCommand
             }
         }
 
-        ModLog.Info("BuildDump: player at " + player.ToString("F2") + ", centre " + centre.ToString("F2") +
-                    (anchored ? " (anchor)" : " (the player, no anchor set)")
-                    + ", radius " + radius.ToString("F1", CultureInfo.InvariantCulture) + " m (+-" + VerticalWindow +
-                    " m high): " + pieces + " piece(s), " + (found.Count - pieces) + " dropped item(s)");
+        ModLog.Info($"BuildDump: player at {player:F2}, centre {centre:F2}{(anchored ? " (anchor)" : " (the player, no anchor set)")}, radius {radius.ToString("F1", CultureInfo.InvariantCulture)} m (+-{VerticalWindow} m high): {pieces} piece(s), {found.Count - pieces} dropped item(s)");
         if (found.Count == 0)
         {
-            return "nothing within " + radius + " m of " + centre.ToString("F1");
+            return $"nothing within {radius} m of {centre:F1}";
         }
 
         CultureInfo c = CultureInfo.InvariantCulture;
@@ -126,25 +119,16 @@ internal sealed class BuildDumpCommand : ConsoleCommand
             Vector3 s = t.lossyScale;
             sum += t.position;
             minY = Mathf.Min(minY, t.position.y);
-            lines.Add(f.Key + " | " + lp.x.ToString("0.###", c) + " " + lp.y.ToString("0.###", c) + " " +
-                      lp.z.ToString("0.###", c)
-                      + " | " + e.x.ToString("0.#", c) + " " + e.y.ToString("0.#", c) + " " + e.z.ToString("0.#", c) +
-                      " | " + s.x.ToString("0.###", c) + " " + s.y.ToString("0.###", c) + " " + s.z.ToString("0.###", c)
-                      + " | world " + t.position.x.ToString("0.###", c) + " " + t.position.y.ToString("0.###", c) +
-                      " " + t.position.z.ToString("0.###", c));
+            lines.Add($"{f.Key} | {lp.x.ToString("0.###", c)} {lp.y.ToString("0.###", c)} {lp.z.ToString("0.###", c)} | {e.x.ToString("0.#", c)} {e.y.ToString("0.#", c)} {e.z.ToString("0.#", c)} | {s.x.ToString("0.###", c)} {s.y.ToString("0.###", c)} {s.z.ToString("0.###", c)} | world {t.position.x.ToString("0.###", c)} {t.position.y.ToString("0.###", c)} {t.position.z.ToString("0.###", c)}");
         }
 
         lines.Sort(Order);
         Vector3 centreOfAll = sum / found.Count;
         centreOfAll.y = minY;
         var sb = new StringBuilder();
-        sb.AppendLine("# stt_dumpbuild " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", c) + ", " + found.Count +
-                      " object(s): " + pieces + " piece(s), " + (found.Count - pieces) + " dropped item(s)");
-        sb.AppendLine("# player at " + player.ToString("F3") + "; capture centre " + centre.ToString("F3") +
-                      (anchored ? " (anchor)" : " (the player: no anchor set)") + "; radius " +
-                      radius.ToString("F1", c) + " m horizontal, +-" + VerticalWindow + " m vertical");
-        sb.AppendLine("# centre of the objects, lowest y (for a construction base): " + centreOfAll.ToString("F3") +
-                      " = offset " + (centreOfAll - centre).ToString("F3") + " from the capture centre");
+        sb.AppendLine($"# stt_dumpbuild {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", c)}, {found.Count} object(s): {pieces} piece(s), {found.Count - pieces} dropped item(s)");
+        sb.AppendLine($"# player at {player:F3}; capture centre {centre:F3}{(anchored ? " (anchor)" : " (the player: no anchor set)")}; radius {radius.ToString("F1", c)} m horizontal, +-{VerticalWindow} m vertical");
+        sb.AppendLine($"# centre of the objects, lowest y (for a construction base): {centreOfAll:F3} = offset {(centreOfAll - centre):F3} from the capture centre");
         sb.AppendLine(
             "# prefab | offset x y z from the capture centre, WORLD axes | rotation euler x y z, WORLD | lossy scale x y z | world position x y z");
         foreach (string l in lines)
@@ -154,17 +138,16 @@ internal sealed class BuildDumpCommand : ConsoleCommand
 
         string text = sb.ToString();
         string stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", c);
-        string path = ModCache.File(Plugin.ModName, "build_dump_" + stamp + ".txt");
+        string path = ModCache.File(Plugin.ModName, $"build_dump_{stamp}.txt");
         File.WriteAllText(path, text);
         File.WriteAllText(ModCache.File(Plugin.ModName, "build_dump.txt"), text);
         foreach (string l in lines)
         {
-            ModLog.Verbose("BuildDump: " + l);
+            ModLog.Verbose($"BuildDump: {l}");
         }
 
-        ModLog.Info("BuildDump: " + found.Count + " object(s) written to " + path);
-        return found.Count + " object(s) (" + pieces + " pieces, " + (found.Count - pieces) + " dropped items) -> " +
-               path;
+        ModLog.Info($"BuildDump: {found.Count} object(s) written to {path}");
+        return $"{found.Count} object(s) ({pieces} pieces, {found.Count - pieces} dropped items) -> {path}";
     }
 
     private static bool Inside(Vector3 at, Vector3 centre, float radius)

@@ -18,7 +18,7 @@ namespace SteveTheTroll.Testing.Commands;
 ///     world objects (ZDOs). The player's own chests are never touched (no stt_depot mark). Levelled ground stays as it
 ///     is. Needs devcommands.
 /// </summary>
-internal sealed class ClearDepotsCommand : ConsoleCommand
+internal sealed class ClearDepotsCommand : SttCommand
 {
     private static readonly AccessTools.FieldRef<ZDOMan, Dictionary<ZDOID, ZDO>> Objects =
         AccessTools.FieldRefAccess<ZDOMan, Dictionary<ZDOID, ZDO>>("m_objectsByID");
@@ -28,7 +28,7 @@ internal sealed class ClearDepotsCommand : ConsoleCommand
     public override string Help =>
         "SteveTheTroll test: remove every troll depot (frames + depot chests WITH contents) [within radius m, default whole world]";
 
-    public override void Run(string[] args)
+    protected override void Execute(string[] args)
     {
         float radius = float.MaxValue;
         float r;
@@ -96,12 +96,8 @@ internal sealed class ClearDepotsCommand : ConsoleCommand
             }
         }
 
-        string msg = "stt_cleardepots: removed " + frames + " depot frame(s) and " + chests + " depot chest(s) (" +
-                     loaded + " loaded, " + (gone.Count - loaded) + " far away)"
-                     + (radius < float.MaxValue
-                         ? " within " + radius.ToString("0", CultureInfo.InvariantCulture) + " m"
-                         : " in the whole world");
+        string msg = $"stt_cleardepots: removed {frames} depot frame(s) and {chests} depot chest(s) ({loaded} loaded, {gone.Count - loaded} far away){(radius < float.MaxValue ? $" within {radius.ToString("0", CultureInfo.InvariantCulture)} m" : " in the whole world")}";
         Console.instance.Print(msg);
-        ModLog.Info("ClearDepotsCommand: " + msg);
+        ModLog.Info($"ClearDepotsCommand: {msg}");
     }
 }

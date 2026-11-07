@@ -14,6 +14,7 @@ using SteveTheTroll.Configuration;
 using SteveTheTroll.Core;
 using SteveTheTroll.Features.Costume.Infrastructure;
 using SteveTheTroll.Features.Hubs.Infrastructure;
+using SteveTheTroll.Features.Riding.Infrastructure;
 using SteveTheTroll.Features.Slippers.Infrastructure;
 using SteveTheTroll.Features.Trolls.Backpack.Infrastructure;
 using SteveTheTroll.Features.Trolls.Combat.Infrastructure;
@@ -99,12 +100,16 @@ public class Plugin : BaseUnityPlugin
             ModSettings.CostumeOn &&
             CostumeItems
                 .Install(); // T-009d: costume helmet / chest / legs + Troll Club (bundle parts, vanilla prefabs)
-        bool trolls = false, hubs = false;
+        bool trolls = false, hubs = false, riding = false;
         if (ModSettings.TrollsOn)
         {
             DepotPrefab.Install(); // D-064: troll depot frame prefab (vanilla prefabs)
             DepotGround.Install(); // D-103: own level-ground terrain op for the depot spots
             TrollTaming.Install(); // T-008a: the game's Troll becomes tameable (vanilla prefabs, added later by Jotunn)
+            if (ModSettings.RidingOn)
+            {
+                riding = RideItem.Install(); // T-213: the Troll Halter and Seat item
+            }
             trolls = true;
             if (ModSettings.HubsOn)
             {
@@ -119,7 +124,7 @@ public class Plugin : BaseUnityPlugin
             .GetExecutingAssembly()); // the patches are declared in src/Integrations/Harmony (MIGRATION_DECISIONS A5)
         _installer = new ModInstaller(Config);
         bool installed =
-            _installer.Install(slippers, costume, trolls, hubs); // the KY hub page (F6) + the four features
+            _installer.Install(slippers, costume, trolls, hubs, riding); // the KY hub page (F6) + the five features
         Config.SettingChanged += (s, e) =>
         {
             if (_installer != null)
@@ -134,9 +139,10 @@ public class Plugin : BaseUnityPlugin
         CommandManager.Instance.AddConsoleCommand(new ClearDepotsCommand()); // D-104: stt_cleardepots (start clean)
         CommandManager.Instance.AddConsoleCommand(new LevelGroundCommand()); // D-105: stt_levelground (repair)
         CommandManager.Instance.AddConsoleCommand(new ComingPreviewCommand()); // D-058 preview: stt_coming [name]
-        CommandManager.Instance.AddConsoleCommand(new FillBackpackCommand()); // D-064 test: stt_fillbackpack [item]
+        CommandManager.Instance.AddConsoleCommand(new UnlockCommand()); // stt_unlock <word> (the other stt_ commands need the Steam account or this)
+            CommandManager.Instance.AddConsoleCommand(new FillBackpackCommand()); // D-064 test: stt_fillbackpack [item]
         ModLog.Verbose(
-            "Plugin: console commands stt_dumpbuild, stt_clear, stt_cleardepots, stt_levelground, stt_coming, stt_fillbackpack registered");
+            "Plugin: console commands stt_unlock, stt_dumpbuild, stt_clear, stt_cleardepots, stt_levelground, stt_coming, stt_fillbackpack registered");
         ModLog.Verbose("Plugin: Awake finished (Harmony patches applied)");
     }
 
@@ -162,6 +168,7 @@ public class Plugin : BaseUnityPlugin
             () => TrollZones.Tick()); // D-084: zones around far own trolls stay loaded (they keep farming)
         Run("TrollCensus", () => TrollCensus.Tick()); // D-085: trolls within 500 m of the bed (spawn cap)
         Run("TrollMapPins", () => TrollMapPins.Tick()); // D-081: a map pin (costume head icon) per own tamed troll
+        Run("HubMapPins", () => HubMapPins.Tick()); // 2026-11-06: a map pin (HUB plaque icon + name) per Troll Hub, not removable by players
         Run("TrollBedHeal", () => TrollBedHeal.Tick()); // D-085: +50 HP/s within 50 m of the bed
         Run("TrollDepot", () => TrollDepot.Tick()); // D-159: retry removing empty depots
         Run("RuntimeHealth",

@@ -1,0 +1,99 @@
+﻿{
+    "name":  "ride-shake-walk",
+    "description":  "T-213: the rider does not slide or shake in the troll frame while the troll walks.",
+    "timeout":  60,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  16
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideVerdict",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideGiveHalter"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideAlt",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideDrive",
+                      "args":  {
+                                   "troll":  "troll",
+                                   "forward":  1
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideSample",
+                      "args":  {
+                                   "troll":  "troll",
+                                   "on":  1
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  4
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideRidden",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "expect":  true,
+                        "label":  "still riding"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideGap",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "max":  1,
+                        "label":  "the rider sits exactly on the seat point in every frame (cm)"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
+}

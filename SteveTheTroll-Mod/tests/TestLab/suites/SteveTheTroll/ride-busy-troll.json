@@ -1,0 +1,124 @@
+﻿{
+    "name":  "ride-busy-troll",
+    "description":  "T-213: a troll that the mod itself is driving (farming / recovery tick every frame) still walks where the rider steers it; clicks swing it.",
+    "timeout":  90,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  16
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideVerdict",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideGiveHalter"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideAlt",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.mark",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideDrive",
+                      "args":  {
+                                   "troll":  "troll",
+                                   "forward":  1
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  4
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "pressKey",
+                      "button":  "Attack",
+                      "frames":  25
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  },
+                  {
+                      "do":  "pressKey",
+                      "button":  "SecondaryAttack",
+                      "frames":  25
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideDrive",
+                      "args":  {
+                                   "troll":  "troll",
+                                   "forward":  0
+                               }
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideRidden",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "expect":  true,
+                        "label":  "still riding after W (not thrown off)"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.moved",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "min":  4,
+                        "label":  "the troll walked while W was held (m)"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
+}

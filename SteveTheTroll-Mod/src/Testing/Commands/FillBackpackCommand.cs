@@ -14,14 +14,14 @@ namespace SteveTheTroll.Testing.Commands;
 ///     item (default Wood) until it is full, then sends it farming - it notices the full backpack and walks to your bed /
 ///     the troll depot.
 /// </summary>
-internal sealed class FillBackpackCommand : ConsoleCommand
+internal sealed class FillBackpackCommand : SttCommand
 {
     public override string Name => "stt_fillbackpack";
 
     public override string Help =>
         "SteveTheTroll test: fill your nearest tamed troll's backpack (default Wood) so it goes to the troll depot";
 
-    public override void Run(string[] args)
+    protected override void Execute(string[] args)
     {
         Player p = Player.m_localPlayer;
         string item = args != null && args.Length > 0 && args[0].Length > 0 ? args[0] : "Wood";
@@ -29,7 +29,7 @@ internal sealed class FillBackpackCommand : ConsoleCommand
         ItemDrop drop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
         if (p == null || drop == null)
         {
-            Console.instance.Print("stt_fillbackpack: no player / no item '" + item + "'");
+            Console.instance.Print($"stt_fillbackpack: no player / no item '{item}'");
             return;
         }
 
@@ -80,8 +80,7 @@ internal sealed class FillBackpackCommand : ConsoleCommand
 
         bool sent = troll.GetComponent<TrollFarmer>() != null ||
                     TrollOrderService.Send(new FarmFocusCommand(troll, "", true));
-        ModLog.Info("FillBackpackCommand: " + TrollTaming.Tag(troll) + " got " + stacks + " stack(s) of " + item +
-                    ", farming " + sent);
-        Console.instance.Print("stt_fillbackpack: " + stacks + " stack(s) of " + item + " added; the troll heads home");
+        ModLog.Info($"FillBackpackCommand: {TrollTaming.Tag(troll)} got {stacks} stack(s) of {item}, farming {sent}");
+        Console.instance.Print($"stt_fillbackpack: {stacks} stack(s) of {item} added; the troll heads home");
     }
 }

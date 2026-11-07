@@ -1,0 +1,27 @@
+{
+    "name":  "backpack-ignores-stone",
+    "timeout":  60,
+    "description":  "T-214 D1 (user: Stone / Grausten NEVER in a backpack): Stone and Grausten lying next to a tamed troll are not picked up, while Wood dropped at the same time is (the control, so the test cannot pass because nothing is picked up at all). BackpackRules.Accepts / TrollFocus.PickupItems.",
+    "steps":  [
+                  { "do":  "use", "block":  "start", "args":  { "clearTrolls":  true, "slippers":  true, "hub":  true } },
+                  { "do":  "hook", "name":  "stt.spawnTroll", "args":  { "dx":  -12, "dz":  12 }, "as":  "troll" },
+                  { "do":  "wait", "seconds":  1 },
+                  { "do":  "hook", "name":  "stt.dropNear", "args":  { "troll":  "troll", "prefab":  "Stone", "count":  3, "dx":  3, "dz":  0 } },
+                  { "do":  "hook", "name":  "stt.dropNear", "args":  { "troll":  "troll", "prefab":  "Grausten", "count":  3, "dx":  3, "dz":  1 } },
+                  { "do":  "hook", "name":  "stt.dropNear", "args":  { "troll":  "troll", "prefab":  "Wood", "count":  3, "dx":  4, "dz":  2 } },
+                  { "do":  "hook", "name":  "stt.observe", "args":  { "back":  15 } },
+                  {
+                      "do":  "wait",
+                      "until":  { "check":  "hook", "name":  "stt.backpackCount", "args":  { "troll":  "troll", "prefab":  "Wood" }, "min":  1 },
+                      "timeout":  20,
+                      "label":  "the control: the Wood is picked up"
+                  },
+                  { "do":  "wait", "seconds":  10, "label":  "time enough for the troll to have picked up the Stone too, if it ever would" }
+              ],
+    "asserts":  [
+                    { "check":  "hook", "name":  "stt.backpackCount", "args":  { "troll":  "troll", "prefab":  "Wood" }, "min":  1, "label":  "Wood was picked up (the pickup works)" },
+                    { "check":  "hook", "name":  "stt.backpackCount", "args":  { "troll":  "troll", "prefab":  "Stone" }, "max":  0, "label":  "no Stone in the backpack" },
+                    { "check":  "hook", "name":  "stt.backpackCount", "args":  { "troll":  "troll", "prefab":  "Grausten" }, "max":  0, "label":  "no Grausten in the backpack" },
+                    { "check":  "noErrors", "source":  "SteveTheTroll" }
+                ]
+}

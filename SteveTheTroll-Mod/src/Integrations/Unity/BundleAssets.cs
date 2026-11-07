@@ -26,7 +26,8 @@ internal static class BundleAssets
         ClubParts = "ClubParts",
         CostumeChestGround = "CostumeChestGround",
         CostumeLegsGround = "CostumeLegsGround",
-        CostumeViewer = "CostumeViewer";
+        CostumeViewer = "CostumeViewer",
+        HalterParts = "HalterParts";
 
     // sprites (item / status effect / map icons)
     internal const string SlipperIcon = "SlipperIcon",
@@ -34,7 +35,8 @@ internal static class BundleAssets
         CostumeChestIcon = "CostumeChestIcon",
         CostumeLegsIcon = "CostumeLegsIcon",
         TrollClubIcon = "TrollClubIcon",
-        SetIcon = "SteveTheTrollSetIcon";
+        SetIcon = "SteveTheTrollSetIcon",
+        HalterIcon = "HalterIcon";
 
     /// Name and type of every asset above (World_BundleAssets loads each; the integration tests compare it with the constants).
     internal static readonly KeyValuePair<string, Type>[] All =
@@ -42,7 +44,7 @@ internal static class BundleAssets
         Of<GameObject>(SlipperParts), Of<GameObject>(SlipperSkinParts), Of<GameObject>(CostumeHelmetParts),
         Of<GameObject>(CostumeChestParts), Of<GameObject>(CostumeLegsParts),
         Of<GameObject>(ClubParts), Of<GameObject>(CostumeChestGround), Of<GameObject>(CostumeLegsGround),
-        Of<GameObject>(CostumeViewer),
+        Of<GameObject>(CostumeViewer), Of<GameObject>(HalterParts), Of<Sprite>(HalterIcon),
         Of<Sprite>(SlipperIcon), Of<Sprite>(CostumeHelmetIcon), Of<Sprite>(CostumeChestIcon),
         Of<Sprite>(CostumeLegsIcon), Of<Sprite>(TrollClubIcon),
         Of<Sprite>(SetIcon)

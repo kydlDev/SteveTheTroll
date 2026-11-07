@@ -299,7 +299,9 @@ internal static partial class InGameTests
         }
         catch (TypeInitializationException e)
         {
-            return "FAIL: " + (e.InnerException != null ? e.InnerException.Message : e.Message);
+            Exception inner = e.InnerException ?? e;
+            ModLog.Warn($"InGameTests: a self-check type failed to initialise: {inner.GetType().FullName}: {inner.Message}");
+            return $"FAIL: {inner.GetType().FullName}: {inner.Message}";
         }
     }
 

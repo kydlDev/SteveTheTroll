@@ -1,0 +1,129 @@
+﻿{
+    "name":  "ride-mount-dismount",
+    "description":  "T-213: the Troll Halter and Seat. Without the item the alt key does nothing special; with it the alt key mounts a tamed troll (halter on, player seated, leashes to the hands), W steers it, the same key dismounts, the item is still in the inventory and the halter is gone.",
+    "timeout":  90,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  16
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideVerdict",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideGiveHalter"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideAlt",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.mark",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideDrive",
+                      "args":  {
+                                   "troll":  "troll",
+                                   "forward":  1
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  3
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideDrive",
+                      "args":  {
+                                   "troll":  "troll",
+                                   "forward":  0
+                               }
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideRidden",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "expect":  true,
+                        "label":  "the player rides the troll after the alt key"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideSeatDelta",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "max":  150,
+                        "label":  "the player sits on the seat (cm)"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideParts",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "min":  10,
+                        "label":  "the halter parts are on the troll"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideLeashes",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "contains":  "2 of 2 leashes ok",
+                        "label":  "both leashes reach from the bit to the hands"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.moved",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "min":  4,
+                        "label":  "the troll walked where the rider steered it (m)"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
+}

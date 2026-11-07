@@ -13,7 +13,7 @@ internal static class MountFile
     /// Expected outcome: the line the file holds for this player riding this troll; an empty string when nobody rides (the file is then emptied).
     internal static string Write(long playerId, string trollId)
     {
-        return string.IsNullOrEmpty(trollId) ? "" : "player=" + playerId.ToString(CultureInfo.InvariantCulture) + ";troll=" + trollId;
+        return string.IsNullOrEmpty(trollId) ? "" : $"player={playerId.ToString(CultureInfo.InvariantCulture)};troll={trollId}";
     }
 
     /// Reads a file's text. Expected outcome: true with the ids for a valid line of THIS player; false (and empty outputs) for anything else - another player's line, damage, empty.

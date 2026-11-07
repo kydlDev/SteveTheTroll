@@ -27,10 +27,16 @@ internal static class ModSettings
     // [TrollHub]: the Troll Hub building (D-135) - its own functionality switch, needs [Trolls] Enable too
     public static ConfigEntry<bool> HubEnable, HubAutoAssign;
 
+    // [Riding]: the Troll Halter and Seat (T-213), needs [Trolls] Enable too
+    public static ConfigEntry<bool> RidingEnable;
+
     public static ConfigEntry<KeyCode> AttackKey;
 
     // [DebugLog]
     public static ConfigEntry<bool> DebugLog;
+
+    // [Commands] 2026-11-06: who may use the stt_ console commands
+    public static ConfigEntry<string> CommandsUnlockWord;
 
     // --- dev-only fixed values (Tunables): not in the config file, KydlTools changes them for testing -----------------------------------
     // --- T-008a troll taming (D-037 / D-038): the user's numbers. ---
@@ -232,6 +238,76 @@ internal static class ModSettings
     public static readonly Tunable<float> ClubSlide = new("Club", "Slide", 0f, -0.4f, 0.4f,
         "Slides the Troll Club through the hand (metres, + = the hand holds it further down).");
 
+    // --- T-213 rideable troll: placement values to tune in game with KydlTools (F7); the settled values become the defaults here. All in metres, 0 = as exported from Unity. ---
+    // 2026-11-06 (user: "controls in F7 to adjust the player's position in the chair a bit better", "make the seat not so wide"): how the rider sits (degrees, in the troll's frame) and how wide the seat is.
+    // 2026-11-06 (user: "take the hands position from the moose holding reins and put it into our sitting position - sits like on a chair but the reins are in the hands"): the rider keeps the chair pose, the arms are bent to hold the reins.
+    public static readonly Tunable<bool> RideHandsOn = new("TrollRiding", "HandsOnReins", true,
+        "The rider's hands hold the reins (arms bent to the hand positions below). Off = the plain animation.");
+
+    public static readonly Tunable<float> RideHandX = new("TrollRiding", "HandSpread", 0.22f, 0f, 0.8f,
+        "Hands: distance of each hand from the middle line (m).");
+
+    public static readonly Tunable<float> RideHandY = new("TrollRiding", "HandHeight", 0.15f, -0.6f, 0.8f,
+        "Hands: height above the seat point (m, in the rider's frame).");
+
+    public static readonly Tunable<float> RideHandZ = new("TrollRiding", "HandForward", 0.5f, 0f, 1.0f,
+        "Hands: how far in front of the seat point (m).");
+
+    public static readonly Tunable<float> RideRiderYaw = new("TrollRiding", "RiderYaw", 0f, -90f, 90f,
+        "Rider turned left/right on the seat (degrees).");
+
+    public static readonly Tunable<float> RideRiderPitch = new("TrollRiding", "RiderPitch", 0f, -45f, 45f,
+        "Rider leaning forward (+) / back (-) on the seat (degrees).");
+
+    public static readonly Tunable<float> RideRiderRoll = new("TrollRiding", "RiderRoll", 0f, -45f, 45f,
+        "Rider leaning to the right (+) / left (-) on the seat (degrees).");
+
+    public static readonly Tunable<float> RideSeatWidth = new("TrollRiding", "SeatWidth", 1f, 0.3f, 1.5f,
+        "Width of the seat (1 = as modelled, smaller = narrower).");
+
+    public static readonly Tunable<float> RideSeatX = new("TrollRiding", "SeatX", 0f, -1.5f, 1.5f,
+        "Seat position left/right (m, + = right of the troll).");
+
+    public static readonly Tunable<float> RideSeatY = new("TrollRiding", "SeatY", -0.5f, -3f, 3f,
+        "Seat position up/down (m, relative to the seat anchor).");
+
+    /// 2026-11-06 (user: the reins are not in the rider's hands - the chair pose keeps the hands down): the sitting animation. 0 = lox (hands forward on reins), 1 = asksvin, 2 = moose, 3 = chair (the old one).
+    public static readonly Tunable<int> RideAnimation = new("TrollRiding", "Animation", 3, 0, 3,
+        "Rider pose: 0 lox, 1 asksvin, 2 moose, 3 chair (default; the hands are put on the reins by HandsOnReins). Takes effect on the next mount.");
+
+    internal static readonly string[] RideAnimations = { "attach_lox", "attach_asksvin", "attach_moose", "attach_chair" };
+
+    public static readonly Tunable<float> RideSeatZ = new("TrollRiding", "SeatZ", -0.15f, -3f, 3f,
+        "Seat position back/forward (m, + = towards the troll head).");
+
+    public static readonly Tunable<float> RideBodyX = new("TrollRiding", "BodyX", 0f, -1f, 1f,
+        "Straps + seat model left/right (m).");
+
+    public static readonly Tunable<float> RideBodyY = new("TrollRiding", "BodyY", 0f, -2f, 2f,
+        "Straps + seat model up/down (m).");
+
+    public static readonly Tunable<float> RideBodyZ = new("TrollRiding", "BodyZ", 0f, -2f, 2f,
+        "Straps + seat model back/forward (m).");
+
+    public static readonly Tunable<float> RideHeadX = new("TrollRiding", "HeadX", 0f, -1f, 1f,
+        "Bit + rings model left/right (m).");
+
+    public static readonly Tunable<float> RideHeadY = new("TrollRiding", "HeadY", 0f, -2f, 2f,
+        "Bit + rings model up/down (m).");
+
+    public static readonly Tunable<float> RideHeadZ = new("TrollRiding", "HeadZ", 0f, -2f, 2f,
+        "Bit + rings model back/forward (m).");
+
+    public static readonly Tunable<float> RideLeashSag = new("TrollRiding", "LeashSag", 0.12f, 0f, 0.6f,
+        "How much the leash hangs between the bit and your hand (fraction of its length).");
+
+    // 2026-11-06: the reins run around the head and neck, not through them; this widens (>1) or narrows the detour.
+    public static readonly Tunable<float> RideReinWiden = new("TrollRiding", "ReinWiden", 1f, 0.6f, 2f,
+        "How far out the reins pass beside the troll's head and neck (1 = default).");
+
+    public static readonly Tunable<float> RideLeashWidth = new("TrollRiding", "LeashWidth", 0.1f, 0.02f, 0.4f,
+        "Width of the leather leash (m).");
+
     /// Is the mod switched on ([General] EnableAll)? Off = inert: no effects, no menus; nothing built is removed.
     public static bool On => EnableAll == null || EnableAll.Value;
 
@@ -241,6 +317,9 @@ internal static class ModSettings
 
     public static bool CostumeOn => Functions.IsOn(On, CostumeEnable == null || CostumeEnable.Value);
     public static bool TrollsOn => Functions.IsOn(On, TrollsEnable == null || TrollsEnable.Value);
+
+    /// The rideable troll (T-213): [General] EnableAll AND [Trolls] Enable AND [Riding] Enable. Read live; the item needs a restart to appear.
+    public static bool RidingOn => Functions.IsOn(TrollsOn, RidingEnable == null || RidingEnable.Value);
 
     /// The Troll Hubs (D-135): [General] EnableAll AND [Trolls] Enable AND [TrollHub] Enable. Read live like the others.
     public static bool HubsOn => Functions.IsOn(TrollsOn, HubEnable == null || HubEnable.Value);
@@ -269,8 +348,13 @@ internal static class ModSettings
             "The Troll Hub building: where your trolls go when you log out and unload, with a sign you can name. Off: trolls use the bed and the Troll Hub tab goes away at once; the building is added when the game starts, so switching this on needs a game restart.");
         HubAutoAssign = c.Bind("TrollHub", "AutoAssign", true,
             "On: a troll you did not send to a hub yourself uses the hub nearest to it. Off: only trolls you assigned in the Troll Hub tab use a hub, the others use the bed.");
+        RidingEnable = c.Bind("Riding", "Enable", true,
+            "The Troll Halter and Seat: craft it (workbench level 3), keep it in your inventory and use the alternative interact key on a tamed troll to ride it. Off: riding stops at once; the item is added when the game starts, so switching this on needs a game restart.");
         DebugLog = c.Bind("DebugLog", "Enable", false,
             "Writes detailed lines about everything the mod does to the BepInEx log (for bug reports). Leave off while playing normally.");
+
+        CommandsUnlockWord = c.Bind("General", "UnlockWord", "",
+            "The stt_ console commands (test / debug helpers) stay locked until you type in the console: stt_unlock <this word>. Empty = no word set, the commands stay locked. Unlocked until the game closes.");
 
         ConfigTools.ApplyCommaFix(c, savedLines); // after every Bind: "3,5" typed by hand means 3.5, not 35
         ConfigTools.DropRemoved(c);
@@ -283,6 +367,6 @@ internal static class ModSettings
                        CostumeOn + ", trolls " + TrollsOn + ", attack key " + AttackKey.Value + ", debug log " +
                        DebugLog.Value + ")");
         return EnableAll != null && SlippersEnable != null && CostumeEnable != null && TrollsEnable != null &&
-               HubEnable != null && HubAutoAssign != null && AttackKey != null && DebugLog != null;
+               HubEnable != null && HubAutoAssign != null && RidingEnable != null && AttackKey != null && DebugLog != null && CommandsUnlockWord != null;
     }
 }

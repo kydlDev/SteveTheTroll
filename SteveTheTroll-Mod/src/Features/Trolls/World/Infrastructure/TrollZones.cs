@@ -201,8 +201,9 @@ internal static partial class TrollZones
         }
         catch (Exception e)
         {
-            return "FAIL: FindObjects threw " + (e.InnerException ?? e).GetType().Name + ": " +
-                   (e.InnerException ?? e).Message;
+            Exception inner = e.InnerException ?? e;
+            ModLog.Warn($"TrollZones: FindObjects self-check threw {inner.GetType().FullName}: {inner.Message}");
+            return $"FAIL: FindObjects threw {inner.GetType().FullName}: {inner.Message}";
         }
     }
 

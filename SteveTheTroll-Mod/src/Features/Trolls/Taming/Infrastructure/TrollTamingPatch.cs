@@ -70,7 +70,7 @@ internal static class TrollTamingPatch
         catch (InvalidOperationException e)
         {
             ModLog.Warn(
-                "TrollTamingPatch: m_tameDeltaTime unreadable (" + e.Message + ") - tick " + FallbackTick + " s");
+                "TrollTamingPatch: m_tameDeltaTime unreadable (" + e.GetType().FullName + ": " + e.Message + ") - tick " + FallbackTick + " s");
             return FallbackTick;
         }
     }

@@ -11,7 +11,17 @@ namespace SteveTheTroll.Features.Trolls.Recovery.Domain;
 internal static class LedgeRules
 {
     /// The ground jumps this much within CliffProbeMetres along the line to the goal: a step the troll cannot simply walk up / down (StuckRules.StepMaxRise is 0.9 m per metre).
-    internal const float CliffRise = 2.5f, CliffProbeMetres = 3f;
+    /// 2026-11-06 (user: trolls did not walk down a steep mountain path): CliffRise 2.5 -> 1.8 m in 3 m (about 31 degrees) - a steep path is a cliff for a troll that is already stuck (this is only asked after StuckTrigger seconds).
+    internal const float CliffRise = 1.8f, CliffProbeMetres = 3f;
+
+    /// A goal farther than MaxFlatMetres gets a ledge walk to a point this far ahead (the game's path takes over from there) instead of none.
+    internal const float FarWalkMetres = 25f;
+
+    /// Is the goal too far for one ledge walk (a waypoint walk)? Expected outcome: true beyond MaxFlatMetres.
+    internal static bool IsFar(float flatDistance)
+    {
+        return flatDistance > MaxFlatMetres;
+    }
 
     /// A ledge walk is only started for a goal at most this far (flat) and this much higher / lower: meadow cliffs, not mountain faces.
     internal const float MaxFlatMetres = 80f, MaxHeightDifference = 40f;

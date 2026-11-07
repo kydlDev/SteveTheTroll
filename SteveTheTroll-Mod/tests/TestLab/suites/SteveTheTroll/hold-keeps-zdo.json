@@ -1,0 +1,36 @@
+{
+    "name":  "hold-keeps-zdo",
+    "timeout":  90,
+    "description":  "T-214 B1: a troll that stands still because the player (within 4 m) looks at it (TrollHold) is NOT counted as frozen, even when it should be travelling: after more than 30 s (the Rebuild rung) it has the same ZDO, the same backpack and was never rebuilt. Before the fix the watch rebuilt it at 30 s (cliff-walk-high-down). stt.forceTravelling makes the watch judge it as travelling; stt.startFarm makes it walk off so TrollHold engages.",
+    "steps":  [
+                  { "do":  "use", "block":  "start", "args":  { "clearTrolls":  true, "slippers":  true, "hub":  true } },
+                  { "do":  "hook", "name":  "stt.spawnTrollNear", "args":  { "dx":  0, "dz":  3 }, "as":  "troll" },
+                  { "do":  "face", "target":  "troll" },
+                  { "do":  "wait", "seconds":  0.5 },
+                  { "do":  "hook", "name":  "stt.pack", "args":  { "troll":  "troll", "prefab":  "Wood", "count":  7 }, "expect":  0 },
+                  { "do":  "hook", "name":  "stt.followTroll", "args":  { "troll":  "troll" } },
+                  { "do":  "hook", "name":  "stt.startFarm", "args":  { "troll":  "troll" } },
+                  { "do":  "hook", "name":  "stt.forceTravelling", "args":  { "on":  true }, "expect":  true, "label":  "the watch is told the troll should be travelling" },
+                  { "do":  "face", "target":  "troll" },
+                  { "do":  "hook", "name":  "stt.mark", "args":  { "troll":  "troll" } },
+                  { "do":  "wait", "seconds":  8 },
+                  { "do":  "face", "target":  "troll" },
+                  { "do":  "wait", "seconds":  8 },
+                  { "do":  "face", "target":  "troll" },
+                  { "do":  "wait", "seconds":  8 },
+                  { "do":  "face", "target":  "troll" },
+                  { "do":  "wait", "seconds":  8 },
+                  { "do":  "face", "target":  "troll" },
+                  { "do":  "wait", "seconds":  8 },
+                  { "do":  "hook", "name":  "stt.forceTravelling", "args":  { "on":  false }, "expect":  false, "label":  "back to the real travelling rule" }
+              ],
+    "asserts":  [
+                    { "check":  "hook", "name":  "stt.moved", "args":  { "troll":  "troll" }, "max":  1, "label":  "it stood still for 40 s (the hold engaged, so the test measures the hold)" },
+                    { "check":  "hook", "name":  "stt.followedZdoAlive", "expect":  true, "label":  "the ZDO is still there after more than 30 s held" },
+                    { "check":  "hook", "name":  "stt.followedPackCount", "args":  { "prefab":  "Wood" }, "min":  7, "label":  "the backpack is intact: the 7 Wood put in are still there (read from the ZDO); more is fine - a troll within 50 m picks up loose Wood while it is held, which depends on the simulation range" },
+                    { "check":  "hook", "name":  "stt.trollFrozen", "args":  { "troll":  "troll" }, "expect":  false, "label":  "a held troll is not counted as frozen" },
+                    { "check":  "logContains", "source":  "SteveTheTroll", "text":  "rebuilt from its ZDO", "expect":  false, "label":  "it was never rebuilt" },
+                    { "check":  "logContains", "source":  "SteveTheTroll", "text":  "has not moved for", "expect":  false, "label":  "the frozen watch never fired" },
+                    { "check":  "noErrors", "source":  "SteveTheTroll" }
+                ]
+}

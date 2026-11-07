@@ -9,11 +9,14 @@ public class LedgeRulesTests
 {
     const float Stuck = StuckRules.StuckTrigger;
 
-    [TestCase(0f, false)] [TestCase(2.4f, false)] [TestCase(2.5f, true)] [TestCase(-2.5f, true)] [TestCase(-30f, true)]
+    [TestCase(0f, false)] [TestCase(1.7f, false)] [TestCase(1.8f, true)] [TestCase(-1.9f, true)] [TestCase(-2.4f, true)] [TestCase(-30f, true)]
     public void IsCliff(float change, bool expected) { Assert.That(LedgeRules.IsCliff(change), Is.EqualTo(expected)); }
 
     [TestCase(10f, 8f, true)] [TestCase(10f, -40f, true)] [TestCase(10f, 41f, false)] [TestCase(80f, 5f, true)] [TestCase(80.1f, 5f, false)] [TestCase(0f, 0f, false)]
     public void Possible(float flat, float height, bool expected) { Assert.That(LedgeRules.Possible(flat, height), Is.EqualTo(expected)); }
+
+    [TestCase(80f, false)] [TestCase(80.1f, true)] [TestCase(1200f, true)] [TestCase(10f, false)]
+    public void IsFar_BeyondTheLedgeRange(float flat, bool expected) { Assert.That(LedgeRules.IsFar(flat), Is.EqualTo(expected)); }
 
     [TestCase(0.016f, 50f, 0.0512f)] [TestCase(1f, 0.5f, 0.5f)] [TestCase(1f, 0f, 0f)] [TestCase(-1f, 5f, 0f)]
     public void StepMetres_NeverPastTheGoal(float dt, float toGoal, float expected) { Assert.That(LedgeRules.StepMetres(dt, toGoal), Is.EqualTo(expected).Within(0.0001f)); }

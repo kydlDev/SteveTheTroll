@@ -73,7 +73,8 @@ internal static partial class TrollFarming
         }
         catch (Exception e)
         {
-            LastFar = "FAILED: " + (e.InnerException != null ? e.InnerException.Message : e.Message);
+            Exception farError = e.InnerException ?? e;
+            LastFar = $"FAILED: {farError.GetType().FullName}: {farError.Message}";
             if (!_farWarned)
             {
                 _farWarned = true;

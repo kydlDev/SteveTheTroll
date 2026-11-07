@@ -12,7 +12,7 @@ namespace SteveTheTroll.Testing.Commands;
 ///     the player at the
 ///     height of the player's feet. Saved and synced like hoe work. Needs devcommands.
 /// </summary>
-internal sealed class LevelGroundCommand : ConsoleCommand
+internal sealed class LevelGroundCommand : SttCommand
 {
     private const float DepotSearch = 15f;
     public override string Name => "stt_levelground";
@@ -20,7 +20,7 @@ internal sealed class LevelGroundCommand : ConsoleCommand
     public override string Help =>
         "SteveTheTroll test: level a 14 x 14 m square flat (at the nearest troll depot within 15 m, else where you stand)";
 
-    public override void Run(string[] args)
+    protected override void Execute(string[] args)
     {
         Player p = Player.m_localPlayer;
         if (p == null || ZNetScene.instance == null)
@@ -56,7 +56,7 @@ internal sealed class LevelGroundCommand : ConsoleCommand
             best = d;
             centre = v.transform.position;
             height = v.transform.position.y;
-            where = "at the troll depot " + d.ToString("0") + " m away";
+            where = $"at the troll depot {d.ToString("0")} m away";
         }
 
         foreach (ZNetView v in Object.FindObjectsByType<ZNetView>(FindObjectsSortMode.None))
@@ -70,10 +70,9 @@ internal sealed class LevelGroundCommand : ConsoleCommand
 
         bool ok = DepotGround.Repair(centre, height);
         string msg = ok
-            ? "stt_levelground: levelled " + (2f * DepotGround.RepairRadius).ToString("0") + " x " +
-              (2f * DepotGround.RepairRadius).ToString("0") + " m " + where + " at height " + height.ToString("F1")
+            ? $"stt_levelground: levelled {(2f * DepotGround.RepairRadius).ToString("0")} x {(2f * DepotGround.RepairRadius).ToString("0")} m {where} at height {height:F1}"
             : "stt_levelground: the level op is not available";
         Console.instance.Print(msg);
-        ModLog.Info("LevelGroundCommand: " + msg);
+        ModLog.Info($"LevelGroundCommand: {msg}");
     }
 }

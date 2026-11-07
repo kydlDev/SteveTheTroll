@@ -1,0 +1,75 @@
+﻿{
+    "name":  "ride-long",
+    "description":  "T-213: a ride longer than the frozen-troll watchdog (30 s) is not interrupted: the troll stands under the rider for 40 s with the AI off, nobody rebuilds it, the player is still on the seat.",
+    "timeout":  120,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  16
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideVerdict",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideGiveHalter"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideAlt",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  40
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideRidden",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "expect":  true,
+                        "label":  "still riding after 40 s standing still (not rebuilt, not thrown off)"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideSeatDelta",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "max":  150,
+                        "label":  "the player still sits on the seat (cm)"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
+}

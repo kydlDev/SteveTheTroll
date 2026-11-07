@@ -1,4 +1,5 @@
 using HarmonyLib;
+using SteveTheTroll.Presentation.Map;
 using SteveTheTroll.Features.Hubs.Infrastructure;
 using UnityEngine;
 
@@ -23,5 +24,15 @@ internal static class HubPlacement_Place
     private static bool Prefix(Player __instance, Piece piece, Vector3 pos)
     {
         return HubPlacement.Place.Prefix(__instance, piece, pos);
+    }
+}
+
+// 2026-11-06 (user: players cannot remove hub map pins): the game's RemovePin (right-click on a pin) does nothing for a hub pin; HubMapPins removes it itself when the hub is gone.
+[HarmonyPatch(typeof(Minimap), nameof(Minimap.RemovePin), typeof(Minimap.PinData))]
+internal static class HubsPatch_KeepHubPins
+{
+    private static bool Prefix(Minimap.PinData pin)
+    {
+        return HubMapPins.Removing || !HubMapPins.IsHubPin(pin);
     }
 }

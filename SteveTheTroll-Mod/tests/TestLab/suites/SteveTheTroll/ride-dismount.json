@@ -1,0 +1,85 @@
+﻿{
+    "name":  "ride-dismount",
+    "description":  "T-213: the same alt key dismounts; the player is free, the halter is gone from the troll, the item is still in the inventory.",
+    "timeout":  90,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  16
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideGiveHalter"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideAlt",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.rideAlt",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1.5
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideRidden",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "expect":  false,
+                        "label":  "the player no longer rides"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideParts",
+                        "args":  {
+                                     "troll":  "troll"
+                                 },
+                        "max":  0,
+                        "label":  "the halter parts are gone from the troll"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.rideHasHalter",
+                        "expect":  true,
+                        "label":  "the halter and seat are still in the inventory"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
+}

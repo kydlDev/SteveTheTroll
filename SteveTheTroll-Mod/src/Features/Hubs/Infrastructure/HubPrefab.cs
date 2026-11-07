@@ -42,7 +42,7 @@ internal static class HubPrefab
         }
         catch (Exception e)
         {
-            ModLog.Error("HubPrefab: building the Troll Hub failed: " + e);
+            ModLog.Error($"HubPrefab: building the Troll Hub failed with {e.GetType().FullName}: {e.Message}{Environment.NewLine}{e.StackTrace}");
         }
     }
 

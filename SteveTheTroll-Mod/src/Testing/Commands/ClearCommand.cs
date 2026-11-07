@@ -20,7 +20,7 @@ namespace SteveTheTroll.Testing.Commands;
 ///     "drops" = loaded creatures are killed (they drop their loot), unloaded ones are still removed. Needs devcommands
 ///     like the game's own.
 /// </summary>
-internal sealed class ClearCommand : ConsoleCommand
+internal sealed class ClearCommand : SttCommand
 {
     internal const float DefaultRadius = 500f, MaxRadius = 5000f;
 
@@ -32,7 +32,7 @@ internal sealed class ClearCommand : ConsoleCommand
     public override string Help =>
         "SteveTheTroll test: remove every creature (no players) within [radius=500] m; add 'drops' to kill the loaded ones instead";
 
-    public override void Run(string[] args)
+    protected override void Execute(string[] args)
     {
         float radius = DefaultRadius;
         bool drops = false;
@@ -77,7 +77,7 @@ internal sealed class ClearCommand : ConsoleCommand
                 continue;
             }
 
-            ZNetView view = c.GetComponent<ZNetView>();
+            var view = c.GetComponent<ZNetView>();
             if (view != null && view.GetZDO() != null)
             {
                 loaded.Add(view.GetZDO());
@@ -127,11 +127,9 @@ internal sealed class ClearCommand : ConsoleCommand
             far++;
         }
 
-        string msg = "stt_clear: " + (drops ? killed + " killed, " : "") + removed + " removed nearby, " + far +
-                     " removed in unloaded areas (radius " + radius.ToString("0", CultureInfo.InvariantCulture) +
-                     " m, players kept)";
+        string msg = $"stt_clear: {(drops ? $"{killed} killed, " : "")}{removed} removed nearby, {far} removed in unloaded areas (radius {radius.ToString("0", CultureInfo.InvariantCulture)} m, players kept)";
         Console.instance.Print(msg);
-        ModLog.Info("ClearCommand: " + msg);
+        ModLog.Info($"ClearCommand: {msg}");
     }
 
     /// Pure: flat (x / z) distance within the radius, inclusive.
