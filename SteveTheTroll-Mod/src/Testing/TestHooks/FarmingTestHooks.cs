@@ -40,6 +40,23 @@ internal static class FarmingTestHooks
         return tree;
     }
 
+    /// 2026-11-07 (farm-friend-detour): the game has a troll-sized navmesh path between two ground points `dx`,`dz` metres from the player (same offsets as stt.plantTree). Asking also makes the game build the missing navmesh cells. Without a path the game's own movement stops the troll in place, the stuck rule then sends it 20 m sideways, and a test that needs the troll to walk its straight line never sees it, so such a test waits for this before it spawns the troll. Expected outcome: true once the navmesh is there.
+    [TestHook("stt.pathReady")]
+    private static bool PathReady(float fromDx, float fromDz, float toDx, float toDz)
+    {
+        Player p = Player.m_localPlayer;
+        if (p == null || Pathfinding.instance == null || ZoneSystem.instance == null)
+        {
+            return false;
+        }
+
+        Vector3 from = p.transform.position + new Vector3(fromDx, 0f, fromDz);
+        Vector3 to = p.transform.position + new Vector3(toDx, 0f, toDz);
+        from.y = ZoneSystem.instance.GetGroundHeight(from);
+        to.y = ZoneSystem.instance.GetGroundHeight(to);
+        return Pathfinding.instance.HavePath(from, to, Pathfinding.AgentType.TrollSize);
+    }
+
     /// Planted trees still standing untouched (a felled tree is destroyed, so the lab cannot name it any more - this hook needs no tree argument). Expected outcome: 0 once hit.
     [TestHook("stt.plantedUntouched")]
     private static int PlantedUntouched()
@@ -96,6 +113,13 @@ internal static class FarmingTestHooks
     {
         TrollFarmer f = troll != null ? troll.GetComponent<TrollFarmer>() : null;
         return f != null ? f.Attacks : -1;
+    }
+
+    /// Has the troll's farmer started at least `min` swings (also the one that makes it remember the spot of its source)? Expected outcome: true once.
+    [TestHook("stt.farmAttacksAtLeast")]
+    private static bool FarmAttacksAtLeast(GameObject troll, int min)
+    {
+        return FarmAttacks(troll) >= min;
     }
 
     /// Removes the planted trees (stt.reset). Expected outcome: how many were removed.

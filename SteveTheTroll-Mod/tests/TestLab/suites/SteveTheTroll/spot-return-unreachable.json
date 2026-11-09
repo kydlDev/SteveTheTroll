@@ -1,0 +1,157 @@
+{
+    "name":  "spot-return-unreachable",
+    "description":  "The other half of spot-return (2026-11-09): the remembered spot is inside a closed ring of player-built walls the troll must not break. After unloading it walks there, fails two recovery cycles and gives the place up (D-187 best effort), then farms from where it stands. It must NOT reach the spot and must NOT hit a wall. Ring radius 14 m: the troll counts as arrived within 12 m of the spot, so a smaller ring (first try 6 m, 00:58) is \"reached\" from outside the wall.",
+    "timeout":  480,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "tripScene"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.walledTree",
+                      "args":  {
+                                   "dx":  60,
+                                   "dz":  0,
+                                   "radius":  14
+                               },
+                      "label":  "a Beech inside a closed ring of stone walls (two high, radius 14 m = bigger than the troll\u0027s 12 m arrival distance, so standing at the wall is NOT arriving) 60 m east - the spot will be this place"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.wallsAlive",
+                                    "min":  56
+                                },
+                      "timeout":  1,
+                      "label":  "the whole ring stands (28 walls per layer, two high)"
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.rememberSpotAndFill",
+                                    "args":  {
+                                                 "troll":  "troll",
+                                                 "dx":  60,
+                                                 "dz":  0
+                                             },
+                                    "min":  1
+                                },
+                      "timeout":  30,
+                      "label":  "the place is injected as the remembered spot AND the pack is filled in ONE call, at a moment when the troll works on a source it already remembered (polled until then: a swing at a NEW source would replace the spot)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedSpotDrift",
+                      "expect":  0,
+                      "label":  "the remembered spot is exactly the injected one",
+                      "stop":  true
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedStatus",
+                      "expect":  "OK",
+                      "stop":  true,
+                      "label":  "precondition: the followed troll is loaded, owned here and remembers exactly the injected spot (any other answer NAMES the reason: NOT_LOADED / NO_FARMER / NO_REMEMBERED_SPOT / NOT_OWNER / SPOT_MISMATCH)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.stepAside",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  -25
+                               },
+                      "label":  "the player steps 25 m south, off the troll\u0027s way to the spot (a troll that walks past a player who looks at it is frozen by TrollHold - run agent24-s1)"
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.followedJournalHas",
+                                    "args":  {
+                                                 "name":  "Unloaded",
+                                                 "atLeast":  1
+                                             },
+                                    "expect":  true
+                                },
+                      "timeout":  120,
+                      "label":  "the troll unloaded (an EVENT in the trip journal, not a state that has to be caught between two polls)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedSpotDecision",
+                      "expect":  "SpotWalk",
+                      "label":  "the troll decided to walk back to the spot (any skip names its reason: NoSpot / TooClose / OutsideLeash)",
+                      "stop":  true
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedSpotDrift",
+                      "expect":  0,
+                      "label":  "still exactly the injected spot after the unload",
+                      "stop":  true
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.followedSpotEnd",
+                                    "expect":  "SpotGaveUp"
+                                },
+                      "timeout":  330,
+                      "label":  "the walk back ended by the troll GIVING THE PLACE UP (two failed recovery cycles) - it did not reach it and was not cancelled"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.wallsHitByTroll",
+                      "expect":  0,
+                      "label":  "no hit of a tamed troll reached a player-built wall (PlayerPieceGuard)"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  3
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedFarming",
+                      "expect":  true,
+                      "label":  "it farms again from where it stands"
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.followedUnloadedAll",
+                        "expect":  true,
+                        "label":  "every stack filled was delivered (unload ledger)"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.followedSpotDecision",
+                        "expect":  "SpotWalk",
+                        "label":  "the decision after the unload was to walk back"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.followedSpotEnd",
+                        "expect":  "SpotGaveUp",
+                        "label":  "the place was given up"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.followedJournalValid",
+                        "expect":  true,
+                        "label":  "the trip events came in a legal order"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
+}

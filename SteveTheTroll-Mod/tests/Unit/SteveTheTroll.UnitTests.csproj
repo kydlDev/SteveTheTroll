@@ -28,6 +28,10 @@
   <ItemGroup Condition="'$(KydlQuality)' != 'true'">
     <!-- which functionalities are on (PROJECT_RULES 11) -->
     <Compile Include="..\..\src\Configuration\Functions.cs" Link="Mod\Functions.cs" />
+    <!-- 2026-11-08 the per-troll unload ledger (pure C#) -->
+    <Compile Include="..\..\src\Features\Trolls\Farming\Infrastructure\FarmUnloadLedger.cs" Link="Mod\FarmUnloadLedger.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Farming\Infrastructure\TrollJournal.cs" Link="Mod\TrollJournal.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Farming\Infrastructure\TripRules.cs" Link="Mod\TripRules.cs" />
     <!-- D-135 Troll Hub: pure rules + the building's data -->
     <Compile Include="..\..\src\Features\Hubs\Domain\HubRules.cs" Link="Mod\HubRules.cs" />
     <Compile Include="..\..\src\Features\Hubs\Domain\HubUnlockRules.cs" Link="Mod\HubUnlockRules.cs" />

@@ -9,7 +9,7 @@
 - A troll with a hub that has farmed everything around it now walks on to look for more (150 m at a time, the zones load around it) until it is 950 m from its hub; when nothing is left it tells you once and suggests planting trees or building a new hub elsewhere.
 - A troll you are looking at (standing still on purpose) is no longer treated as stuck.
 - A troll no longer stands guard over a creature it cannot hit inside the bed no-hit zone; it goes back to farming after 5 s.
-- Added a flight recorder to the diagnostics: when a troll stalls, the facts of every troll are saved to a file next to the log (needs KydlCore 1.0.1).
+- Added a flight recorder to the diagnostics: when a troll stalls, the facts of every troll are saved to a file next to the log (needs KydlCore 1.1.0).
 - The developer console commands (`stt_...`, test helpers) now stay locked until you type `stt_unlock <word>`; the word is the new setting `[General] UnlockWord` in your config (empty = they stay locked). The `stt_freeze` / `stt_unfreeze` commands are gone.
 - Every error the mod catches is now written to the log with the exact exception type and what the mod did instead, so the next bug report names the exception.
 

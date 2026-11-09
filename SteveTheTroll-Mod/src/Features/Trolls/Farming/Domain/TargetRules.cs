@@ -13,10 +13,23 @@ internal static class TargetRules
     /// How far ahead (m) and how wide (m, each side of the walking line) a troll counts as "in front of me".
     // D-180 (fix12 farm-friend-detour: passing a standing troll the walker never got more than 1.4 m beside the line - the 2.8 m waypoint is inside the two bodies, so it pushed
     // the friend ahead of it up to the tree): the check starts 5 m ahead and the waypoint lies 4 m beside the friend (two troll bodies and a margin)
-    internal const float Ahead = 5f, HalfWidth = 1.8f;
+    // 2026-11-07 (full runs agent24-full1/full3, farm-friend-detour): a friend 2.6 m beside the line was judged "not in the way" and was shoved 2 m, then 10 m, before the tree - two
+    // troll bodies need about 3 m between their centres, so the corridor is 3.2 m each side (the detour waypoint, 4 m beside the friend, stays clear of the corridor).
+    internal const float Ahead = 5f, HalfWidth = 3.2f;
 
     /// How far beside the other troll (m) the detour point lies.
     internal const float Side = 4f;
+
+    // 2026-11-07 (agent24-ffd4): a detour leg had a fixed 1.5 s, but the 4 m sideways leg takes a troll (2.2 m/s with the turn and the start) about 1.8 s, so it always ran out of time
+    // 0.7 m short and the walker turned forward 3.3 m beside the friend - 0.1 m from touching it. A leg gets the time its length needs at a slow walk, plus a margin; it still ends
+    // early on arrival.
+    internal const float SlowWalkMetresPerSecond = 1.5f, LegMarginSeconds = 0.5f, MinLegSeconds = 1.5f;
+
+    /// How long (s) a detour leg of `metres` may run before the next leg starts. Expected outcome: at least MinLegSeconds, growing with the length.
+    internal static float LegSeconds(float metres)
+    {
+        return Math.Max(MinLegSeconds, Math.Max(0f, metres) / SlowWalkMetresPerSecond + LegMarginSeconds);
+    }
 
     /// A reservation of a target is kept this long (s) after its holder last refreshed it.
     internal const float HoldSeconds = 6f;

@@ -5,6 +5,7 @@ using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Hubs.Infrastructure;
 using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
+using SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
 using SteveTheTroll.Features.Trolls.Registry.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using SteveTheTroll.Features.Trolls.World.Infrastructure;
@@ -202,6 +203,13 @@ internal static class TrollFrozenWatch
             return;
         }
 
+        // 2026-11-07 (full run agent24-full4, frozen-troll-detected): the watch starts the moment the troll exists, a moment before the registry gives it its id - the id read then
+        // was empty, so the freeze was detected (evidence dumped, player told) but never recorded and the map pin / hook never showed it. Read the id again when it was missing.
+        if (string.IsNullOrEmpty(w.SttId))
+        {
+            w.SttId = z.GetString(TrollRegistry.IdKey);
+        }
+
         if (!string.IsNullOrEmpty(w.SttId))
         {
             Frozen.Add(w.SttId);
@@ -224,6 +232,13 @@ internal static class TrollFrozenWatch
     {
         TrollFarmer f = c.GetComponent<TrollFarmer>();
         bool travelling = TestForceTravelling || c.GetComponent<TrollReturn>() != null || (f != null && (f.Travelling || f.GoingHome));
+        TrollRecovery rec = c.GetComponent<TrollRecovery>();
+        if (travelling && !TestForceTravelling && rec != null && rec.Recovering)
+        {
+            // 2026-11-09 (agent24-y5): blocked by a wall and climbing the recovery ladder (detours, ledge walk) is not a freeze; rebuilding the troll threw the ladder away every 30 s
+            ModLog.Every("TrollFrozenWatch.recovering." + c.GetInstanceID(), 30d, "TrollFrozenWatch: " + TrollTaming.Tag(c) + " is working through a recovery cycle - not counted as frozen");
+            travelling = false;
+        }
         // T-214 B1: standing still because the player looks at it (TrollHold), fighting or staggering is not a freeze
         return FrozenRules.ExpectsMovement(travelling, TrollHold.IsHolding(c), c.InAttack(), c.IsStaggering());
     }

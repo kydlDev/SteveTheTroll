@@ -131,10 +131,7 @@
       "do": "wait",
       "until": {
         "check": "hook",
-        "name": "stt.followedBackpackAtMost",
-        "args": {
-          "stacks": 0
-        },
+        "name": "stt.followedUnloadedAll",
         "expect": true
       },
       "timeout": 300
@@ -164,12 +161,9 @@
   "asserts": [
     {
       "check": "hook",
-      "name": "stt.followedBackpackAtMost",
-      "args": {
-        "stacks": 0
-      },
+      "name": "stt.followedUnloadedAll",
       "expect": true,
-      "label": "it reached its hub and unloaded everything"
+      "label": "it reached its hub and delivered every stack it was filled with into a depot (unload ledger: an event, so a later pickup of loose items cannot undo it - agent24-full11)"
     },
     {
       "check": "hook",

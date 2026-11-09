@@ -53,6 +53,12 @@ internal sealed class ValheimTrollMovement : ITrollMovement
     public void Stop()
     {
         _ai.StopMoving();
+        // 2026-11-07 (review of full run 3, ledge walk pushed sideways): the character's own movement intent is cleared as well, whatever the game's StopMoving leaves of it
+        if (_body != null)
+        {
+            _body.SetMoveDir(Vector3.zero);
+            _body.SetRun(false);
+        }
     }
 
     /// Both private game methods were found (in-game test Startup_TamingReflection checks the same pair through TrollFarming).

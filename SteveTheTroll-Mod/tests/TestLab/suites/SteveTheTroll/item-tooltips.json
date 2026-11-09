@@ -1,0 +1,53 @@
+{
+  "name": "item-tooltips",
+  "description": "DrakesTestLab 0.4.5+ (uiHover + screenText, new in use 2026-11-08): the game's own tooltip of every item the mod adds - slippers, the three costume pieces and the club - is opened exactly as a player does (the virtual mouse rests on the inventory slot) and READ: it names the item, the slippers show their description, and no raw $stevethetroll_ localisation token is on screen (an untranslated key would show as text).",
+  "timeout": 90,
+  "steps": [
+    {
+      "do": "use",
+      "block": "start",
+      "args": { "clearTrolls": false, "slippers": false, "hub": false }
+    },
+    { "do": "pressKey", "button": "Inventory" },
+    { "do": "wait", "seconds": 0.5 },
+    { "do": "check", "check": "uiVisible", "name": "InventoryGui", "label": "the Inventory key opened the inventory" },
+    { "do": "give", "prefab": "STT_TrollSlippers" },
+    { "do": "give", "prefab": "STT_CostumeHelmet" },
+    { "do": "give", "prefab": "STT_CostumeChest" },
+    { "do": "give", "prefab": "STT_CostumeLegs" },
+    { "do": "give", "prefab": "STT_TrollClub" },
+    { "do": "wait", "seconds": 1 },
+
+    { "do": "uiHover", "icon": "STT_TrollSlippers", "until": "Fluffy Slippers", "wait": 1 },
+    { "do": "check", "check": "screenText", "contains": "Fluffy Slippers", "label": "the slippers' tooltip names them" },
+    { "do": "check", "check": "screenText", "contains": "Soft, fluffy plush slippers", "label": "and shows their description" },
+    { "do": "check", "check": "screenText", "notContains": "$stevethetroll", "label": "no raw localisation token on screen (slippers)" },
+    { "do": "uiRelease" },
+
+    { "do": "uiHover", "icon": "STT_CostumeHelmet", "until": "Troll Mascot Head", "wait": 1 },
+    { "do": "check", "check": "screenText", "contains": "Troll Mascot Head", "label": "the costume helmet's tooltip names it" },
+    { "do": "check", "check": "screenText", "notContains": "$stevethetroll", "label": "no raw localisation token on screen (helmet)" },
+    { "do": "uiRelease" },
+
+    { "do": "uiHover", "icon": "STT_CostumeChest", "until": "Troll Mascot Suit", "wait": 1 },
+    { "do": "check", "check": "screenText", "contains": "Troll Mascot Suit", "label": "the costume chest piece's tooltip names it" },
+    { "do": "check", "check": "screenText", "notContains": "$stevethetroll", "label": "no raw localisation token on screen (chest)" },
+    { "do": "uiRelease" },
+
+    { "do": "uiHover", "icon": "STT_CostumeLegs", "until": "Troll Mascot Trousers", "wait": 1 },
+    { "do": "check", "check": "screenText", "contains": "Troll Mascot Trousers", "label": "the costume legs' tooltip names them" },
+    { "do": "check", "check": "screenText", "notContains": "$stevethetroll", "label": "no raw localisation token on screen (legs)" },
+    { "do": "uiRelease" },
+
+    { "do": "uiHover", "icon": "STT_TrollClub", "until": "Troll Club", "wait": 1 },
+    { "do": "check", "check": "screenText", "contains": "Troll Club", "label": "the club's tooltip names it" },
+    { "do": "check", "check": "screenText", "notContains": "$stevethetroll", "label": "no raw localisation token on screen (club)" },
+    { "do": "uiRelease" },
+
+    { "do": "closeUi" }
+  ],
+  "asserts": [
+    { "check": "noErrors", "source": "SteveTheTroll" },
+    { "check": "noErrors", "source": "DrakesTestLab" }
+  ]
+}

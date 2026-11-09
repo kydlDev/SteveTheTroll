@@ -1,11 +1,63 @@
 {
-  "description": "Every SteveTheTroll test starts here: the arena spot (MIGRATION_DECISIONS C26), stt.reset (bed on the player's spot, hub closed, ghost trolls dropped, costume off, proximity watch on), no test trolls, and - unless switched off - the slippers on and HUB 1 25 m in front.",
-  "params": { "clearTrolls": true, "slippers": true, "hub": false },
-  "steps": [
-    { "do": "hook", "name": "stt.arena", "contains": "arena at", "label": "start on the arena spot (MIGRATION_DECISIONS C26)" },
-    { "do": "hook", "name": "stt.reset" },
-    { "if": "{{clearTrolls}}", "do": "hook", "name": "stt.clearTrolls" },
-    { "if": "{{slippers}}", "do": "give", "prefab": "STT_TrollSlippers", "count": 1, "equip": true },
-    { "if": "{{hub}}", "do": "hook", "name": "stt.addHub", "args": { "number": 1, "dx": 0, "dz": 25 } }
-  ]
+    "description":  "Every SteveTheTroll test starts here: the arena spot (MIGRATION_DECISIONS C26), stt.reset (bed on the player\u0027s spot, hub closed, ghost trolls dropped, costume off, proximity watch on), no test trolls, and - unless switched off - the slippers on and HUB 1 25 m in front. clearMobs (default TRUE since 2026-11-09, agent24: every test starts in an arena without wild creatures and VERIFIES it; a test that needs a wild creature spawns it itself after this block): no wild creature within 80 m.",
+    "params":  {
+                   "clearTrolls":  true,
+                   "slippers":  true,
+                   "hub":  false,
+                   "clearMobs":  true
+               },
+    "steps":  [
+                  {
+                      "do":  "hook",
+                      "name":  "stt.arena",
+                      "contains":  "arena at",
+                      "label":  "start on the arena spot (MIGRATION_DECISIONS C26)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.reset"
+                  },
+                  {
+                      "if":  "{{clearTrolls}}",
+                      "do":  "hook",
+                      "name":  "stt.clearTrolls"
+                  },
+                  {
+                      "if":  "{{clearMobs}}",
+                      "do":  "hook",
+                      "name":  "stt.clearMobs",
+                      "args":  {
+                                   "radius":  80
+                               },
+                      "label":  "2026-11-09 (full10: a wild Boar, full12: a wild Greyling started a guard chase in the middle of a fight test): the tests that fight or watch a fight start without wild creatures within 80 m"
+                  },
+                  {
+                      "if":  "{{clearMobs}}",
+                      "do":  "hook",
+                      "name":  "stt.wildMobsNear",
+                      "args":  {
+                                   "radius":  80
+                               },
+                      "expect":  0,
+                      "label":  "precondition: no wild creature left within 80 m (the start is verified clean, not assumed)",
+                      "stop":  true
+                  },
+                  {
+                      "if":  "{{slippers}}",
+                      "do":  "give",
+                      "prefab":  "STT_TrollSlippers",
+                      "count":  1,
+                      "equip":  true
+                  },
+                  {
+                      "if":  "{{hub}}",
+                      "do":  "hook",
+                      "name":  "stt.addHub",
+                      "args":  {
+                                   "number":  1,
+                                   "dx":  0,
+                                   "dz":  25
+                               }
+                  }
+              ]
 }

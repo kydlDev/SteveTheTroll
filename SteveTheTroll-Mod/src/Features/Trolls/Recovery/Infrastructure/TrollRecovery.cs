@@ -92,6 +92,10 @@ internal sealed partial class TrollRecovery : MonoBehaviour
 
     private RecoveryMachine M => _pipeline.Machine;
 
+    /// 2026-11-09 (agent24-y5, spot-return-unreachable: TrollFrozenWatch rebuilt the troll after 30 s against a wall and the new TrollRecovery started the ladder over - no cycle ever failed): the troll is in the
+    /// middle of a recovery cycle (a rung done or running) and the ladder was stepped within StaleSeconds - it is working on being blocked, it is not frozen. Expected outcome: false for a troll whose AI step does not run.
+    internal bool Recovering => _hasCtx && _canAbandon && M.Dirty && Time.time - _lastTick < StaleSeconds; // only a walk the ladder can END (spot, farm target): a hub is never abandoned, there the frozen watch stays the last resort
+
     /// A manoeuvre (rage / detour leg) is running right now: the caller must hand the frame to Continue.
     internal bool Busy => M.Stage != RecoveryStage.Travel && Time.time - _lastTick < StaleSeconds;
 
@@ -220,7 +224,7 @@ internal sealed partial class TrollRecovery : MonoBehaviour
             d = Flat(goal);
             if (!_hasCtx || ka != _ka || kb != _kb)
             {
-                EnterContext(ka, kb, d);
+                EnterContext(ka, kb, d, !_hasCtx ? "no context yet (first walk, or Forget)" : "goal key changed " + _ka + "/" + _kb + " -> " + ka + "/" + kb);
             }
 
             if (now >= _nextPrune)
@@ -307,13 +311,15 @@ internal sealed partial class TrollRecovery : MonoBehaviour
         return _hasCtx && Tick(dt, _goal, _ka, _kb, _canAbandon, false, _goalObject);
     }
 
-    private void EnterContext(long ka, long kb, float d)
+    private void EnterContext(long ka, long kb, float d, string enterReason)
     {
         _troll = _ctx.EnsureId(); // the one explicit id write (owner only), as TrollRegistry.IdOf did here before D-169
         _ka = ka;
         _kb = kb;
         _hasCtx = true;
         _abandon = false;
+        // 2026-11-09 (agent24-y3, spot-return-unreachable): the ladder started over after every ledge walk and no cycle ever failed; this says WHY a walk (re)enters the context
+        ModLog.Verbose("TrollRecovery: " + TrollTaming.Tag(this) + " enters the walk context - " + enterReason + " (stage was " + M.Stage + ", ledge used " + M.LedgeUsed + ", detours done " + M.DetoursDone + ", cycle failures " + Book.Failed(_troll, ka, kb) + ")");
         _pipeline.BeginCycle(Book.Failed(_troll, ka, kb));
         _meter.NewAttempt(d);
         ModLog.Verbose("TrollRecovery: " + TrollTaming.Tag(this) + " walks to " +

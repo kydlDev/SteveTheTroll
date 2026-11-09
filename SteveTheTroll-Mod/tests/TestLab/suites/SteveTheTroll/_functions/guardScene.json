@@ -1,13 +1,72 @@
-{
-  "description": "D-176: the guard-fight scene - slippers on, HUB 1 25 m ahead, a farming troll (tag `troll`) 16 m ahead-left, and 2 s later a creature (tag `mob`, default Greydwarf) at `mobDx`,`mobDz` that goes for the player. Call guardFight next.",
-  "params": { "prefab": "Greydwarf", "mobDx": -2, "mobDz": 18 },
-  "steps": [
-    { "do": "give", "prefab": "STT_TrollSlippers", "count": 1, "equip": true },
-    { "do": "hook", "name": "stt.addHub", "args": { "number": 1, "dx": 0, "dz": 25 } },
-    { "do": "hook", "name": "stt.spawnTroll", "args": { "dx": -14, "dz": 8 }, "as": "troll" },
-    { "do": "hook", "name": "stt.plantTree", "args": { "dx": -10, "dz": 14 }, "label": "a tree 6 m from the troll and 8 m from where the creature appears: the troll farms HERE and stays within the 20 m guard range (run 163541: with nothing near it ran 65 m to a log and the creature was out of reach)" },
-    { "do": "hook", "name": "stt.startFarm", "args": { "troll": "troll" } },
-    { "do": "wait", "seconds": 2 },
-    { "do": "hook", "name": "stt.spawnMob", "args": { "prefab": "{{prefab}}", "dx": "{{mobDx}}", "dz": "{{mobDz}}" }, "as": "mob" }
-  ]
+﻿{
+    "description":  "D-176: the guard-fight scene - slippers on, HUB 1 25 m ahead, a farming troll (tag `troll`) 16 m ahead-left, and 2 s later a creature (tag `mob`, default Greydwarf) at `mobDx`,`mobDz` that goes for the player. Call guardFight next.",
+    "params":  {
+                   "prefab":  "Greydwarf",
+                   "mobDx":  -2,
+                   "mobDz":  18
+               },
+    "steps":  [
+                  {
+                      "do":  "hook",
+                      "name":  "stt.clearMobs",
+                      "args":  {
+                                   "radius":  80
+                               },
+                      "label":  "2026-11-09: the fight scene starts without wild creatures within 80 m (cleared AFTER the arena moved; a stray Greyling/Boar changes what the guard does)"
+                  },
+                  {
+                      "do":  "give",
+                      "prefab":  "STT_TrollSlippers",
+                      "count":  1,
+                      "equip":  true
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.addHub",
+                      "args":  {
+                                   "number":  1,
+                                   "dx":  0,
+                                   "dz":  25
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  -14,
+                                   "dz":  8
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.plantTree",
+                      "args":  {
+                                   "dx":  -10,
+                                   "dz":  14
+                               },
+                      "label":  "a tree 6 m from the troll and 8 m from where the creature appears: the troll farms HERE and stays within the 20 m guard range (run 163541: with nothing near it ran 65 m to a log and the creature was out of reach)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.startFarm",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnMob",
+                      "args":  {
+                                   "prefab":  "{{prefab}}",
+                                   "dx":  "{{mobDx}}",
+                                   "dz":  "{{mobDz}}"
+                               },
+                      "as":  "mob"
+                  }
+              ]
 }

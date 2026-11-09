@@ -16,7 +16,7 @@ public class FriendDetourTests
     }
 
     [TestCase(0f, -2f)]  // behind
-    [TestCase(3f, 3f)]   // beside, outside the half width
+    [TestCase(3.5f, 3f)] // beside, outside the half width
     [TestCase(0f, 8f)]   // beyond the look-ahead
     public void A_friend_off_the_line_or_far_is_not_in_the_way(float x, float z)
     {

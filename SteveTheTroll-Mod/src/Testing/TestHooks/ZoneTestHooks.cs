@@ -107,6 +107,20 @@ internal static class ZoneTestHooks
         return "triggered " + FarmFriendDetour.Triggers + ", sideways legs " + FarmFriendDetour.SidewaysDone + ", passed " + FarmFriendDetour.Passed;
     }
 
+    /// 2026-11-07 (review of full runs 1-3: farm-friend-detour passed or failed without proving a detour ran): the friend-detour counters as numbers - `triggers` (detours started),
+    /// `sideways` (first legs done), `passed` (friends passed). Expected outcome: the count; throws for another name.
+    [TestHook("stt.detourCount")]
+    private static int DetourCount(string counter)
+    {
+        switch (counter)
+        {
+            case "triggers": return FarmFriendDetour.Triggers;
+            case "sideways": return FarmFriendDetour.SidewaysDone;
+            case "passed": return FarmFriendDetour.Passed;
+            default: throw new System.Exception("unknown detour counter '" + counter + "' (triggers, sideways, passed)");
+        }
+    }
+
     /// Zeroes the friend-detour counters. Expected outcome: true.
     [TestHook("stt.resetDetourStats")]
     private static bool ResetDetourStats()

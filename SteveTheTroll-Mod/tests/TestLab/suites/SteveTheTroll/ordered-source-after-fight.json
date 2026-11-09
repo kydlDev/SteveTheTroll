@@ -9,7 +9,8 @@
                       "args":  {
                                    "clearTrolls":  true,
                                    "slippers":  false,
-                                   "hub":  false
+                                   "hub":  false,
+                                   "clearMobs":  true
                                }
                   },
                   {

@@ -20,30 +20,36 @@ public class TargetRulesTests
         return (float)point.GetType().GetProperty(name, Any).GetValue(point, null);
     }
 
-    static bool Blocked(float ox, float oz, float gz = 10f)
+    // 2026-11-07 (review of full runs 1-3): the tests used their own 3.5 m / 1.8 m / 2.8 m - not the production corridor (5 m / 3.2 m / 4 m) - so they proved a geometry the game never uses
+    static float Prod(string name)
     {
-        return (bool)ModAssembly.Call(T, "Blocked", P(0f, 0f), P(0f, gz), P(ox, oz), 3.5f, 1.8f);
+        return (float)ModAssembly.Type(T).GetField(name, System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic).GetValue(null);
     }
 
-    static bool BlockedAt(float mx, float mz, float gx, float gz, float ox, float oz, float ahead = 3.5f, float half = 1.8f)
+    static bool Blocked(float ox, float oz, float gz = 10f)
     {
-        return (bool)ModAssembly.Call(T, "Blocked", P(mx, mz), P(gx, gz), P(ox, oz), ahead, half);
+        return (bool)ModAssembly.Call(T, "Blocked", P(0f, 0f), P(0f, gz), P(ox, oz), Prod("Ahead"), Prod("HalfWidth"));
+    }
+
+    static bool BlockedAt(float mx, float mz, float gx, float gz, float ox, float oz, float ahead = float.NaN, float half = float.NaN)
+    {
+        return (bool)ModAssembly.Call(T, "Blocked", P(mx, mz), P(gx, gz), P(ox, oz), float.IsNaN(ahead) ? Prod("Ahead") : ahead, float.IsNaN(half) ? Prod("HalfWidth") : half);
     }
 
     // 2026-11-06 (diagnostics review): the live farmer rarely walks the straight line of the fixture - the corridor must hold for any direction and any start point
     [Test] public void Blocked_DiagonalApproach_FriendOnTheLine() { Assert.That(BlockedAt(0f, 0f, 10f, 10f, 2f, 2f), Is.True); }
-    [Test] public void NotBlocked_DiagonalApproach_FriendBesideTheLine() { Assert.That(BlockedAt(0f, 0f, 10f, 10f, 4f, 0f), Is.False); }
+    [Test] public void NotBlocked_DiagonalApproach_FriendBesideTheLine() { Assert.That(BlockedAt(0f, 0f, 10f, 10f, 6f, 0f), Is.False); }
     [Test] public void Blocked_OffsetStart_FriendOnTheLine() { Assert.That(BlockedAt(-30f, 47f, -30f, 60f, -30.5f, 49.5f), Is.True); }
     [Test] public void NotBlocked_FriendBehindTheFarmer() { Assert.That(BlockedAt(0f, 0f, 0f, 10f, 0f, -2f), Is.False); }
     [Test] public void NotBlocked_FriendBeyondTheLookAhead() { Assert.That(BlockedAt(0f, 0f, 0f, 20f, 0f, 6f), Is.False); }
-    [Test] public void NotBlocked_FriendPastTheGoal() { Assert.That(BlockedAt(0f, 0f, 0f, 2f, 0f, 3f), Is.True.Or.False, "past the goal is the walker's own business; it must not throw"); }
+    [Test] public void NotBlocked_FriendPastTheGoal() { Assert.That(BlockedAt(0f, 0f, 0f, 2f, 0f, 3f), Is.False, "a friend past the goal is not in the way (the walker stops at the goal)"); }
 
     [Test] public void Blocked_IsRotationInvariant_LikeTheFixtureAtEveryAngle()
     {
         for (int deg = 0; deg < 360; deg += 15)
         {
             float a = deg * 0.0174533f, c = (float)System.Math.Cos(a), s = (float)System.Math.Sin(a);
-            foreach (float[] f in new[] { new[] { 0f, 2f }, new[] { 1.5f, 2f }, new[] { 3f, 2f }, new[] { 0f, -2f }, new[] { 0f, 6f } })
+            foreach (float[] f in new[] { new[] { 0f, 2f }, new[] { 1.5f, 2f }, new[] { 2.6f, 2f }, new[] { 4f, 2f }, new[] { 0f, -2f }, new[] { 0f, 6f } })
             {
                 bool straight = BlockedAt(0f, 0f, 0f, 10f, f[0], f[1]);
                 bool turned = BlockedAt(100f, -50f, 100f + (-s * 10f), -50f + c * 10f, 100f + (c * f[0] - s * f[1]), -50f + (s * f[0] + c * f[1]));
@@ -54,7 +60,12 @@ public class TargetRulesTests
 
     [Test] public void Blocked_TrollRightAhead() { Assert.That(Blocked(0f, 2f), Is.True); }
     [Test] public void Blocked_TrollAheadAndSlightlyAside_StillInTheWay() { Assert.That(Blocked(1.5f, 2f), Is.True); }
-    [Test] public void NotBlocked_TrollWellBesideTheLine() { Assert.That(Blocked(3f, 2f), Is.False); }
+    [Test] public void NotBlocked_TrollWellBesideTheLine() { Assert.That(Blocked(4f, 2f), Is.False); }
+    [Test] public void Blocked_TrollTwoPointSixBesideTheLine_TwoBodiesWouldTouch() { Assert.That(Blocked(2.6f, 2f), Is.True); }
+    // 2026-11-07 (agent24-ffd4): the 4 m sideways leg took about 1.8 s at troll speed but had a fixed 1.5 s and ended 0.7 m short, 3.3 m beside the friend
+    [Test] public void LegSeconds_SidewaysLeg_LongEnoughForATrollToArrive() { Assert.That((float)ModAssembly.Call(T, "LegSeconds", Prod("Side")), Is.GreaterThanOrEqualTo(Prod("Side") / 2.2f)); }
+    [Test] public void LegSeconds_ShortOrNegativeLeg_NeverBelowTheFloor() { Assert.That((float)ModAssembly.Call(T, "LegSeconds", 0.5f), Is.EqualTo(Prod("MinLegSeconds"))); Assert.That((float)ModAssembly.Call(T, "LegSeconds", -3f), Is.EqualTo(Prod("MinLegSeconds"))); }
+    [Test] public void LegSeconds_LongerLeg_TakesLonger() { Assert.That((float)ModAssembly.Call(T, "LegSeconds", 10f), Is.GreaterThan((float)ModAssembly.Call(T, "LegSeconds", 5f))); }
     [Test] public void NotBlocked_TrollBehind() { Assert.That(Blocked(0f, -2f), Is.False); }
     [Test] public void NotBlocked_TrollTooFarAhead() { Assert.That(Blocked(0f, 6f), Is.False); }
     [Test] public void NotBlocked_TrollBeyondTheGoal() { Assert.That(Blocked(0f, 12f), Is.False); }
@@ -63,7 +74,7 @@ public class TargetRulesTests
 
     static float[] Way(float ox, float oz)
     {
-        object way = ModAssembly.Call(T, "Waypoint", P(0f, 0f), P(0f, 10f), P(ox, oz), 2.8f);
+        object way = ModAssembly.Call(T, "Waypoint", P(0f, 0f), P(0f, 10f), P(ox, oz), Prod("Side"));
         return new[] { Coord(way, "X"), Coord(way, "Z") };
     }
 
@@ -75,7 +86,7 @@ public class TargetRulesTests
     }
     [Test] public void Waypoint_OtherSlightlyLeft_GoesRightOfIt() { var w = Way(-0.5f, 2f); Assert.That(w[0], Is.GreaterThan(-0.5f + 2f)); }
     [Test] public void Waypoint_OtherExactlyOnTheLine_TakesTheWalkersRight() { var w = Way(0f, 2f); Assert.That(w[0], Is.LessThan(-2f)); }
-    [Test] public void Waypoint_IsBesideTheOther_NotOnTheLine() { var w = Way(0f, 2f); Assert.That(System.Math.Abs(w[0]), Is.GreaterThan(1.8f)); }
+    [Test] public void Waypoint_IsBesideTheOther_NotOnTheLine() { var w = Way(0f, 2f); Assert.That(System.Math.Abs(w[0]), Is.GreaterThan(Prod("HalfWidth"))); }
 
     static bool Held(int holder, float at, int me, float now) { return (bool)ModAssembly.Call(T, "HeldByOther", holder, at, me, now, 6f); }
     [Test] public void Held_ByAnotherTrollRecently() { Assert.That(Held(7, 10f, 5, 12f), Is.True); }

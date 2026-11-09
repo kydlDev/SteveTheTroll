@@ -75,6 +75,10 @@ internal static partial class CombatTestHooks
         Character ch = mob.GetComponent<Character>();
         if (ch != null)
         {
+            // 2026-11-07 (agent24-part1, frozen-troll-detected: "the standing troll" drifted 14 m in 25 s with its AI off): switching the AI off leaves the character's LAST move
+            // direction in place and the game's character update keeps applying it - HoldStill only runs inside UpdateAI, which no longer runs. The creature really stands still now.
+            ch.SetMoveDir(Vector3.zero);
+            ch.SetRun(false);
             Frozen.Add(ch); // 2026-11-05: ai.enabled = false did not stop a TAMED troll (its farming steers in an UpdateAI postfix) - HoldStill zeroes the move every frame
         }
 

@@ -14,8 +14,8 @@ namespace SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 /// </summary>
 internal sealed class FarmFriendDetour
 {
-    // 2026-11-05: two legs (TargetRules.SideStep, then Waypoint), each at most DetourSeconds; a leg ends early within ArriveMetres of its point
-    private const float DetourSeconds = 1.5f, DetourCheckSeconds = 0.25f, LogSeconds = 10f, ArriveMetres = 0.8f;
+    // 2026-11-05: two legs (TargetRules.SideStep, then Waypoint), each at most TargetRules.LegSeconds of its length (2026-11-07: was a fixed 1.5 s, too short for the 4 m sideways leg); a leg ends early within ArriveMetres of its point
+    private const float DetourCheckSeconds = 0.25f, LogSeconds = 10f, ArriveMetres = 0.8f;
     private int _detours;
 
     /// Detours started / first (sideways) legs done / friends passed this session (the farm-friend-detour test logs them, so the log says whether the detour code ran at all).
@@ -38,7 +38,7 @@ internal sealed class FarmFriendDetour
                 SidewaysDone++;
                 ModLog.Info("TrollFarmer: " + TrollTaming.Tag(self.transform) + " detour: sideways leg done at " + self.transform.position.ToString("F1") + ", now past the friend (" + SidewaysDone + " sideways leg(s) done)");
                 _detourTo = _secondLeg;
-                _detourUntil = Time.time + DetourSeconds;
+                _detourUntil = Time.time + LegTime(self.transform.position, _detourTo);
             }
             else if (!_onFirstLeg && left.magnitude <= ArriveMetres)
             {
@@ -57,7 +57,7 @@ internal sealed class FarmFriendDetour
             // the sideways leg ran out of time before it arrived: the second leg still follows, so the walker never turns back into the friend
             _onFirstLeg = false;
             _detourTo = _secondLeg;
-            _detourUntil = Time.time + DetourSeconds;
+            _detourUntil = Time.time + LegTime(self.transform.position, _detourTo);
             around = _detourTo;
             return true;
         }
@@ -92,7 +92,7 @@ internal sealed class FarmFriendDetour
             _detourTo = new Vector3(step.X, p.y, step.Z);
             _secondLeg = new Vector3(way.X, p.y, way.Z);
             _onFirstLeg = true;
-            _detourUntil = Time.time + DetourSeconds;
+            _detourUntil = Time.time + LegTime(p, _detourTo);
             _detours++;
             Triggers++;
             ModLog.Info("TrollFarmer: " + TrollTaming.Tag(self.transform) + " detour started (trigger " + Triggers + "): me " + p.ToString("F1") + ", goal " + goal.ToString("F1") + ", friend " + o.ToString("F1") +
@@ -111,6 +111,14 @@ internal sealed class FarmFriendDetour
         }
 
         return around != goal;
+    }
+
+    /// Seconds the leg from `from` to `to` may take (flat distance, see TargetRules.LegSeconds).
+    private static float LegTime(Vector3 from, Vector3 to)
+    {
+        Vector3 d = to - from;
+        d.y = 0f;
+        return TargetRules.LegSeconds(d.magnitude);
     }
 
     /// D-178 (fix11 farm-friend-detour: the farmer passed a friend standing on its line 7 m wide and this never fired - nothing said where the friend was): once a second,

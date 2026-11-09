@@ -1,93 +1,56 @@
-﻿{
+{
     "name":  "spot-return",
-    "description":  "A troll with a full backpack unloads at home, then walks back to the spot where it farmed (user request 2026-10-31)",
+    "description":  "A troll with a full backpack walks to its hub (70 m), unloads, then walks back to the spot where it farmed and farms there (user request 2026-10-31). 2026-11-09: split in two - this one has a REACHABLE spot and must reach it; spot-return-unreachable has a spot behind a wall ring and must give it up. No \"reached or gave up\".",
     "timeout":  330,
     "steps":  [
                   {
                       "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  false,
-                                   "slippers":  false,
-                                   "hub":  false
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.clearMobs",
-                      "args":  {
-                                   "radius":  80
-                               },
-                      "label":  "D-175: this test is about unloading, not fighting (run 194722: a wild Greyling attacked at the start, fighting wins over unloading by design) - the arena starts without wild creatures; guard-mob-kills covers the fight"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.wildMobsNear",
-                      "args":  {
-                                   "radius":  80
-                               },
-                      "expect":  0,
-                      "label":  "no wild creature left within 80 m"
-                  },
-                  {
-                      "do":  "give",
-                      "prefab":  "STT_TrollSlippers",
-                      "count":  1,
-                      "equip":  true
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.addHub",
-                      "args":  {
-                                   "number":  1,
-                                   "dx":  0,
-                                   "dz":  25
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dz":  8,
-                                   "dx":  -14
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.startFarm",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
+                      "block":  "tripScene"
                   },
                   {
                       "do":  "wait",
-                      "seconds":  3
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.pathReady",
+                                    "args":  {
+                                                 "fromDx":  0,
+                                                 "fromDz":  60,
+                                                 "toDx":  60,
+                                                 "toDz":  0
+                                             },
+                                    "expect":  true
+                                },
+                      "timeout":  30,
+                      "label":  "precondition: the game has a troll-sized navmesh path from the hub area to the spot 60 m east (asking also builds the missing cells) - the spot is reachable by construction"
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.rememberSpotAndFill",
+                                    "args":  {
+                                                 "troll":  "troll",
+                                                 "dx":  60,
+                                                 "dz":  0
+                                             },
+                                    "min":  1
+                                },
+                      "timeout":  30,
+                      "label":  "the place is injected as the remembered spot AND the pack is filled in ONE call, at a moment when the troll works on a source it already remembered (polled until then: a swing at a NEW source would replace the spot)"
                   },
                   {
                       "do":  "hook",
-                      "name":  "stt.rememberSpot",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "dx":  150,
-                                   "dz":  0
-                               },
-                      "expect":  true,
-                      "label":  "spot 150 m away remembered"
+                      "name":  "stt.followedSpotDrift",
+                      "expect":  0,
+                      "label":  "the remembered spot is exactly the injected one",
+                      "stop":  true
                   },
                   {
                       "do":  "hook",
-                      "name":  "stt.followTroll",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.fillBackpack",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
+                      "name":  "stt.followedStatus",
+                      "expect":  "OK",
+                      "stop":  true,
+                      "label":  "precondition: the followed troll is loaded, owned here and remembers exactly the injected spot (any other answer NAMES the reason: NOT_LOADED / NO_FARMER / NO_REMEMBERED_SPOT / NOT_OWNER / SPOT_MISMATCH)"
                   },
                   {
                       "do":  "hook",
@@ -96,43 +59,54 @@
                                    "dx":  0,
                                    "dz":  -25
                                },
-                      "label":  "the player steps 25 m south, off the troll\u0027s way east to its spot but no further from the spot (run 181331: 40 m south-west took the troll out of the loaded area, its object was re-created and the walk was lost)"
+                      "label":  "the player steps 25 m south, off the troll\u0027s way to the spot (a troll that walks past a player who looks at it is frozen by TrollHold - run agent24-s1)"
                   },
                   {
                       "do":  "wait",
                       "until":  {
                                     "check":  "hook",
-                                    "name":  "stt.followedBackpackAtMost",
+                                    "name":  "stt.followedJournalHas",
                                     "args":  {
-                                                 "stacks":  20
+                                                 "name":  "Unloaded",
+                                                 "atLeast":  1
                                              },
                                     "expect":  true
                                 },
-                      "timeout":  150
+                      "timeout":  120,
+                      "label":  "the troll unloaded (an EVENT in the trip journal, not a state that has to be caught between two polls)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedSpotDecision",
+                      "expect":  "SpotWalk",
+                      "label":  "the troll decided to walk back to the spot (any skip names its reason: NoSpot / TooClose / OutsideLeash)",
+                      "stop":  true
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedSpotDrift",
+                      "expect":  0,
+                      "label":  "still exactly the injected spot after the unload",
+                      "stop":  true
                   },
                   {
                       "do":  "wait",
                       "until":  {
                                     "check":  "hook",
-                                    "name":  "stt.travelling",
-                                    "args":  {
-                                                 "troll":  "troll"
-                                             },
+                                    "name":  "stt.followedSpotReached",
                                     "expect":  true
                                 },
-                      "timeout":  60
+                      "timeout":  120,
+                      "label":  "the walk back ended AT the spot (SpotArrived, or SpotSource = a source within 12 m of the spot was found): the journal says so"
                   },
                   {
-                      "do":  "wait",
-                      "until":  {
-                                    "check":  "hook",
-                                    "name":  "stt.followedSpotOutcome",
-                                    "args":  {
-                                                 "metres":  15
-                                             },
-                                    "expect":  true
-                                },
-                      "timeout":  90
+                      "do":  "hook",
+                      "name":  "stt.followedReachedSpot",
+                      "args":  {
+                                   "metres":  15
+                               },
+                      "expect":  true,
+                      "label":  "and the troll really stands within 15 m of the spot"
                   },
                   {
                       "do":  "wait",
@@ -148,23 +122,31 @@
     "asserts":  [
                     {
                         "check":  "hook",
-                        "name":  "stt.followedBackpackAtMost",
-                        "args":  {
-                                     "stacks":  20
-                                 },
-                        "expect":  true
+                        "name":  "stt.followedUnloadedAll",
+                        "expect":  true,
+                        "label":  "every stack filled was delivered (unload ledger)"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.followedSpotDecision",
+                        "expect":  "SpotWalk",
+                        "label":  "the decision after the unload was to walk back"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.followedSpotReached",
+                        "expect":  true,
+                        "label":  "the walk back reached the spot"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.followedJournalValid",
+                        "expect":  true,
+                        "label":  "the trip events came in a legal order (Full, DepotWalk, Unloaded, one decision, one spot end)"
                     },
                     {
                         "check":  "noErrors",
                         "source":  "SteveTheTroll"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.followedSpotOutcome",
-                        "args":  {
-                                     "metres":  15
-                                 },
-                        "expect":  true
                     }
                 ]
 }

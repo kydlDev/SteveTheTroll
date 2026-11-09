@@ -237,6 +237,11 @@ internal sealed class TrollChase : MonoBehaviour
     internal static TrollChase Begin(Character troll, Character target, bool guard = false)
     {
         TrollChase c = troll.GetComponent<TrollChase>() ?? troll.gameObject.AddComponent<TrollChase>();
+        if (c._target != null && c._target != target)
+        {
+            ModLog.Verbose("TrollChase: " + TrollOrders.Shown(troll) + " chase of " + c._target.name + " (" + (c._target.IsDead() ? "dead" : "alive") + ", " + c._swings + " swing(s), " + (Time.time - c._start).ToString("F1") + " s) is replaced by a new one at " + (target != null ? target.name : "?") + " before it logged its end");
+        }
+
         c._target = target;
         c._start = Time.time;
         c._swings = 0;

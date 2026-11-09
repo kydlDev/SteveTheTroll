@@ -32,6 +32,22 @@
                       "label":  "the hub behind-left of the player, ~46 m from the troll"
                   },
                   {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.pathReady",
+                                    "args":  {
+                                                 "fromDx":  15,
+                                                 "fromDz":  30,
+                                                 "toDx":  -12,
+                                                 "toDz":  -2
+                                             },
+                                    "expect":  true
+                                },
+                      "timeout":  30,
+                      "label":  "2026-11-07 (agent24-part4: the troll moved 2.8 m AWAY from its hub): the game has a navmesh path from the troll's spawn point to 4 m in front of the hub BEFORE the troll exists - fresh open ground has none for the first seconds; the game then stops a troll in place and the 3 s stuck rule sends it 20 m sideways. The test times the order, not the navmesh build"
+                  },
+                  {
                       "do":  "hook",
                       "name":  "stt.spawnTroll",
                       "args":  {

@@ -143,6 +143,10 @@ internal sealed partial class TrollFarmer
 
     // ---- the swing ladder's actions ----
 
+    /// 2026-11-09 (agent24-y4: an injected spot was replaced by the first swing at a NEW source, even when injected and filled in one call): true while the troll works on a source whose place it
+    /// already remembered - nothing but a NEW source can replace the spot now, and a full pack is seen before the next source is chosen. Used by the test hooks. Expected outcome: false between sources.
+    internal bool SpotSettled => _target != null && _target == _rememberedFor;
+
     private bool OnSwing()
     {
         if (!_me.IsItemEquiped(_weapon))
@@ -153,6 +157,13 @@ internal sealed partial class TrollFarmer
         if (_me.StartAttack(null, false))
         {
             Attacks++;
+            if (_target != null && _target != _rememberedFor)
+            {
+                _rememberedFor = _target; // the place it really worked on (D-163), written once per source
+                Spots.Remember(_target.transform.position);
+                FarmHomeTrip.Note(GetComponent<Character>(), TripGrammar.SpotRemembered, _target.name);
+            }
+
             _ladder.Swung();
             _nextAttack = Time.time + MinAttackGap; // D-048: keep swinging
         }
@@ -234,6 +245,13 @@ internal sealed partial class TrollFarmer
     private void Search()
     {
         _nextSearch = Time.time + SearchSeconds;
+        // 2026-11-08 (spot-return race, agent24 lab52c): the full check (2 s) and the search (3 s) run on separate timers - a full backpack must
+        // end the search BEFORE it picks a new source, or the pick would overwrite where the troll worked with a spot next to the bed.
+        if (!IsFull && Full())
+        {
+            return;
+        }
+
         if (Travelling &&
             !TargetRules.NearSearchWhileTravelling(_toSpot, HubGeometry.Flat(_travelTo - transform.position)))
         {
@@ -267,6 +285,7 @@ internal sealed partial class TrollFarmer
             CurrentItem = item;
             if (Travelling && _toSpot)
             {
+                FarmHomeTrip.Note(GetComponent<Character>(), TripGrammar.SpotSource, _target != null ? _target.name : "");
                 SetSpotWalk(false);
             }
 
@@ -279,8 +298,7 @@ internal sealed partial class TrollFarmer
             _exploreHeading = float.NaN;
             _exploreSteps = 0;
             _saidNothing = false;
-            Spots.Remember(_target.transform.position);
-            FarmReservations.Hold(_target, Me);
+            FarmReservations.Hold(_target, Me); // the spot is remembered with the first swing on it (OnSwing), not when the source is only picked
             ModLog.Info("TrollFarmer: " + TrollTaming.Tag(this) + " farms " + item +
                         (_focus.Length > 0 && item != _focus
                             ? " (no " + _focus + " found, farming something else)"
@@ -426,6 +444,16 @@ internal sealed partial class TrollFarmer
 
         ModLog.Info("TrollFarmer: " + TrollTaming.Tag(this) + " backpack is full - goes to " +
                     HubRegistry.DestinationName(GetComponent<Character>()));
+        if (Travelling && _toSpot)
+        {
+            FarmHomeTrip.Note(GetComponent<Character>(), TripGrammar.SpotCancelled, "backpack full");
+        }
+
+        if (!IsFull)
+        {
+            FarmHomeTrip.Note(GetComponent<Character>(), TripGrammar.Full);
+        }
+
         _home = true;
         Auto = true;
         IsFull = true;

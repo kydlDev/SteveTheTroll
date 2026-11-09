@@ -44,6 +44,7 @@ internal static partial class TestHooks
     private static ZDOID _follow = ZDOID.None;
     private static int _depotWoodAtFollow;
     private static readonly Dictionary<ZDOID, int> Filled = new();
+    private static readonly Dictionary<ZDOID, int> FilledStacks = new(); // 2026-11-08: the stacks stt.fillBackpack put in (stt.followedUnloadedAll compares the unload ledger with it)
 
     // ---- long-range farming and the remembered spot (user 2026-10-31) -------------------------------------------------------------------------------
 
@@ -108,6 +109,9 @@ internal static partial class TestHooks
         _followId = "";
         _follow = ZDOID.None;
         Filled.Clear();
+        FilledStacks.Clear();
+        FarmUnloadLedger.Clear();
+        TrollJournal.Clear();
         _depotWoodAtFollow = 0;
         Game.instance.GetPlayerProfile().SetCustomSpawnPoint(p.transform.position);
         ClearHubs();
@@ -243,7 +247,7 @@ internal static partial class TestHooks
 
     /// Flat metres the troll has moved since stt.mark.
     [TestHook("stt.moved")]
-    private static int Moved(GameObject troll)
+    private static float Moved(GameObject troll)
     {
         Vector3 was;
         if (!Marks.TryGetValue(troll.GetInstanceID(), out was))
@@ -251,7 +255,8 @@ internal static partial class TestHooks
             throw new Exception("stt.mark was not called");
         }
 
-        return Mathf.RoundToInt(HubGeometry.Flat(troll.transform.position - was));
+        // 2026-11-07 (review of full runs 1-3): exact metres, not rounded to whole numbers (1.4 m passed "max 1")
+        return HubGeometry.Flat(troll.transform.position - was);
     }
 
     /// Flat metres from the troll to the hub it would use (-1 = none).
@@ -323,6 +328,11 @@ internal static partial class TestHooks
         int had;
         Filled.TryGetValue(z.m_uid, out had);
         Filled[z.m_uid] = had + n * 20; // D-174: item conservation (stt.followedConserved)
+        // 2026-11-08 (agent24-w1: "240 stack(s) filled" - n counts the ADDS of 20 Wood, a stack holds 50, so the 96 slots took 240 adds): the stacks the pack really holds after the fill are what an
+        // unload must deliver (the ledger counts stacks moved)
+        int usedAfter, slotsAfter;
+        BackpackStore.Fill(z, out usedAfter, out slotsAfter);
+        FilledStacks[z.m_uid] = usedAfter;
         return n;
     }
 
@@ -417,12 +427,64 @@ internal static partial class TestHooks
         ZDO z = FollowedZdo();
         if (z == null)
         {
+            ModLog.Every("TestHooks.followedBackpackAtMost", 10.0, "followed troll " + _followId + ": its ZDO (" + _follow + ") is GONE - not a backpack that is too full");
             return z != null;
         }
 
         int used, slots;
         BackpackStore.Fill(z, out used, out slots);
+        if (used > stacks)
+        {
+            // 2026-11-08 (full11: "hook returned False" could mean a gone ZDO or stacks still inside): say which, and what the unload ledger knows
+            ModLog.Every("TestHooks.followedBackpackAtMost", 10.0, "followed troll " + _followId + " holds " + used + " of " + slots + " stack(s), more than the " + stacks + " allowed; " + UnloadLedgerText());
+        }
+
         return used <= stacks;
+    }
+
+    /// 2026-11-08 (full11 obstacle-route: the troll delivered all 96 stacks, 15 ms later its backpack pickup took 1 loose Wood, and "backpack = 0" never held again): the stacks the followed
+    /// troll has delivered into depots (FarmUnloadLedger, an event that is recorded when it happens). Expected outcome: the count; -1 when its ZDO is gone (never 0, so a lost troll cannot pass).
+    [TestHook("stt.followedUnloadedStacks")]
+    private static int FollowedUnloadedStacks()
+    {
+        if (FollowedZdo() == null)
+        {
+            return -1;
+        }
+
+        FarmUnloadLedger.Entry e;
+        return FarmUnloadLedger.Of(_follow.ToString(), out e) ? e.Moved : 0;
+    }
+
+    /// 2026-11-08: every stack stt.fillBackpack put into the followed troll was delivered into depots (unloaded at least as many stacks as were filled, none left over by the last unload).
+    /// Expected outcome: true once delivered; false while not, when nothing was filled, or when its ZDO is gone.
+    [TestHook("stt.followedUnloadedAll")]
+    private static bool FollowedUnloadedAll()
+    {
+        if (FollowedZdo() == null)
+        {
+            return FollowedZdo() != null;
+        }
+
+        int filled;
+        FilledStacks.TryGetValue(_follow, out filled);
+        FarmUnloadLedger.Entry e;
+        bool known = FarmUnloadLedger.Of(_follow.ToString(), out e);
+        bool all = filled > 0 && known && e.Moved >= filled && e.LastLeft == 0;
+        if (!all)
+        {
+            ModLog.Every("TestHooks.followedUnloadedAll", 10.0, "followed troll " + _followId + ": " + filled + " stack(s) filled; " + UnloadLedgerText());
+        }
+
+        return all;
+    }
+
+    private static string UnloadLedgerText()
+    {
+        FarmUnloadLedger.Entry e;
+        return FarmUnloadLedger.Of(_follow.ToString(), out e)
+            ? "unload ledger: " + e.Unloads + " unload(s), " + e.Moved + " stack(s) delivered, last one moved " + e.LastMoved + " and left " + e.LastLeft
+            : "unload ledger: no unload yet";
     }
 
     /// D-174: one line about the followed troll - loaded or not, ZDO there or not, stacks / slots, distance to its hub. Expected outcome: the text (diagnosis).
@@ -440,7 +502,7 @@ internal static partial class TestHooks
         BackpackStore.Fill(z, out used, out slots);
         HubInfo hub = c != null ? HubRegistry.For(c) : null;
         string s = "followed troll " + _followId + ": " + (c != null ? "loaded" : "not loaded") + ", at " +
-                   z.GetPosition().ToString("F0") + ", backpack " + used + " of " + slots
+                   z.GetPosition().ToString("F0") + ", backpack " + used + " of " + slots + ", " + UnloadLedgerText()
                    + (hub != null
                        ? ", " + HubGeometry.Flat(hub.Pos - z.GetPosition()).ToString("F0") + " m from " + hub.Name
                        : "");

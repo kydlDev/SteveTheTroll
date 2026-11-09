@@ -216,6 +216,14 @@ internal sealed partial class TrollRecovery
         flat.y = 0f;
         float d = flat.magnitude;
         float step = LedgeRules.StepMetres(dt, d);
+        string moveKey = "TrollRecovery.ledgemove." + TrollTaming.Tag(this);
+        if (ModLog.IsDue(moveKey, 2d))
+        {
+            // Diagnosis of the forced ledge walks that sometimes move the troll 0 m: is dt zero, is the step zero, or does something else move the troll back?
+            ModLog.Every(moveKey, 2d, TrollTaming.Tag(this) + " ledge walk: dt " + dt.ToString("F4") + " s, step " + step.ToString("F3") + " m, " + d.ToString("F1") + " m to " + LedgeGoal.ToString("F1") +
+                                      ", at " + pos.ToString("F1") + ", game move dir " + GetComponent<Character>().GetMoveDir().ToString("F1") + ", time scale " + Time.timeScale.ToString("F2"));
+        }
+
         if (zs == null || step <= 0f || d < 0.01f)
         {
             return true;
@@ -223,6 +231,10 @@ internal sealed partial class TrollRecovery
 
         Vector3 dir = flat / d;
         Vector3 next = pos + dir * step;
+        // 2026-11-07 (full run agent24-full3, ledge-forced-medium-down): the walk that ran before (the explore travel to a far place) had left the game's move direction set, and the
+        // game's character update kept pushing the troll that way every physics step - 24 m sideways in 40 s while these steps went the other way. The ledge walk drives the
+        // troll itself, so the game's own movement is switched off every step.
+        mv.Stop();
         mv.LookAt(next);
         bool zoneLoaded = zs.IsZoneLoaded(ZoneSystem.GetZone(next));
         if (!zoneLoaded || Blocked(pos, next))

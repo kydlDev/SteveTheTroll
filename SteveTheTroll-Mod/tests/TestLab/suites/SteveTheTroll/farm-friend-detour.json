@@ -1,159 +1,210 @@
-{
-    "name": "farm-friend-detour",
-    "description": "D-151 / D-177 / D-181: a tamed troll stands still on the line between a farming troll and its tree - the farmer gets past it (FarmFriendDetour steps around when it is in the way, or the farmer's own way already passes it) without pushing it, and hits the tree",
-    "timeout": 120,
-    "steps": [
-        {
-            "do": "use",
-            "block": "start",
-            "args": {
-                "clearTrolls": true,
-                "slippers": true,
-                "hub": true
-            }
-        },
-        {
-            "do": "hook",
-            "name": "stt.resetDetourStats",
-            "expect": true,
-            "label": "no friend detour counted yet"
-        },
-        {
-            "do": "hook",
-            "name": "stt.clearMobs",
-            "args": {
-                "radius": 80
-            },
-            "label": "no wild creature in the arena meadow to pin a guard target (the unarmed-farm flake)"
-        },
-        {
-            "do": "use",
-            "block": "openGround",
-            "args": {
-                "metres": 100,
-                "radius": 40
-            }
-        },
-        {
-            "do": "wait",
-            "seconds": 1
-        },
-        {
-            "do": "hook",
-            "name": "stt.spawnTroll",
-            "args": {
-                "dx": 0,
-                "dz": 25
-            },
-            "as": "blocker"
-        },
-        {
-            "do": "hook",
-            "name": "stt.freezeMob",
-            "args": {
-                "mob": "blocker"
-            },
-            "expect": true,
-            "label": "the friend stands still (its AI is off)"
-        },
-        {
-            "do": "hook",
-            "name": "stt.plantTree",
-            "args": {
-                "dx": 0,
-                "dz": 34
-            },
-            "as": "tree"
-        },
-        {
-            "do": "hook",
-            "name": "stt.spawnTroll",
-            "args": {
-                "dx": 0,
-                "dz": 16
-            },
-            "as": "troll"
-        },
-        {
-            "do": "hook",
-            "name": "stt.followTroll",
-            "args": {
-                "troll": "troll"
-            },
-            "label": "the farmer is followed by its ZDO (the object can be recreated)"
-        },
-        {
-            "do": "hook",
-            "name": "stt.observe",
-            "args": {
-                "back": 15
-            },
-            "label": "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
-        },
-        {
-            "do": "wait",
-            "seconds": 1
-        },
-        {
-            "do": "hook",
-            "name": "stt.mark",
-            "args": {
-                "troll": "blocker"
-            },
-            "label": "where the friend stands"
-        },
-        {
-            "do": "hook",
-            "name": "stt.farmOn",
-            "args": {
-                "troll": "troll",
-                "source": "tree"
-            },
-            "expect": true,
-            "label": "2026-11-05 (final gate run 3 / focus: \"start farming\" took a world Beech 43 m out, off the line - the friend was never passed): the farmer is ordered onto the planted tree, so the friend stands on its line every time"
-        },
-        {
-            "do": "wait",
-            "until": {
-                "check": "hook",
-                "name": "stt.plantedHitAtLeast",
-                "args": {
-                    "min": 1
-                },
-                "expect": true
-            },
-            "timeout": 45,
-            "label": "the farmer got past its friend and hit the tree (hits counted by the hit patch, not by the tree's ZDO health)"
-        },
-        {
-            "do": "hook",
-            "name": "stt.detourStats",
-            "label": "diagnosis: did the detour code run (triggered / sideways legs / passed)"
-        },
-        {
-            "do": "hook",
-            "name": "stt.followedOwnership",
-            "label": "diagnosis: who owns the farmer and why"
-        },
-        {
-            "do": "hook",
-            "name": "stt.ownTrollClaims",
-            "label": "diagnosis: own trolls without an owner claimed this run"
-        }
-    ],
-    "asserts": [
-        {
-            "check": "hook",
-            "name": "stt.moved",
-            "args": {
-                "troll": "blocker"
-            },
-            "max": 1.5,
-            "label": "the friend was not pushed (user: \"not ... one waits behind the first\" / \"re-route next to it\"; fix12: the farmer pushed it up to the tree)"
-        },
-        {
-            "check": "noErrors",
-            "source": "SteveTheTroll"
-        }
-    ]
+﻿{
+    "name":  "farm-friend-detour",
+    "description":  "D-151 / D-177 / D-181: a tamed troll stands still on the line between a farming troll and its tree - the farmer gets past it (FarmFriendDetour steps around when it is in the way, or the farmer\u0027s own way already passes it) without pushing it, and hits the tree",
+    "timeout":  120,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.resetDetourStats",
+                      "expect":  true,
+                      "label":  "no friend detour counted yet"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.clearMobs",
+                      "args":  {
+                                   "radius":  150
+                               },
+                      "label":  "no wild creature in the arena meadow to pin a guard target (the unarmed-farm flake); 150 m since 2026-11-07 (agent24-full7: a Skeleton from outside 80 m reached the farmer)"
+                  },
+                  {
+                      "do":  "use",
+                      "block":  "openGround",
+                      "args":  {
+                                   "metres":  100,
+                                   "radius":  40
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  25
+                               },
+                      "as":  "blocker"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.freezeMob",
+                      "args":  {
+                                   "mob":  "blocker"
+                               },
+                      "expect":  true,
+                      "label":  "the friend stands still (its AI is off)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.plantTree",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  34
+                               },
+                      "as":  "tree"
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.pathReady",
+                                    "args":  {
+                                                 "fromDx":  0,
+                                                 "fromDz":  16,
+                                                 "toDx":  0,
+                                                 "toDz":  31
+                                             },
+                                    "expect":  true
+                                },
+                      "timeout":  30,
+                      "label":  "2026-11-07: the game has a navmesh path along the farmer's line (spawn point to 3 m in front of the tree - the trunk itself is cut out of the navmesh) BEFORE the farmer exists - a fresh arena has none for the first seconds; the game then stops a troll in place, the stuck rule sends it 20 m sideways and it reaches the tree past the friend, so the friend was never in its way (agent24-ffd1: stuck at spawn, 'navmesh path NONE')"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  16
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followTroll",
+                      "args":  {
+                                   "troll":  "troll"
+                               },
+                      "label":  "the farmer is followed by its ZDO (the object can be recreated)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.observe",
+                      "args":  {
+                                   "back":  15
+                               },
+                      "label":  "D-178: the player watches from 15 m back - the trolls work, unload and go to the bed without walking into the player"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  1
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.mark",
+                      "args":  {
+                                   "troll":  "blocker"
+                               },
+                      "label":  "where the friend stands"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.clearMobs",
+                      "args":  {
+                                   "radius":  150
+                               },
+                      "label":  "2026-11-07 (agent24-full7: a wild Skeleton came within the guard range 1 s after the order, the farmer chased it past the friend and pushed it 3 m - a guard chase, not the detour under test): no wild creature around right before the order (the first clear is 6+ s older)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.farmOn",
+                      "args":  {
+                                   "troll":  "troll",
+                                   "source":  "tree"
+                               },
+                      "expect":  true,
+                      "label":  "2026-11-05 (final gate run 3 / focus: \"start farming\" took a world Beech 43 m out, off the line - the friend was never passed): the farmer is ordered onto the planted tree, so the friend stands on its line every time"
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.plantedHitAtLeast",
+                                    "args":  {
+                                                 "min":  1
+                                             },
+                                    "expect":  true
+                                },
+                      "timeout":  45,
+                      "label":  "the farmer got past its friend and hit the tree (hits counted by the hit patch, not by the tree\u0027s ZDO health)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.detourStats",
+                      "label":  "diagnosis: did the detour code run (triggered / sideways legs / passed)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedOwnership",
+                      "label":  "diagnosis: who owns the farmer and why"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.ownTrollClaims",
+                      "label":  "diagnosis: own trolls without an owner claimed this run"
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.moved",
+                        "args":  {
+                                     "troll":  "blocker"
+                                 },
+                        "max":  1.5,
+                        "label":  "the friend was not pushed (user: \"not ... one waits behind the first\" / \"re-route next to it\"; fix12: the farmer pushed it up to the tree)"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.detourCount",
+                        "args":  {
+                                     "counter":  "triggers"
+                                 },
+                        "min":  1,
+                        "label":  "the detour code ran: at least one detour was started (the friend stands exactly on the farmer\\u0027s line to its tree)"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.detourCount",
+                        "args":  {
+                                     "counter":  "sideways"
+                                 },
+                        "min":  1,
+                        "label":  "the sideways leg of the detour was completed"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.detourCount",
+                        "args":  {
+                                     "counter":  "passed"
+                                 },
+                        "min":  1,
+                        "label":  "the farmer got past the friend on the second leg"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
 }

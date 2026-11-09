@@ -10,7 +10,8 @@ using UnityEngine;
 public static class HalterLeatherBuilder
 {
     const string Dir = "Assets/SteveTheTroll_Ride/";
-    const string Photos = @"E:\Projects\Valheim\Photos\SteveTheTroll\";
+    // Project-relative (SteveTheTroll-Unity/Assets -> <Valheim>/Photos/SteveTheTroll), no machine path in the repo.
+    static string Photos => Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "..", "Photos", "SteveTheTroll")) + Path.DirectorySeparatorChar;
     const float W = 0.22f, T = 0.06f, R = 0.025f;
     const int TS = 512;
 

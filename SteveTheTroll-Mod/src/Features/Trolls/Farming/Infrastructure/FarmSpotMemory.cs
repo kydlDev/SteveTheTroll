@@ -51,6 +51,13 @@ internal sealed class FarmSpotMemory
         bool mine = view != null && view.IsValid() && view.IsOwner();
         if (mine)
         {
+            Vector3 previous;
+            if (Spot(out previous) && HubGeometry.Flat(previous - at) > 1f)
+            {
+                // 2026-11-09 (agent24-y2: an injected spot was replaced 0.1 s later by a swing at a new source and nothing in the log said so)
+                ModLog.Verbose("FarmSpotMemory: " + TrollTaming.Tag(_troll) + " spot " + previous.ToString("F0") + " replaced by " + at.ToString("F0") + " (" + HubGeometry.Flat(previous - at).ToString("F0") + " m apart)");
+            }
+
             view.GetZDO().Set(SpotKey, at);
         }
         else

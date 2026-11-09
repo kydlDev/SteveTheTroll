@@ -101,6 +101,8 @@ internal sealed partial class TrollFarmer : MonoBehaviour
     /// Full backpack: on its way to unload (D-062).
     internal bool IsFull { get; set; }
 
+    private GameObject _rememberedFor; // the source whose place was written as the spot (once per source)
+
     /// Went farming on its own (D-058 / D-062: no "nothing found" / "home" messages).
     internal bool Auto { get; set; }
 
@@ -196,6 +198,11 @@ internal sealed partial class TrollFarmer : MonoBehaviour
 
     private void EndTravel(bool failed)
     {
+        if (_toSpot && Travelling)
+        {
+            FarmHomeTrip.Note(GetComponent<Character>(), failed ? TripGrammar.SpotGaveUp : TripGrammar.SpotArrived);
+        }
+
         if (_toSpot)
         {
             SetSpotWalk(false);
@@ -268,6 +275,11 @@ internal sealed partial class TrollFarmer : MonoBehaviour
     /// `announce` (D-058): the troll starts on its own after waiting without orders - its owner gets a message with the item it found.
     internal void Setup(string focus, Vector3 centre, bool announce = false)
     {
+        if (Travelling && _toSpot)
+        {
+            FarmHomeTrip.Note(GetComponent<Character>(), TripGrammar.SpotCancelled, "new setup / order");
+        }
+
         if (!announce)
         {
             SetSpotWalk(

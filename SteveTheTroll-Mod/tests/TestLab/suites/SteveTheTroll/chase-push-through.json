@@ -26,6 +26,14 @@
                   },
                   {
                       "do":  "hook",
+                      "name":  "stt.clearMobs",
+                      "args":  {
+                                   "radius":  80
+                               },
+                      "label":  "this test is about the push-through, not about other fights: a wild Greyling started a guard chase at the end of full12 and replaced the Greydwarf chase before it logged its end - the arena starts without wild creatures"
+                  },
+                  {
+                      "do":  "hook",
                       "name":  "stt.spawnMob",
                       "args":  {
                                    "prefab":  "Greydwarf",

@@ -1,0 +1,95 @@
+{
+    "description":  "2026-11-09 (full12: the troll started 19 m from its hub and unloaded 1 s after it was full, so a spot injected after the full signal came too late): the scene of the spot-return tests - HUB 1 70 m ahead (the troll starts ~64 m from it and must WALK there), a troll (tag `troll`, followed) that has swung once at its first source (it remembers that place only now), and the proof that its trip is long.",
+    "params":  {
+
+               },
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  false,
+                                   "slippers":  false,
+                                   "hub":  false
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.clearMobs",
+                      "args":  {
+                                   "radius":  80
+                               },
+                      "label":  "D-175: this test is about unloading, not fighting - the arena starts without wild creatures; guard-mob-kills covers the fight"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.wildMobsNear",
+                      "args":  {
+                                   "radius":  80
+                               },
+                      "expect":  0,
+                      "label":  "no wild creature left within 80 m",
+                      "stop":  true
+                  },
+                  {
+                      "do":  "give",
+                      "prefab":  "STT_TrollSlippers",
+                      "count":  1,
+                      "equip":  true
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.addHub",
+                      "args":  {
+                                   "number":  1,
+                                   "dx":  0,
+                                   "dz":  70
+                               },
+                      "label":  "HUB 1 70 m ahead: a full troll within 50 m of its hub counts as home at once (full12) - 70 m makes it walk"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  -14,
+                                   "dz":  8
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.startFarm",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.farmAttacksAtLeast",
+                                    "args":  {
+                                                 "troll":  "troll",
+                                                 "min":  1
+                                             },
+                                    "expect":  true
+                                },
+                      "timeout":  30,
+                      "label":  "the troll has swung at its first source - it remembers that place with the first swing (not before), so nothing can overwrite a spot injected now"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followTroll",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.followedMetresFromHub",
+                      "min":  55,
+                      "label":  "precondition: the troll is at least 55 m from its hub, so its trip takes seconds and the injected spot cannot come too late",
+                      "stop":  true
+                  }
+              ]
+}

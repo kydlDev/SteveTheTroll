@@ -3,102 +3,128 @@
     "description":  "D-176 (guard-mob-kills, run 211553): the bed no-hit zone (15 m, TrollNoHit) stays - a creature inside it is not chased (no 30 s stand with 998 refused swings), the troll keeps the guard target, and the creature is not hurt. Item 2: the pinned target is released after 5 s (the troll cannot chase) and not taken again, so the troll goes back to farming",
     "timeout":  70,
     "steps":  [
-        {
-            "do":  "use",
-            "block":  "start",
-            "args":  {
-                "clearTrolls":  true,
-                "slippers":  true,
-                "hub":  true
-            }
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.spawnTroll",
-            "args":  {
-                "dx":  -14,
-                "dz":  8
-            },
-            "as":  "troll"
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.startFarm",
-            "args":  {
-                "troll":  "troll"
-            }
-        },
-        {
-            "do":  "wait",
-            "seconds":  2
-        },
-        {
-            "do":  "hook",
-            "name":  "stt.spawnMob",
-            "args":  {
-                "prefab":  "Greydwarf",
-                "dx":  -2,
-                "dz":  5
-            },
-            "as":  "mob"
-        },
-        {
-            "do":  "wait",
-            "until":  {
-                "check":  "hook",
-                "name":  "stt.guardTargetOf",
-                "args":  {
-                    "mob":  "mob",
-                    "troll":  "troll"
-                },
-                "expect":  "Greydwarf"
-            },
-            "timeout":  8,
-            "label":  "the guard still gives the troll the target inside the zone"
-        },
-        {
-            "do":  "wait",
-            "seconds":  10,
-            "label":  "the troll cannot hit the creature inside the bed circle"
-        },
-        {
-            "do":  "wait",
-            "until":  {
-                "check":  "hook",
-                "name":  "stt.forcedTargetOf",
-                "args":  {
-                    "troll":  "troll"
-                },
-                "expect":  ""
-            },
-            "timeout":  15,
-            "label":  "the guard target is released after a few seconds - the troll is not pinned to a creature it cannot hit"
-        }
-    ],
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true,
+                                   "clearMobs":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  -14,
+                                   "dz":  8
+                               },
+                      "as":  "troll"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.plantTree",
+                      "args":  {
+                                   "dx":  -22,
+                                   "dz":  8
+                               },
+                      "label":  "something to farm next to the troll: without a source the troll walks 285 m away within 2 s and is out of defend range when the creature comes (full run agent24-full2)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.plantTree",
+                      "args":  {
+                                   "dx":  -22,
+                                   "dz":  14
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.plantTree",
+                      "args":  {
+                                   "dx":  -26,
+                                   "dz":  11
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.startFarm",
+                      "args":  {
+                                   "troll":  "troll"
+                               }
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnMob",
+                      "args":  {
+                                   "prefab":  "Greydwarf",
+                                   "dx":  -2,
+                                   "dz":  5
+                               },
+                      "as":  "mob"
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.guardTargetOf",
+                                    "args":  {
+                                                 "mob":  "mob",
+                                                 "troll":  "troll"
+                                             },
+                                    "expect":  "Greydwarf"
+                                },
+                      "timeout":  8,
+                      "label":  "the guard still gives the troll the target inside the zone"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  10,
+                      "label":  "the troll cannot hit the creature inside the bed circle"
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.forcedTargetOf",
+                                    "args":  {
+                                                 "troll":  "troll"
+                                             },
+                                    "expect":  ""
+                                },
+                      "timeout":  15,
+                      "label":  "the guard target is released after a few seconds - the troll is not pinned to a creature it cannot hit"
+                  }
+              ],
     "asserts":  [
-        {
-            "check":  "hook",
-            "name":  "stt.lastMobHurt",
-            "expect":  false,
-            "label":  "the no-hit zone held: the creature is not hurt"
-        },
-        {
-            "check":  "logContains",
-            "source":  "SteveTheTroll",
-            "text":  "no chase (bed no-hit zone)",
-            "expect":  true,
-            "label":  "the guard did not start a chase it cannot finish"
-        },
-        {
-            "check":  "logContains",
-            "source":  "SteveTheTroll",
-            "text":  "released (cannot chase)",
-            "expect":  true,
-            "label":  "the release rule fired"
-        },
-        {
-            "check":  "noErrors",
-            "source":  "SteveTheTroll"
-        }
-    ]
+                    {
+                        "check":  "hook",
+                        "name":  "stt.lastMobHurt",
+                        "expect":  false,
+                        "label":  "the no-hit zone held: the creature is not hurt"
+                    },
+                    {
+                        "check":  "logContains",
+                        "source":  "SteveTheTroll",
+                        "text":  "no chase (bed no-hit zone)",
+                        "expect":  true,
+                        "label":  "the guard did not start a chase it cannot finish"
+                    },
+                    {
+                        "check":  "logContains",
+                        "source":  "SteveTheTroll",
+                        "text":  "released (cannot chase)",
+                        "expect":  true,
+                        "label":  "the release rule fired"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
 }

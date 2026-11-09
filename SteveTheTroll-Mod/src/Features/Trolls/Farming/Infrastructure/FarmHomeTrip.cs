@@ -26,8 +26,7 @@ internal sealed class FarmHomeTrip
     private const float UnloadMetres = 10f,
         UnloadStopMetres = 8f,
         UnloadWalkSeconds = 60f,
-        StuckHomeSeconds = 8f,
-        SpotMinMetres = 40f;
+        StuckHomeSeconds = 8f;
 
     private const float WaypointMetres = 30f;
     private readonly TrollFarmer _f;
@@ -36,6 +35,38 @@ internal sealed class FarmHomeTrip
     private float _unloadStart, _homeBest = float.MaxValue, _homeBestAt;
     private bool _arrivalHome;
     private float _nextArrivalLog;
+    private string _stage = "GoingHome"; // 2026-11-08: GoingHome -> WalkingToDepot -> Unloaded (the log says which stage a stuck trip is in)
+
+    /// The ZDO id the unload ledger (and the test hooks) key a troll by. Expected outcome: "" without a ZDO.
+    internal static string ZdoKey(Character troll)
+    {
+        ZDO z = TrollTaming.Zdo(troll);
+        return z != null ? z.m_uid.ToString() : "";
+    }
+
+    private void Stage(string to, string reason)
+    {
+        string from = _stage;
+        _stage = to;
+        ModLog.State("FarmHomeTrip.stage " + TrollTaming.Tag(_f), from, to, reason);
+        // 2026-11-09: the stages that tests care about are also journal events (an event cannot be missed between two polls)
+        if (to == "WalkingToDepot")
+        {
+            Note(_f.GetComponent<Character>(), TripGrammar.DepotWalk, reason);
+        }
+        else if (to == "Unloaded")
+        {
+            Note(_f.GetComponent<Character>(), TripGrammar.Unloaded, reason);
+        }
+    }
+
+    /// 2026-11-09: one event of this troll's trip into TrollJournal (and the debug log). Expected outcome: none.
+    internal static void Note(Character troll, string name, string detail = "")
+    {
+        string key = ZdoKey(troll);
+        TrollJournal.Add(key, Time.time, name, detail);
+        ModLog.Verbose("TrollJournal: " + (troll != null ? troll.name : "?") + " " + name + (detail.Length > 0 ? " (" + detail + ")" : ""));
+    }
 
     internal FarmHomeTrip(TrollFarmer farmer)
     {
@@ -47,7 +78,17 @@ internal sealed class FarmHomeTrip
     {
         Vector3 dir = to - from;
         dir.y = 0f;
-        return from + dir.normalized * Mathf.Min(WaypointMetres, dir.magnitude);
+        Vector3 point = from + dir.normalized * Mathf.Min(WaypointMetres, dir.magnitude);
+        // 2026-11-07 (instruction-latency, full runs 1-5 + review of full3): the point was 30 m ahead at the troll's OWN height. Uphill that is metres below the ground - the game's path
+        // search finds no path to a point that is not on its navmesh, so MoveTo moved nothing and the troll stood still until the 3 s stuck rule sent it sideways (a pass in full3 was
+        // 0.7 m "closer", rounded up to 1). The waypoint lies on the ground.
+        ZoneSystem zs = ZoneSystem.instance;
+        if (zs != null && zs.IsZoneLoaded(ZoneSystem.GetZone(point)))
+        {
+            point.y = zs.GetGroundHeight(point);
+        }
+
+        return point;
     }
 
     /// A new home trip (after ResumeAtSpot). Expected outcome: not unloading, no best distance.
@@ -55,6 +96,7 @@ internal sealed class FarmHomeTrip
     {
         _unloading = false;
         _homeBest = float.MaxValue;
+        _stage = "GoingHome";
         return !_unloading;
     }
 
@@ -147,9 +189,11 @@ internal sealed class FarmHomeTrip
                 _unloading = true;
                 _unloadAt = at;
                 _unloadStart = Time.time;
+                Stage("WalkingToDepot", "reached the " + (atHub ? "hub" : "bed") + " area (" + d.ToString("F1") + " m), depot spot " + at.ToString("F1") + " is " + HubGeometry.Flat(at - _f.transform.position).ToString("F1") + " m away");
                 return _unloading;
             }
 
+            ModLog.Verbose("FarmHomeTrip: " + TrollTaming.Tag(_f) + " is at the " + (atHub ? "hub" : "bed") + " (" + d.ToString("F1") + " m) with a full backpack but TrollDepot.Plan found no depot spot - retries soon");
             TrollIdle.RetrySoon(me);
             if (_f.IsMine())
             {
@@ -182,15 +226,43 @@ internal sealed class FarmHomeTrip
         // until UnloadStopMetres, never into the depot
         if (flat.magnitude > UnloadMetres && !late)
         {
+            // 2026-11-08 (agent24-full10b, far-troll-goes-home-obstacle-route: the troll stood 9 m from its hub behind a wall line and tried to reach the depot chest 23 m away for
+            // 4 minutes - the game's path search has no way round, BaseAI then stops in place, and this plain walk had no stuck detection, so only TrollFrozenWatch's 10 s reclaim
+            // ever moved it; the test passed at ~100 s in full8 / full9 / full10 by luck): the walk to the depot is a walk like the one to the hub - TrollRecovery sees "not getting
+            // anywhere" and detours (a depot is never abandoned: the 60 s walk limit below ends it)
+            long ka, kb;
+            TrollRecovery.KeyOfPlace(_unloadAt, out ka, out kb);
+            if (ModLog.IsDue("FarmHomeTrip.depotWalk." + GetHashCode(), 5.0))
+            {
+                // 2026-11-08 (full11 review): where a depot walk stands - distance, time used of the 60 s limit, whether recovery is busy
+                ModLog.Every("FarmHomeTrip.depotWalk." + GetHashCode(), 5.0,
+                    TrollTaming.Tag(_f) + " walks to the depot spot " + _unloadAt.ToString("F1") + ": " + flat.magnitude.ToString("F1") + " m to go (unloads within " + UnloadMetres.ToString("F0") + " m), walked " +
+                    (Time.time - _unloadStart).ToString("F0") + " of " + UnloadWalkSeconds.ToString("F0") + " s, recovery busy " + TrollRecovery.Of(_f).Busy + ", at " + _f.transform.position.ToString("F1"));
+            }
+
+            if (TrollRecovery.Of(_f).Tick(dt, _unloadAt, ka, kb, false, true, null))
+            {
+                return _unloading;
+            }
+
             _f.Movement.MoveTo(dt, _unloadAt, UnloadStopMetres, false);
             return _unloading;
         }
 
+        {
+            TrollRecovery ru = _f.GetComponent<TrollRecovery>();
+            if (ru != null)
+            {
+                ru.Reached();
+            }
+        } // at the depot (or the walk ended): its counter starts again
         _f.Movement.Stop();
         ai.SetPatrolPoint();
         Character me = _f.GetComponent<Character>();
         int left;
         int moved = TrollDepot.Unload(me, bed, TrollTaming.Owner(me), out left);
+        int delivered = FarmUnloadLedger.Record(ZdoKey(me), moved, left);
+        Stage("Unloaded", (late ? "the " + UnloadWalkSeconds.ToString("F0") + " s walk limit ended the walk, " : "") + moved + " stack(s) moved, " + left + " left, " + delivered + " delivered so far");
         ModLog.Info("TrollFarmer: " + TrollTaming.Tag(_f) + " unloaded " + moved + " stack(s) at the depot (" +
                     flat.magnitude.ToString("F1") + " m" + (late ? ", walked too long" : "") + "), " + left + " left");
         if (_f.IsMine())
@@ -202,6 +274,7 @@ internal sealed class FarmHomeTrip
                 left > 0 ? Notify.Kind.Warn : Notify.Kind.Farm);
         }
 
+        bool decided = false; // ResumeAtSpot writes its own journal decision (SpotWalk / SpotSkipped), every other way out writes TripDone
         switch (HomeRules.AfterUnloading(left, TrollHome.OwnerWears(me)))
         {
             case AfterUnload.ResumeSpot:
@@ -210,8 +283,10 @@ internal sealed class FarmHomeTrip
                     return true;
                 }
 
+                decided = true;
                 break;
             case AfterUnload.StayHome:
+                Note(me, TripGrammar.TripDone, "stays home (owner wears no slippers)");
                 // D-173: no slippers - home is where it waits; GoHome walks it on to the home radius (not full any more) and the farmer ends there
                 _f.IsFull = false;
                 _unloading = false;
@@ -220,6 +295,12 @@ internal sealed class FarmHomeTrip
                 return true;
         }
 
+        if (!decided)
+        {
+            Note(me, TripGrammar.TripDone, left + " stack(s) left");
+        }
+
+        ModLog.Info("TrollFarmer: " + TrollTaming.Tag(_f) + " is done unloading (" + left + " stack(s) left, owner wears the slippers " + TrollHome.OwnerWears(me) + ") - the idle check sends it on from here");
         _f.Remove();
         return moved >= 0;
     }
@@ -229,27 +310,36 @@ internal sealed class FarmHomeTrip
     private bool ResumeAtSpot()
     {
         Vector3 spot;
+        Character self = _f.GetComponent<Character>();
         if (!_f.Spots.Spot(out spot))
         {
+            Note(self, TripGrammar.SpotSkipped, "NoSpot");
+            // 2026-11-08 (agent24-lab52c, spot-return: once the troll did not walk back although the test had remembered a spot 150 m away, and nothing in the log said why): every way out says so
+            ModLog.Info("TrollFarmer: " + TrollTaming.Tag(_f) + " emptied its backpack - no spot to walk back to (none remembered, or it has expired), farms from here");
             return spot != Vector3.zero;
         }
 
         Vector3 away = spot - _f.transform.position;
         away.y = 0f;
-        if (away.magnitude < SpotMinMetres)
+        if (TripRules.Resume(true, away.magnitude, true) == ResumeDecision.TooClose)
         {
-            return away.magnitude >= SpotMinMetres;
+            Note(self, TripGrammar.SpotSkipped, "TooClose " + away.magnitude.ToString("F0") + " m");
+            ModLog.Info("TrollFarmer: " + TrollTaming.Tag(_f) + " emptied its backpack - the remembered spot " + spot.ToString("F0") + " is only " + away.magnitude.ToString("F0") + " m away (under " + TripRules.SpotMinMetres.ToString("F0") + " m) - farms from here");
+            return away.magnitude >= TripRules.SpotMinMetres;
         }
 
         Character me = _f.GetComponent<Character>();
         HubInfo hub = HubRegistry.For(me);
-        if (hub != null && !HubRules.FarmAllowed(true, HubGeometry.Flat(spot - hub.Pos)))
+        if (TripRules.Resume(true, away.magnitude, hub == null || HubRules.FarmAllowed(true, HubGeometry.Flat(spot - hub.Pos))) == ResumeDecision.OutsideLeash)
         {
+            Note(self, TripGrammar.SpotSkipped, "OutsideLeash");
+            ModLog.Info("TrollFarmer: " + TrollTaming.Tag(_f) + " emptied its backpack - the remembered spot " + spot.ToString("F0") + " is " + HubGeometry.Flat(spot - hub.Pos).ToString("F0") + " m from its hub, outside the farm leash - farms from here");
             return hub == null;
         }
 
         ZDO z = TrollTaming.Zdo(me);
         string focus = z != null ? TrollFocus.Normalize(z.GetString(TrollRegistry.FocusKey)) : "";
+        Note(self, TripGrammar.SpotWalk, away.magnitude.ToString("F0") + " m");
         _f.Setup(focus, spot);
         _f.IsFull = false;
         Reset();
