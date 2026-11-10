@@ -21,13 +21,15 @@ Status "Automated" here is only true after the TestLab run named in `_agent\TEST
 | Slipper figures on the feet | FitGeometry (Unity EditMode) | - | slipper-skin | look | Automated + Manual |
 | Bed heal, hold when looked at, order latency | - | - | bed-heal, hold-look, instruction-latency | - | Automated |
 | Set bonus carry +25 % (D-112), constant upgrade cost (D-035) | Carry*, UpgradeCostTests | - | - | - | Unit only |
-| Spawn boost / census cap near the bed (D-042, D-085) | Spawn / census rules | - | spawn-cap | - | Automated (pending first run) |
-| Water keep: 15 m ring around a swimming player, no ship damage (D-131) | water / swim rules | - | water-keep | - | Automated (pending first run) |
-| Hub speed: half speed with no hub within 1250 m, x1.5 in a hub circle (D-135) | speed factor rules | - | hub-speed | - | Automated (pending first run) |
-| Two trolls never share a tree, friend detour (D-151) | reservation rules | - | farm-one-troll-per-tree, farm-friend-detour | - | Automated (pending first run) |
-| Newly tamed troll walks to its tamer and waits (D-043) | - | - | troll-arrival | - | Automated (pending first run) |
-| Troll club breaks special trees (D-120) | - | - | club-breaks | - | Automated (pending first run) |
-| An ordered source survives a fight: after a guard / counter fight the troll goes back to the tree it was ordered to break (2026-11-05, gate run 1) | - | - | ordered-source-after-fight | - | Automated (pending first run) |
+| Spawn boost / census cap near the bed (D-042, D-085) | Spawn / census rules | - | spawn-cap | - | Automated (green in G16g 97/97 on DLL 536D7B65D859, 2026-11-10; not re-run on the current DLL) |
+| Water keep: 15 m ring around a swimming player, no ship damage (D-131) | water / swim rules | - | water-keep | - | Automated (green in G16g 97/97 on DLL 536D7B65D859, 2026-11-10; not re-run on the current DLL) |
+| Hub speed: half speed with no hub within 1250 m, x1.5 in a hub circle (D-135) | speed factor rules | - | hub-speed | - | Automated (green in G16g 97/97 on DLL 536D7B65D859, 2026-11-10; not re-run on the current DLL) |
+| Two trolls never share a tree, friend detour (D-151) | reservation rules | - | farm-one-troll-per-tree, farm-friend-detour | - | Automated (green in G16g 97/97 on DLL 536D7B65D859, 2026-11-10; not re-run on the current DLL) |
+| Newly tamed troll walks to its tamer and waits (D-043) | - | - | troll-arrival | - | Automated (green in G16g 97/97 on DLL 536D7B65D859, 2026-11-10; not re-run on the current DLL) |
+| Troll club breaks special trees (D-120) | - | - | club-breaks | - | Automated (green in G16g 97/97 on DLL 536D7B65D859, 2026-11-10; not re-run on the current DLL) |
+| An ordered source survives a fight: after a guard / counter fight the troll goes back to the tree it was ordered to break (2026-11-05, gate run 1) | - | - | ordered-source-after-fight | - | Automated (green in G16g 97/97 on DLL 536D7B65D859, 2026-11-10; not re-run on the current DLL) |
+| Riding the troll (D-205..D-216): seat follows the bone, no clipping while attacking, Shift/autorun run, ridden troll is never driven by the farming brain | seat / speed rules (partly) | - | ride-long, ride-steer, ride-busy-troll, ride-attack-seat (NEW), ride-run-speed (NEW) | rider/seat look, Shift run, ledge while mounted (manual run 20261110-015153) | **Gap**: the two NEW tests were never run; seat rotation, root writes by LedgeStep, true stationary, mount while farming not covered (PLAN T-217 R1..R9, T5) |
+| Hub: no-hit ring and no-spawn sphere measured from the hub OUTER edge (D-215, 15.5 m) | NoHitHubRingTests, HubRulesTests (NoSpawnSphere, OuterRadius) | - | hub-no-hit-ring (NEW), hub-no-spawn-area (changed) | - | Automated (the two lab tests never run); the long hub distances (500 / 950 / 1000 / 1250 m) are still measured from the middle (PLAN T-217 O1, D-217) |
 | Test infrastructure: frozen creatures really hold still (farm-friend-detour), trolls spawn into free space and onto a loaded terrain collider (instruction-latency) | - | - | farm-friend-detour, instruction-latency (+ every stt.spawnTroll) | - | Automated |
 | Map pins, hover name of a tamed troll (D-081, D-060) | - | - | - | look | **Gap** (manual only) |
 | Hub sign editor (D-135) | - | - | - | hub-look | Manual |
