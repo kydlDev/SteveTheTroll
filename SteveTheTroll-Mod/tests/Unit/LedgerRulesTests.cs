@@ -64,6 +64,31 @@ public class LedgerRulesTests
     }
 
     [Test]
+    public void NewlyMissing_SkipsEntriesTheFileAlreadyFlagged()
+    {
+        // T-217 O2: the manual run re-reported the same ids at every join
+        LedgerEntry flagged = E("b2");
+        flagged.Missing = true;
+        flagged.MissingSince = "2026-11-09 23:00:00";
+        var missing = new List<LedgerEntry> { E("a1"), flagged, E("c3") };
+
+        List<LedgerEntry> fresh = LedgerRules.NewlyMissing(missing);
+
+        Assert.That(fresh.ConvertAll(m => m.Id), Is.EqualTo(new[] { "a1", "c3" }));
+    }
+
+    [Test]
+    public void NewlyMissing_AllFlagged_NothingToReport()
+    {
+        LedgerEntry flagged = E("b2");
+        flagged.Missing = true;
+
+        Assert.That(LedgerRules.NewlyMissing(new List<LedgerEntry> { flagged }), Is.Empty, "a second visit reports nothing again");
+        Assert.That(LedgerRules.NewlyMissing(null), Is.Empty);
+        Assert.That(LedgerRules.NewlyMissing(new List<LedgerEntry>()), Is.Empty);
+    }
+
+    [Test]
     public void Merge_LiveEntryWithoutZdo_IsMissingSinceNow()
     {
         List<LedgerEntry> r = LedgerRules.Merge(new List<LedgerEntry>(), new List<LedgerEntry> { E("a1") }, new HashSet<string>(), Now);

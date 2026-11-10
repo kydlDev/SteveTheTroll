@@ -1,137 +1,132 @@
 ﻿{
-    "name":  "ride-run-speed",
-    "description":  "D-214/D-216 (user 2026-11-10: a ridden troll feels slow, Shift did nothing - the mod\u0027s own farming brain kept calling Stop(), which zeroed the move direction and the run flag): a tree stands 8 m beyond the troll so its farming brain is busy when the rider mounts; while the rider holds the run key the ridden troll reaches its RUN speed (x1.25 = 7.5 m/s or x1.5 = 9 m/s), not only the jog (3.8 / 4.5 m/s); 100 m out of the bed / hub no-hit ring on open ground.",
-    "timeout":  60,
-    "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  true,
-                                   "slippers":  true,
-                                   "hub":  true
-                               }
-                  },
-                  {
-                      "do":  "use",
-                      "block":  "openGround",
-                      "args":  {
-                                   "metres":  100,
-                                   "radius":  30
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  0,
-                                   "dz":  16
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.plantTree",
-                      "args":  {
-                                   "dx":  0,
-                                   "dz":  24
-                               },
-                      "as":  "tree"
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  3
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideVerdict",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideGiveHalter"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideAlt",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  2
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideSample",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "on":  1
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideDrive",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "forward":  2
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  6
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideDrive",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "forward":  0
-                               }
-                  }
-              ],
-    "asserts":  [
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideRidden",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "expect":  true,
-                        "label":  "still riding"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideSpeedMax",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "min":  650,
-                        "label":  "the ridden troll runs: over 6.5 m/s (cm/s; the jog is at most 4.5 m/s)"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideForeignMoveSets",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "max":  0,
-                        "label":  "nothing but the saddle set the ridden troll\u0027s move direction (the farming brain used to zero it and the run flag every tick)"
-                    },
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+    "name": "ride-run-speed",
+    "description": "D-214/D-216 (user 2026-11-10: a ridden troll feels slow, Shift did nothing - the mod's own farming brain kept calling Stop(), which zeroed the move direction and the run flag): a tree stands 8 m beyond the troll so its farming brain is busy when the rider mounts; while the rider holds the run key the ridden troll reaches its RUN speed (x1.25 = 7.5 m/s or x1.5 = 9 m/s), not only the jog (3.8 / 4.5 m/s); 100 m out of the bed / hub no-hit ring on open ground.",
+    "timeout": 60,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": true,
+                "slippers": true,
+                "hub": true
+            }
+        },
+        {
+            "do": "use",
+            "block": "openGround",
+            "args": {
+                "metres": 100,
+                "radius": 30
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 0,
+                "dz": 16
+            },
+            "as": "troll"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.plantTree",
+            "args": {
+                "dx": 0,
+                "dz": 24
+            },
+            "as": "tree"
+        },
+        {
+            "do": "wait",
+            "seconds": 3
+        },
+        {
+            "do": "use",
+            "block": "rideMount"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideSample",
+            "args": {
+                "troll": "troll",
+                "on": 1
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideDrive",
+            "args": {
+                "troll": "troll",
+                "forward": 2
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 6
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideDrive",
+            "args": {
+                "troll": "troll",
+                "forward": 0
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 4
+        }
+    ],
+    "asserts": [
+        {
+            "check": "hook",
+            "name": "stt.rideRidden",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": true,
+            "label": "still riding"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideSpeedMax",
+            "args": {
+                "troll": "troll"
+            },
+            "min": 650,
+            "label": "the ridden troll runs: over 6.5 m/s (cm/s; the jog is at most 4.5 m/s)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideForeignMoveSets",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 0,
+            "label": "nothing but the saddle set the ridden troll's move direction (the farming brain used to zero it and the run flag every tick)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideSpeedXZ",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 20,
+            "label": "T-217 R5 / R6: 4 s after the run key was released the troll has stopped (flat speed, cm/s)"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
 }

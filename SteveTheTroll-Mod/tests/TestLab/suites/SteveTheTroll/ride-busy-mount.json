@@ -1,0 +1,207 @@
+﻿{
+    "name": "ride-busy-mount",
+    "description": "T-217 R1 / R6 (manual test 20261110-015153: the mod's own farming / recovery brain walked a ridden troll 6.5 m): the troll is BUSY when it is mounted - a tree stands 8 m beyond it and it was ordered to fell it. Under the rider (no input for 8 s) its brains are refused by the ridden gate, nothing but the saddle sets its move direction, its root does not leave the place where it settled and the tree is not hit. After the dismount it takes up its work again and hits the tree; 100 m out of the bed / hub no-hit ring on open ground.",
+    "timeout": 120,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": true,
+                "slippers": true,
+                "hub": true
+            }
+        },
+        {
+            "do": "use",
+            "block": "openGround",
+            "args": {
+                "metres": 100,
+                "radius": 30
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 0,
+                "dz": 16
+            },
+            "as": "troll"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.plantTree",
+            "args": {
+                "dx": 0,
+                "dz": 36
+            },
+            "as": "tree"
+        },
+        {
+            "do": "hook",
+            "name": "stt.farmOn",
+            "args": {
+                "troll": "troll",
+                "source": "tree"
+            },
+            "expect": true,
+            "label": "the break order was taken: the troll is busy (walking to the tree 20 m away)"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideGiveHalter"
+        },
+        {
+            "do": "hook",
+            "name": "stt.riddenGateReset"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideAlt",
+            "args": {
+                "troll": "troll"
+            }
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.rideRidden",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": true,
+            "label": "mounted while the troll was busy",
+            "stop": true
+        },
+        {
+            "do": "wait",
+            "until": {
+                "check": "hook",
+                "name": "stt.rideStill",
+                "args": {
+                    "troll": "troll"
+                },
+                "expect": "Still"
+            },
+            "timeout": 8,
+            "label": "the mounted troll settles (its walk to the tree ends under the rider)"
+        },
+        {
+            "do": "wait",
+            "seconds": 8
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.rideStill",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": "Still",
+            "label": "8 s under the rider without input: the troll stands (not Drifting)"
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.rideDrift",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 50,
+            "label": "root drift under the rider (cm)"
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.rideForeignMoveSets",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 0,
+            "label": "no driver but the saddle set the move direction while ridden"
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.riddenGateRefusals",
+            "min": 1,
+            "label": "the troll's own brains asked and were refused (the gate was really in the way, not just idle)"
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.plantedUntouched",
+            "expect": 1,
+            "label": "the tree was not hit while the troll was ridden"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideAlt",
+            "args": {
+                "troll": "troll"
+            }
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.rideRidden",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": false,
+            "label": "dismounted"
+        },
+        {
+            "do": "hook",
+            "name": "stt.observe",
+            "args": {
+                "back": 15
+            },
+            "label": "the player watches from 15 m back (a troll does not walk into the player)"
+        },
+        {
+            "do": "hook",
+            "name": "stt.farmOn",
+            "args": {
+                "troll": "troll",
+                "source": "tree"
+            },
+            "label": "the order again (a dismounted troll takes orders)"
+        },
+        {
+            "do": "wait",
+            "until": {
+                "check": "hook",
+                "name": "stt.plantedUntouched",
+                "expect": 0
+            },
+            "timeout": 60,
+            "label": "after the dismount the troll works again: the tree is hit"
+        }
+    ],
+    "asserts": [
+        {
+            "check": "hook",
+            "name": "stt.plantedUntouched",
+            "expect": 0,
+            "label": "control went back to the troll's own brains after the dismount (the tree was hit)"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
+}

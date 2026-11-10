@@ -3,6 +3,7 @@ using SteveTheTroll.Features.Trolls.Combat.Domain;
 using SteveTheTroll.Features.Trolls.Contracts;
 using SteveTheTroll.Features.Trolls.Core;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Combat.Infrastructure;
@@ -63,6 +64,12 @@ internal sealed class TrollSlam : MonoBehaviour
     internal bool Step(MonsterAI ai)
     {
         Humanoid me = GetComponent<Humanoid>();
+        // T-217 R1: no autonomous step under a rider (false = this step did not drive the troll)
+        if (RiddenGate.Refuses(me, "TrollSlam.Step"))
+        {
+            return false;
+        }
+
         if (me == null || me.IsDead())
         {
             Destroy(this);

@@ -184,6 +184,10 @@
                   "ride-run-speed",
                   "ride-steer",
                   "ride-busy-troll",
+        "ride-stop",
+        "ride-busy-mount",
+        "meta-ride-shove-fails",
+        "perf-working-trolls",
                   "costume-after-slippers"
               ]
 }

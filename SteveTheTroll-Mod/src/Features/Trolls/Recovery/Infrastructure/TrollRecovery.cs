@@ -12,6 +12,7 @@ using SteveTheTroll.Features.Trolls.Recovery.Domain;
 using SteveTheTroll.Features.Trolls.Recovery.Execution;
 using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
@@ -197,6 +198,12 @@ internal sealed partial class TrollRecovery : MonoBehaviour
     internal bool Tick(float dt, Vector3 goal, long ka, long kb, bool canAbandon, bool expectMovement,
         GameObject goalObject)
     {
+        // T-217 R1 / R2: no manoeuvre (leg, rage, ledge walk with its direct root writes) under a rider; false = the caller walks as usual, and its walk is refused by its own gate
+        if (RiddenGate.Refuses(GetComponent<Character>(), "TrollRecovery.Tick"))
+        {
+            return false;
+        }
+
         ITrollCombat combat = _ctx.Capabilities.Combat;
         float now = Time.time;
         bool alive = combat != null && !combat.IsDead;

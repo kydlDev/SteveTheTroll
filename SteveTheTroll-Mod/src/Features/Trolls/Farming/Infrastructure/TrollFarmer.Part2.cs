@@ -268,7 +268,7 @@ internal sealed partial class TrollFarmer
         HubInfo hub = HubRegistry.For(GetComponent<Character>());
         Func<GameObject, bool> skip = hub == null
             ? (Func<GameObject, bool>)IsBad
-            : g => IsBad(g) || !HubRules.FarmAllowed(true, HubGeometry.Flat(g.transform.position - hub.Pos));
+            : g => IsBad(g) || !HubRules.FarmAllowed(true, HubGeometry.FromEdge(hub.Pos, g.transform.position));
         float[] ranges = new[]
             { ModSettings.FarmQuickRange.Value, ModSettings.FarmRange.Value, ModSettings.FarmMaxRange.Value };
         OperationResponse<SelectionHit> hit = TargetSelection.FirstHit(ranges, goals, (range, goal) =>
@@ -373,7 +373,7 @@ internal sealed partial class TrollFarmer
         }
 
         float tx, tz, used;
-        if (!ExploreRules.Next(p.x, p.z, hub.Pos.x, hub.Pos.z, _exploreHeading, HubRules.FarmLeash, (x, z) => Spots.IsBad(new Vector3(x, p.y, z)), out tx, out tz, out used))
+        if (!ExploreRules.Next(p.x, p.z, hub.Pos.x, hub.Pos.z, _exploreHeading, HubRules.RadiusFromMiddle(HubRules.FarmLeash), (x, z) => Spots.IsBad(new Vector3(x, p.y, z)), out tx, out tz, out used))
         {
             if (Time.time >= _nextNothingLog)
             {

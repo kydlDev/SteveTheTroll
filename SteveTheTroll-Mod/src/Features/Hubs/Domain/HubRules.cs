@@ -40,8 +40,40 @@ internal static class HubRules
 
     internal const float FarSpeedShare = 0.5f, HubSpeedFactor = 1.5f;
 
-    /// May the player build another hub? `own` = hubs the player has, `nearestOwn` = flat distance to the nearest hub of ANY player (-1 = none).
-    /// Expected outcome: TooMany at 10, TooClose below 1000 m (exactly 1000 m is fine), else Ok.
+    /// D-217 (user 2026-11-10: "yes, everything should be from the outer limit"): EVERY hub distance the rules below are given - ServeRadius, FarRadius, ManualReach, AutoReach,
+    /// FarmLeash - is the flat distance from the hub's OUTER edge (HubData.OuterRadius from its middle), not from its middle. Expected outcomes: -1 stays -1 (no hub);
+    /// 0 anywhere inside the building; else the middle distance minus OuterRadius.
+    internal static float EdgeDistance(float fromMiddle)
+    {
+        if (fromMiddle < 0f)
+        {
+            return -1f;
+        }
+
+        return fromMiddle <= HubData.OuterRadius ? 0f : fromMiddle - HubData.OuterRadius;
+    }
+
+    /// D-217: the gap between two hubs' outer edges for MinSpacing (edge to edge, so the middles are at least MinSpacing + 2 x OuterRadius apart).
+    /// Expected outcomes: -1 stays -1 (no other hub); 0 for overlapping hubs; else the middle distance minus 2 x OuterRadius.
+    internal static float EdgeToEdge(float middleToMiddle)
+    {
+        if (middleToMiddle < 0f)
+        {
+            return -1f;
+        }
+
+        float both = 2f * HubData.OuterRadius;
+        return middleToMiddle <= both ? 0f : middleToMiddle - both;
+    }
+
+    /// D-217: the radius around a hub's MIDDLE that equals `fromEdge` metres beyond its outer edge (for code that works with circles around the middle, e.g. the explore ring).
+    internal static float RadiusFromMiddle(float fromEdge)
+    {
+        return fromEdge + HubData.OuterRadius;
+    }
+
+    /// May the player build another hub? `own` = hubs the player has, `nearest` = flat distance between the new hub's outer edge and the outer edge of the nearest hub of ANY
+    /// player (EdgeToEdge; -1 = none). Expected outcome: TooMany at 10, TooClose below 1000 m (exactly 1000 m is fine), else Ok.
     internal static Verdict Check(int own, float nearest)
     {
         if (own >= MaxHubs)

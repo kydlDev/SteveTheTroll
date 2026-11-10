@@ -130,7 +130,7 @@ internal static class HubRegistry
         return null;
     }
 
-    /// The owner's hub nearest to `pos` (null = none); `distance` = flat metres (-1).
+    /// The owner's hub nearest to `pos` (null = none); `distance` = flat metres from that hub's OUTER edge (D-217; 0 inside the building, -1 = none).
     internal static HubInfo Nearest(long owner, Vector3 pos, out float distance)
     {
         IList<HubInfo> all = All();
@@ -139,20 +139,21 @@ internal static class HubRegistry
         for (int i = 0; i < all.Count; i++)
         {
             owners[i] = all[i].Owner;
-            dists[i] = HubGeometry.Flat(all[i].Pos - pos);
+            dists[i] = HubGeometry.FromEdge(all[i].Pos, pos);
         }
 
         int at = HubRules.NearestOwned(owner, owners, dists, out distance); // D-160: the choice is the unit-tested rule
         return at >= 0 ? all[at] : null;
     }
 
-    /// Placement check for a new hub at `pos` by `owner`. Expected outcome: Ok, or why not; `nearest` = flat distance to the nearest hub of anyone (-1).
+    /// Placement check for a new hub at `pos` by `owner`. Expected outcome: Ok, or why not; `nearest` = flat metres between the new hub's outer edge and the outer edge of the
+    /// nearest hub of anyone (D-217: edge to edge; -1 = none).
     internal static HubRules.Verdict CanBuild(long owner, Vector3 pos, out float nearest)
     {
         nearest = -1f;
         foreach (HubInfo h in All(true))
         {
-            float d = HubGeometry.Flat(h.Pos - pos);
+            float d = HubRules.EdgeToEdge(HubGeometry.Flat(h.Pos - pos));
             if (nearest < 0f || d < nearest)
             {
                 nearest = d;
@@ -175,7 +176,7 @@ internal static class HubRegistry
         HubInfo nearest = Nearest(owner, trollPos, out nearestDist);
         HubInfo chosen = manual > 0 ? Find(owner, manual) : null;
         OperationResponse<int> pick = Assignment.Evaluate(new HubAssignmentInput(ModSettings.HubsOn, owner, manual,
-            chosen != null ? HubGeometry.Flat(chosen.Pos - trollPos) : -1f, nearest != null ? nearest.Number : 0,
+            chosen != null ? HubGeometry.FromEdge(chosen.Pos, trollPos) : -1f, nearest != null ? nearest.Number : 0,
             nearestDist, ModSettings.HubAuto));
         return pick.IsSuccess && pick.Value > 0 ? Find(owner, pick.Value) : null;
     }

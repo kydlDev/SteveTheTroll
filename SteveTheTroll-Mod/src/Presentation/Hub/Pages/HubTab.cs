@@ -91,7 +91,7 @@ internal static class HubTab
                 {
                     KyCell.Rich(styled),
                     KyCell.Label(Loc.T("stevethetroll_hub_tab_where",
-                        HubGeometry.Flat(hub.Pos - p.transform.position).ToString("0"))),
+                        HubGeometry.FromEdge(hub.Pos, p.transform.position).ToString("0"))),
                     KyCell.Button("✎", () => HubSignMenu.Open(hub))
                 }
             };

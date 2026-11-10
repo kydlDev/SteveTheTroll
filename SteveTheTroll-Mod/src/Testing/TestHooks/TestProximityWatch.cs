@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using KydlCore.Common;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
+using SteveTheTroll.Features.Trolls.Contracts;
 using UnityEngine;
 
 namespace SteveTheTroll.Testing.TestHooks;
@@ -41,7 +42,8 @@ internal sealed class TestProximityWatch : MonoBehaviour
         Vector3 me = transform.position;
         foreach (Character c in Character.GetAllCharacters())
         {
-            if (c == null || c.IsDead() || !c.IsTamed() || !TrollTaming.IsTroll(c))
+            // T-217 O6 (manual test 00:50:02: 9 false "contact" warnings after the mount): the rider sits ON the ridden troll, that is no contact
+            if (c == null || c.IsDead() || !c.IsTamed() || !TrollTaming.IsTroll(c) || TrollRiding.Is(c))
             {
                 continue;
             }

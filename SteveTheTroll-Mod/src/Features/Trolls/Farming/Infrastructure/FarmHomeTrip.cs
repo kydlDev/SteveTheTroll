@@ -340,7 +340,7 @@ internal sealed class FarmHomeTrip
 
         Character me = _f.GetComponent<Character>();
         HubInfo hub = HubRegistry.For(me);
-        if (TripRules.Resume(true, away.magnitude, hub == null || HubRules.FarmAllowed(true, HubGeometry.Flat(spot - hub.Pos))) == ResumeDecision.OutsideLeash)
+        if (TripRules.Resume(true, away.magnitude, hub == null || HubRules.FarmAllowed(true, HubGeometry.FromEdge(hub.Pos, spot))) == ResumeDecision.OutsideLeash)
         {
             Note(self, TripGrammar.SpotSkipped, "OutsideLeash");
             ModLog.Info("TrollFarmer: " + TrollTaming.Tag(_f) + " emptied its backpack - the remembered spot " + spot.ToString("F0") + " is " + HubGeometry.Flat(spot - hub.Pos).ToString("F0") + " m from its hub, outside the farm leash - farms from here");

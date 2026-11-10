@@ -27,6 +27,17 @@ internal sealed class HalterVisual : MonoBehaviour
     private bool _hasLastPos;
     private float _exactUntil;   // D-214: the seat follows the bone exactly until this time (an attack or a stagger is playing)
     private float _anchorGap;    // D-214: metres between the seat point and the bone anchor it hangs on, after this frame's follow step
+    private Quaternion _restRot = Quaternion.identity;   // T-217 R3: the seat anchor's rotation in the troll's frame while no attack / stagger plays (eased, frozen during one)
+    private bool _hasRest;
+    private float _mountedAt = -1f;   // D-222: when the first frame of this ride ran (the chair's rest pose is learned for SeatTilt.GlueSettleSeconds from here)
+    private float _tiltWeight, _leanDeg;   // T-217 R3: fade weight of the lean (0..1) and the lean applied to the rider this frame (degrees)
+    private readonly Vector3[] _way = new Vector3[5];   // T-217 R8: the rein waypoints, reused (two new arrays per frame before)
+
+    /// Lab: the animated seat anchor on the bone (the rider's lean is compared with it).
+    internal Transform SeatAnchor => _seatAnchor;
+
+    /// Lab / log: the lean (degrees) the rider took over from the seat this frame.
+    internal float LeanDeg => _leanDeg;
 
     /// Lab / log: how far (m) the rider's seat point was from the bone anchor after the last frame (0 = the seat is exactly on the bone).
     internal float AnchorGap => _anchorGap;
@@ -148,7 +159,11 @@ internal sealed class HalterVisual : MonoBehaviour
             }
         }
 
-        ModLog.Every("HalterVisual.status", 10d, $"HalterVisual: halter on {_troll.name}, seat offset {ModSettings.RideSeatX.Value:F2}/{ModSettings.RideSeatY.Value:F2}/{ModSettings.RideSeatZ.Value:F2} m, leash sag {ModSettings.RideLeashSag.Value:F2} of its length");
+        // T-217 R8: the status text is only built when it is due (it was formatted every frame)
+        if (ModLog.IsDue("HalterVisual.status", 10d))
+        {
+            ModLog.Every("HalterVisual.status", 10d, $"HalterVisual: halter on {_troll.name}, seat offset {ModSettings.RideSeatX.Value:F2}/{ModSettings.RideSeatY.Value:F2}/{ModSettings.RideSeatZ.Value:F2} m, seat off the bone {_anchorGap * 100f:F1} cm, follows exactly {FollowsExactly}, glued to the chair {ModSettings.RideSeatGlue.Value}, rider lean {_leanDeg:F1} deg (weight {_tiltWeight:F2}, share {ModSettings.RideSeatTilt.Value:F2}), leash sag {ModSettings.RideLeashSag.Value:F2} of its length");
+        }
     }
 
     // the seat parts are made narrower / wider along the troll's left-right axis (their own X); the base scale is remembered once
@@ -248,11 +263,36 @@ internal sealed class HalterVisual : MonoBehaviour
             _exactUntil = Time.time + SeatFollow.DeliberateHoldSeconds;
         }
 
-        bool deliberate = Time.time < _exactUntil;
+        // D-222 (user 2026-11-10 10:37: "the player's ass is not glued to the chair ... the chair follows the troll but the player goes too much forward and slides into
+        // the troll"): the chair hangs on the bone and moves with every idle sway; with the glue on (Tunable SeatGlue, default) the seat point is ON the bone in every
+        // frame - the easing of D-202 / D-207 / D-208 let the chair leave the rider. `swinging` = a real attack / stagger (the rest pose never learns from it)
+        bool glued = ModSettings.RideSeatGlue.Value;
+        bool swinging = Time.time < _exactUntil;
+        bool deliberate = glued || swinging;
+        if (_mountedAt < 0f)
+        {
+            _mountedAt = Time.time;
+        }
+
         _seatSmooth = Vector3.MoveTowards(_seatSmooth, Vector3.Lerp(_seatSmooth, target, SeatFollow.Share(speed, dt, deliberate)), SeatFollow.MaxStep(speed, dt, deliberate));
         _anchorGap = Vector3.Distance(_troll.transform.TransformPoint(_seatSmooth), _seatAnchor.position);
         _seatPoint.localPosition = _seatSmooth + new Vector3(ModSettings.RideSeatX.Value, ModSettings.RideSeatY.Value, ModSettings.RideSeatZ.Value);
-        _seatPoint.localRotation = Quaternion.Euler(ModSettings.RideRiderPitch.Value, ModSettings.RideRiderYaw.Value, -ModSettings.RideRiderRoll.Value);
+        // T-217 R3: the basket is on the bone and leans with it in a swing; the rider leans the same way (against the bone's rest pose) while the animation is deliberate,
+        // and keeps the fixed rotation otherwise. Pose authority (R4): this component owns the rider's pose - the game's Player.UpdateAttach copies the same seat point in its
+        // own step, and the Vector3 given to Player.AttachStart is the DISMOUNT offset (m_detachOffset), not a seat offset
+        Quaternion anchorRot = Quaternion.Inverse(_troll.transform.rotation) * _seatAnchor.rotation;
+        if (!_hasRest)
+        {
+            _restRot = anchorRot;
+            _hasRest = true;
+        }
+
+        float restShare = glued ? SeatTilt.GluedRestShare(Time.time - _mountedAt, swinging, dt) : SeatTilt.RestShare(deliberate, dt);
+        _restRot = Quaternion.Slerp(_restRot, anchorRot, restShare);
+        _tiltWeight = SeatTilt.Weight(_tiltWeight, deliberate, dt);
+        Quaternion lean = Quaternion.Slerp(Quaternion.identity, anchorRot * Quaternion.Inverse(_restRot), SeatTilt.Applied(_tiltWeight, ModSettings.RideSeatTilt.Value));
+        _leanDeg = Quaternion.Angle(Quaternion.identity, lean);
+        _seatPoint.localRotation = lean * Quaternion.Euler(ModSettings.RideRiderPitch.Value, ModSettings.RideRiderYaw.Value, -ModSettings.RideRiderRoll.Value);
         SeatWidth();
         for (int i = 0; i < 2; i++)
         {
@@ -265,14 +305,12 @@ internal sealed class HalterVisual : MonoBehaviour
             // 2026-11-06 (user: the reins must go around the neck, not into it, and hook on the outside of the rings): the line runs ring -> three waypoints outside the head and neck (in the halter's own space, the troll has no collision for a line) -> hand
             Vector3 a = _leashFrom[i].position, b = _leashTo[i].position;
             float side = i == 0 ? -1f : 1f, wide = ModSettings.RideReinWiden.Value;
-            Vector3[] way =
-            {
-                a,
-                _head.TransformPoint(new Vector3(side * 1.25f * wide, 6.25f, 1.25f)),
-                _head.TransformPoint(new Vector3(side * 1.05f * wide, 6.6f, 0.55f)),
-                _head.TransformPoint(new Vector3(side * 0.7f * wide, 6.85f, 0.28f)),
-                b,
-            };
+            Vector3[] way = _way;
+            way[0] = a;
+            way[1] = _head.TransformPoint(new Vector3(side * 1.25f * wide, 6.25f, 1.25f));
+            way[2] = _head.TransformPoint(new Vector3(side * 1.05f * wide, 6.6f, 0.55f));
+            way[3] = _head.TransformPoint(new Vector3(side * 0.7f * wide, 6.85f, 0.28f));
+            way[4] = b;
             int lastWay = way.Length - 1;
             float sag = ModSettings.RideLeashSag.Value * (b - way[lastWay - 1]).magnitude;
             for (int k = 0; k < lr.positionCount; k++)

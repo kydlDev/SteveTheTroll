@@ -55,6 +55,18 @@ internal static class RideSession
             return false;
         }
 
+        // T-217 R7: nothing is written to the troll before the saddle is set up; a failed setup leaves no rider id in the ZDO, no saddle component and the body's
+        // interpolation as it was (the saddle's OnDestroy puts it back)
+        TrollSaddle saddle = troll.GetComponent<TrollSaddle>() ?? troll.gameObject.AddComponent<TrollSaddle>();
+        if (!saddle.Setup(troll, visual.SeatPoint))
+        {
+            ModLog.Warn($"RideSession.Mount rolled back: the saddle found no seat on {troll.name} - halter and saddle removed, the troll's rider id was never written");
+            visual.Remove();
+            Object.Destroy(saddle);
+            return false;
+        }
+
+        _saddle = saddle;
         var view = troll.GetComponent<ZNetView>();
         if (view != null && view.IsValid())
         {
@@ -62,21 +74,14 @@ internal static class RideSession
             view.GetZDO().Set(RiderKey, p.GetPlayerID());
         }
 
-        _saddle = troll.GetComponent<TrollSaddle>() ?? troll.gameObject.AddComponent<TrollSaddle>();
-        if (!_saddle.Setup(troll, visual.SeatPoint))
-        {
-            visual.Remove();
-            return false;
-        }
-
         _troll = troll;
         _visual = visual;
         p.AttachStart(visual.SeatPoint, troll.gameObject, true, false, false, SteveTheTroll.Configuration.ModSettings.RideAnimations[Mathf.Clamp(SteveTheTroll.Configuration.ModSettings.RideAnimation.Value, 0, 3)], new Vector3(0f, 0.5f, 0f), null);
         p.StartDoodadControl(_saddle);
         string id = TrollRegistry.IdOf(troll);
-        File.WriteAllText(FilePath(), MountFile.Write(p.GetPlayerID(), id));
-        ModLog.Info($"RideSession: mounted {troll.name} id {id}");
-        return true;
+        bool fileWritten = WriteMountFile(MountFile.Write(p.GetPlayerID(), id));
+        ModLog.Info($"RideSession: mounted {troll.name} id {id} (mount file written {fileWritten})");
+        return IsRidden(troll);
     }
 
     /// Expected outcome: the player is off, the halter and saddle removed, the file emptied; the item stays in the inventory (it was never taken).
@@ -121,13 +126,33 @@ internal static class RideSession
             ModLog.Info($"RideSession: ended ({reason}) - item {outcome}, troll {(troll != null ? troll.name : "gone")}");
             _saddle = null;
             _visual = null;
-            File.WriteAllText(FilePath(), "");
-            return true;
+            WriteMountFile("");
+            return _troll == null;
         }
         finally
         {
             _ending = false;
         }
+    }
+
+    /// Writes the mount file (relog recovery). Expected outcome: true when the file holds `text`; a failed write is logged and the ride goes on without the file.
+    private static bool WriteMountFile(string text)
+    {
+        string path = FilePath();
+        try
+        {
+            File.WriteAllText(path, text);
+        }
+        catch (IOException ex)
+        {
+            ModLog.Warn($"RideSession.WriteMountFile: {ex.GetType().FullName}: {ex.Message} while writing {text.Length} character(s) to {MountFile.FileName} - the file is in use or the disk refused it; the ride continues, only the relog recovery of this ride is missing");
+        }
+        catch (System.UnauthorizedAccessException ex)
+        {
+            ModLog.Warn($"RideSession.WriteMountFile: {ex.GetType().FullName}: {ex.Message} while writing {MountFile.FileName} - no write access to the config folder; the ride continues without relog recovery");
+        }
+
+        return File.Exists(path) && new FileInfo(path).Length == text.Length;
     }
 
     /// On login: an old mount file means the client closed while riding; the file is cleared (the troll behaves as normal again since nothing holds the saddle).

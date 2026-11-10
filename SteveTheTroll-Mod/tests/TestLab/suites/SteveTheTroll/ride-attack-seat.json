@@ -1,133 +1,133 @@
 ﻿{
-    "name":  "ride-attack-seat",
-    "description":  "D-214: (100 m out of the bed / hub no-hit ring, like attack-key-tree) while the ridden troll attacks, the rider's seat stays on the bone it hangs on (the rider does not clip through the basket).",
-    "timeout":  60,
-    "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  true,
-                                   "slippers":  true,
-                                   "hub":  true
-                               }
-                  },
-                  {
-                      "do":  "use",
-                      "block":  "openGround",
-                      "args":  {
-                                   "metres":  100,
-                                   "radius":  30
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  0,
-                                   "dz":  16
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideVerdict",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideGiveHalter"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideAlt",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  2
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideSample",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "on":  1
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideAttack",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "on":  1
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  8
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideAttack",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "on":  0
-                               }
-                  }
-              ],
-    "asserts":  [
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideRidden",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "expect":  true,
-                        "label":  "still riding"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideAttackFrames",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "min":  30,
-                        "label":  "the troll really attacked while ridden (sampled frames in an attack)"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideAnchorGapAttack",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "max":  2,
-                        "label":  "the seat is on the bone during every frame of an attack (cm; the old idle easing left it 30 cm and more behind)"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideGap",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "max":  1,
-                        "label":  "the rider sits exactly on the seat point in every frame (cm)"
-                    },
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+    "name": "ride-attack-seat",
+    "description": "D-214: (100 m out of the bed / hub no-hit ring, like attack-key-tree) while the ridden troll attacks, the rider's seat stays on the bone it hangs on (the rider does not clip through the basket).",
+    "timeout": 60,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": true,
+                "slippers": true,
+                "hub": true
+            }
+        },
+        {
+            "do": "use",
+            "block": "openGround",
+            "args": {
+                "metres": 100,
+                "radius": 30
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 0,
+                "dz": 16
+            },
+            "as": "troll"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "use",
+            "block": "rideMount"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideSample",
+            "args": {
+                "troll": "troll",
+                "on": 1
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideAttack",
+            "args": {
+                "troll": "troll",
+                "on": 1
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 8
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideAttack",
+            "args": {
+                "troll": "troll",
+                "on": 0
+            }
+        }
+    ],
+    "asserts": [
+        {
+            "check": "hook",
+            "name": "stt.rideRidden",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": true,
+            "label": "still riding"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideAttackFrames",
+            "args": {
+                "troll": "troll"
+            },
+            "min": 30,
+            "label": "the troll really attacked while ridden (sampled frames in an attack)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideAnchorGapAttack",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 2,
+            "label": "the seat is on the bone during every frame of an attack (cm; the old idle easing left it 30 cm and more behind)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideGap",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 1,
+            "label": "the rider sits exactly on the seat point in every frame (cm)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideSeatTiltAttack",
+            "args": {
+                "troll": "troll"
+            },
+            "min": 45,
+            "label": "T-217 R3: the seat itself leaned far during the attack (degrees; measured 91.6 and 95.0 in runs a26-t1 / a26-t2 - under 45 the swing was not a real one and the tilt gap proves nothing)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideTiltGapAttack",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 5,
+            "label": "T-217 R3 / R10: the rider leans with the seat during the attack: at most 5 degrees between the rider's lean and the seat's lean, both measured from the standing pose at the start of the sampling (runs: 4.8, 9.4 and - with one reference for the whole measurement - 42.1 degrees at a seat lean of 116.5: the rider follows the SWING but not the pose the seat had swayed into before it; the user's verdict 2026-11-10 10:37 is that the rider must sit on the chair in every frame = FAILS until R10 is done)"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
 }

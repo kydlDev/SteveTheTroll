@@ -17,11 +17,14 @@ internal sealed partial class TrollFarmer
     private float _lastStep = -1f, _nextStepStallLog;
     private bool _stallLogged;
 
+    private string _statusKey;   // performance: built once (it was concatenated every frame for every farming troll)
+
     private void Update()
     {
-        if (_target != null && ModLog.IsDue("TrollFarmer.status." + GetInstanceID(), 5d))
+        _statusKey ??= "TrollFarmer.status." + GetInstanceID();
+        if (_target != null && ModLog.IsDue(_statusKey, 5d))
         {
-            ModLog.Every("TrollFarmer.status." + GetInstanceID(), 5d, "TrollFarmer: " + TrollTaming.Tag(this) + " target " + _target.name +
+            ModLog.Every(_statusKey, 5d, "TrollFarmer: " + TrollTaming.Tag(this) + " target " + _target.name +
                          ", last farming step " + (_lastStep < 0f ? "never" : (Time.time - _lastStep).ToString("F1") + " s ago") +
                          ", position " + transform.position.ToString("F0"));
         }

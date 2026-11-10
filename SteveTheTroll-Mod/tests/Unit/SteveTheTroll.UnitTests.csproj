@@ -41,6 +41,10 @@
     <Compile Include="..\..\src\Features\Riding\Domain\RideRecipe.cs" Link="Mod\RideRecipe.cs" />
     <Compile Include="..\..\src\Features\Riding\Domain\MountFile.cs" Link="Mod\MountFile.cs" />
     <Compile Include="..\..\src\Features\Riding\Domain\SeatFollow.cs" Link="Mod\SeatFollow.cs" />
+    <!-- T-217 (2026-11-10): the rider's lean with the seat (R3), the standing watch of a ridden troll (R2 / R5), the closest-point shape rule (O3) -->
+    <Compile Include="..\..\src\Features\Riding\Domain\SeatTilt.cs" Link="Mod\SeatTilt.cs" />
+    <Compile Include="..\..\src\Features\Riding\Domain\RideStill.cs" Link="Mod\RideStill.cs" />
+    <Compile Include="..\..\src\Features\Trolls\Movement\Domain\ClosestPointRules.cs" Link="Mod\ClosestPointRules.cs" />
     <Compile Include="..\..\src\Features\Trolls\Backpack\Domain\DepotRules.cs" Link="Mod\DepotRules.cs" />
     <Compile Include="..\..\src\Features\Trolls\Taming\Domain\HealthRules.cs" Link="Mod\HealthRules.cs" />
     <!-- D-167 stuck detection and recovery: pure rules, the escalation ladder, the per troll + resource failure book (TargetRules: head-on test) -->

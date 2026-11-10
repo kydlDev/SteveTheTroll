@@ -1,0 +1,175 @@
+﻿{
+    "name": "ride-stop",
+    "description": "T-217 R5 (manual test 20261110-015153: 'input stopped' was never checked against 'the troll stands'): the ridden troll runs for 4 s, the rider lets go of everything (autorun off); after the 2 s the game needs to brake it the troll's ROOT stays where it settled for 4 more seconds - flat speed about 0, root drift under 50 cm, nothing but the saddle set its move direction; 100 m out of the bed / hub no-hit ring on open ground.",
+    "timeout": 60,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": true,
+                "slippers": true,
+                "hub": true
+            }
+        },
+        {
+            "do": "use",
+            "block": "openGround",
+            "args": {
+                "metres": 100,
+                "radius": 30
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 0,
+                "dz": 16
+            },
+            "as": "troll"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "use",
+            "block": "rideMount"
+        },
+        {
+            "do": "hook",
+            "name": "stt.riddenGateReset"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideSample",
+            "args": {
+                "troll": "troll",
+                "on": 1
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideDrive",
+            "args": {
+                "troll": "troll",
+                "forward": 2
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 4
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.rideStill",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": "Driven",
+            "label": "while the rider drives, movement is expected (the standing watch says Driven)"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideDrive",
+            "args": {
+                "troll": "troll",
+                "forward": 0
+            }
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.rideAutoRun",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 0,
+            "label": "autorun is off: no key means no movement asked"
+        },
+        {
+            "do": "wait",
+            "until": {
+                "check": "hook",
+                "name": "stt.rideStill",
+                "args": {
+                    "troll": "troll"
+                },
+                "expect": "Still"
+            },
+            "timeout": 6,
+            "label": "within 6 s of letting go the troll has settled (2 s roll-out, then Still)"
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.rideSpeedXZ",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 20,
+            "label": "settled: flat speed at most 20 cm/s"
+        },
+        {
+            "do": "wait",
+            "seconds": 4
+        }
+    ],
+    "asserts": [
+        {
+            "check": "hook",
+            "name": "stt.rideRidden",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": true,
+            "label": "still riding"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideStill",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": "Still",
+            "label": "4 s later the troll still stands where it settled (not Drifting)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideDrift",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 50,
+            "label": "root drift with no rider input (cm; the ledge walk moved it 650 cm)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideSpeedXZ",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 20,
+            "label": "flat speed of the standing troll (cm/s)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideForeignMoveSets",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 0,
+            "label": "nothing but the saddle set the ridden troll's move direction"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
+}

@@ -62,6 +62,12 @@ internal sealed class TrollSaddle : MonoBehaviour, IDoodadController
     private Vector3 _camLast;
     private readonly System.Collections.Generic.List<float> _camSteps = new System.Collections.Generic.List<float>();
 
+    /// T-217 R2 / R5: the troll's root while the rider asks for nothing (drift, flat speed, verdict).
+    internal RideStillWatch Still { get; } = new RideStillWatch();
+
+    /// T-217 R3, lab: the rider's lean against the seat's lean during attacks.
+    internal RideTiltProbe Tilt { get; } = new RideTiltProbe();
+
     internal float GapCm => _gapMax * 100f;
 
     internal float StepCm => _stepMax * 100f;
@@ -108,6 +114,8 @@ internal sealed class TrollSaddle : MonoBehaviour, IDoodadController
         _anchorGapAttackMax = 0f;
         _attackFrames = 0;
         _speedMax = 0f;
+        Tilt.Reset();
+        Still.Reset();
         _big.Length = 0;
         _bigCount = 0;
         _sampleStart = Time.time;
@@ -118,22 +126,33 @@ internal sealed class TrollSaddle : MonoBehaviour, IDoodadController
         _camFrames = _camSteps.Count;
         var sorted = new System.Collections.Generic.List<float>(_camSteps);
         sorted.Sort();
-        float mean = sorted.Count > 0 ? sorted[sorted.Count / 2] : 0f; // the MEDIAN step (one camera jump at the start must not spoil it)
-        float sd = 0f;
+        float median = sorted.Count > 0 ? sorted[sorted.Count / 2] : 0f; // the MEDIAN step (one camera jump at the start must not spoil it)
+        // T-217 R8: the spread was printed but never computed (always 0.00). It is the standard deviation of the camera steps after the first 30 frames (the mount's camera swing)
+        float sum = 0f, sumSq = 0f;
+        int counted = 0;
+        for (int i = 30; i < _camSteps.Count; i++)
+        {
+            sum += _camSteps[i];
+            sumSq += _camSteps[i] * _camSteps[i];
+            counted++;
+        }
+
+        float average = counted > 0 ? sum / counted : 0f;
+        float sd = counted > 1 ? Mathf.Sqrt(Mathf.Max(0f, sumSq / counted - average * average)) : 0f;
         _camStutter = 0;
         _camMax = sorted.Count > 0 ? sorted[sorted.Count - 1] : 0f;
         for (int i = 30; i < _camSteps.Count; i++)
         {
             float d = _camSteps[i];
-            if (mean > 0.004f && (d < mean * 0.25f || d > mean * 2.5f))
+            if (median > 0.004f && (d < median * 0.25f || d > median * 2.5f))
             {
                 _camStutter++;
             }
         }
         Rigidbody rb = _troll != null ? _troll.GetComponent<Rigidbody>() : null;
         Rigidbody pb = Player.m_localPlayer != null ? Player.m_localPlayer.GetComponent<Rigidbody>() : null;
-        string cam = $" | camera moved {(mean * 100f):F2} cm per frame (median; spread {(sd * 100f):F2}, biggest {(_camMax * 100f):F2} cm), stutter frames (under a quarter or over 2.5x the mean) {_camStutter} of {_camFrames}; troll body interpolation {(rb != null ? rb.interpolation.ToString() : "none")}, player body interpolation {(pb != null ? pb.interpolation.ToString() : "none")}, fixed step {(Time.fixedDeltaTime * 1000f):F0} ms, vsync {QualitySettings.vSyncCount}";
-        return $"rider off the seat by at most {GapCm:F1} cm, seat off the bone by at most {AnchorGapCm:F1} cm (while attacking {AnchorGapAttackCm:F1} cm in {_attackFrames} frames), biggest jump between two frames {StepCm:F1} cm (in the troll frame), {_samples} frames; jumps over 4 cm: {_bigCount}{_big}{cam}";
+        string cam = $" | camera moved {(median * 100f):F2} cm per frame (median; standard deviation {(sd * 100f):F2} cm over {counted} frames, biggest {(_camMax * 100f):F2} cm), stutter frames (under a quarter or over 2.5x the median) {_camStutter} of {_camFrames}; troll body interpolation {(rb != null ? rb.interpolation.ToString() : "none")}, player body interpolation {(pb != null ? pb.interpolation.ToString() : "none")}, fixed step {(Time.fixedDeltaTime * 1000f):F0} ms, vsync {QualitySettings.vSyncCount}";
+        return $"rider off the seat by at most {GapCm:F1} cm, seat off the bone by at most {AnchorGapCm:F1} cm (while attacking {AnchorGapAttackCm:F1} cm in {_attackFrames} frames), rider lean off the seat's lean by at most {Tilt.GapDegAllMax:F1} deg in any frame and {Tilt.GapDegMax:F1} deg while attacking (seat leaned up to {Tilt.AnchorTiltDegMax:F1} deg, rider up to {Tilt.RiderTiltDegMax:F1} deg), root drift with no input {Still.DriftCm:F0} cm ({Still.Last}), biggest jump between two frames {StepCm:F1} cm (in the troll frame), {_samples} frames; jumps over 4 cm: {_bigCount}{_big}{cam}";
     }
 
     private void LateUpdate()
@@ -166,11 +185,14 @@ internal sealed class TrollSaddle : MonoBehaviour, IDoodadController
         {
             _anchorGapMax = Mathf.Max(_anchorGapMax, halter.AnchorGap);
             _speedMax = Mathf.Max(_speedMax, new Vector2(_troll.GetVelocity().x, _troll.GetVelocity().z).magnitude);
-            if (_human != null && _human.InAttack())
+            bool attacking = _human != null && _human.InAttack();
+            if (attacking)
             {
                 _attackFrames++;
                 _anchorGapAttackMax = Mathf.Max(_anchorGapAttackMax, halter.AnchorGap);
             }
+
+            Tilt.Frame(_troll.transform, p.transform, halter.SeatAnchor, attacking, Time.time);
         }
     }
     // Lab only (user 2026-11-06 "there is some jitter still"): how smoothly the CAMERA moves while riding - sampled after the game camera has been placed for the frame.
@@ -261,7 +283,11 @@ internal sealed class TrollSaddle : MonoBehaviour, IDoodadController
             if (mb.enabled && ns != null && ns.StartsWith("SteveTheTroll.Features.Trolls.") && !mb.GetType().Name.StartsWith("Backpack"))
             {
                 mb.enabled = false;
-                _suspended.Add(mb);
+                if (!_suspended.Contains(mb))
+                {
+                    _suspended.Add(mb);
+                }
+
                 ModLog.Info($"TrollSaddle: {mb.GetType().Name} paused on the ridden {_troll.name}");
             }
         }
@@ -277,14 +303,23 @@ internal sealed class TrollSaddle : MonoBehaviour, IDoodadController
             _body.interpolation = _oldInterpolation;
         }
 
+        // T-217 R7: only what THIS saddle switched off comes back on (each was enabled when it was caught, so "on" is its state from before the ride); a component
+        // that is gone, or that something else has switched on again meanwhile, is left alone and said so
+        int restored = 0, leftAlone = 0;
         foreach (MonoBehaviour mb in _suspended)
         {
-            if (mb != null)
+            if (mb != null && !mb.enabled)
             {
                 mb.enabled = true;
+                restored++;
+            }
+            else
+            {
+                leftAlone++;
             }
         }
 
+        ModLog.Info($"TrollSaddle: ride over - {restored} paused behaviour(s) switched on again, {leftAlone} left alone (gone or already on), body interpolation back to {_oldInterpolation}");
         _suspended.Clear();
     }
     private void Update()
@@ -295,9 +330,20 @@ internal sealed class TrollSaddle : MonoBehaviour, IDoodadController
             return;
         }
 
-        var view = _troll.GetComponent<ZNetView>();
-        ModLog.Every("TrollSaddle.detail", 2d, $"TrollSaddle: detail - owner {view != null && view.IsValid() && view.IsOwner()}, move dir in effect {_troll.GetMoveDir():F2}, last asked {_lastMove:F2}, run asked {_lastRun}, running {_troll.IsRunning()}, run speed in use {_troll.m_runSpeed:F1} jog {_troll.m_speed:F1} m/s, can move {_troll.CanMove()}, staggering {_troll.IsStaggering()}, in attack {_human.InAttack()}, on ground {_troll.IsOnGround()}, speed {_troll.GetVelocity().magnitude:F2} m/s, swimming {_troll.IsSwimming()}, tamed {_troll.IsTamed()}");
-        ModLog.Every("TrollSaddle.status", 10d, $"TrollSaddle: {_troll.name} ridden, last move {_lastMove:F2}, attacking {_human.InAttack()}");
+        // T-217 R2 / R5: the root is watched while nothing is asked of the troll (a zero move direction does not prove it stands)
+        bool movementExpected = _lastMove != Vector3.zero || _autoOn || _human.InAttack() || _troll.IsStaggering() || !_troll.IsOnGround() || _troll.IsSwimming();
+        StillVerdict still = Still.Tick(_troll, movementExpected, Time.time);
+        // T-217 R8: the two status texts are only built when they are due (they were formatted every frame)
+        if (ModLog.IsDue("TrollSaddle.detail", 2d))
+        {
+            var view = _troll.GetComponent<ZNetView>();
+            ModLog.Every("TrollSaddle.detail", 2d, $"TrollSaddle: detail - owner {view != null && view.IsValid() && view.IsOwner()}, move dir in effect {_troll.GetMoveDir():F2}, last asked {_lastMove:F2}, run asked {_lastRun}, autorun {_autoOn}, running {_troll.IsRunning()}, run speed in use {_troll.m_runSpeed:F1} jog {_troll.m_speed:F1} m/s, can move {_troll.CanMove()}, staggering {_troll.IsStaggering()}, in attack {_human.InAttack()}, on ground {_troll.IsOnGround()}, speed {_troll.GetVelocity().magnitude:F2} m/s (flat {Still.SpeedXZCm / 100f:F2} m/s), standing verdict {still} (biggest drift with no input {Still.DriftCm:F0} cm), foreign move sets {ForeignMoveSets}, swimming {_troll.IsSwimming()}, tamed {_troll.IsTamed()}");
+        }
+
+        if (ModLog.IsDue("TrollSaddle.status", 10d))
+        {
+            ModLog.Every("TrollSaddle.status", 10d, $"TrollSaddle: {_troll.name} ridden, last move {_lastMove:F2}, attacking {_human.InAttack()}");
+        }
 
         // the mouse buttons attack with the troll's own weapon; held = keeps attacking
         bool primary = ZInput.GetButton("Attack") || ZInput.GetButton("JoyAttack") || TestAttack;

@@ -2,6 +2,7 @@ using KydlCore.Common;
 using SteveTheTroll.Features.Trolls.Contracts;
 using SteveTheTroll.Features.Trolls.Recovery.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
@@ -210,6 +211,13 @@ internal sealed partial class TrollRecovery
     /// One frame of the ledge walk: a short step along the line to the goal, the feet on the terrain there. Expected outcome: true = it drove the troll (always while the walk runs).
     private bool LedgeStep(float dt, ITrollMovement mv)
     {
+        // T-217 R2: this step writes transform.position and Rigidbody.position itself - a zero move direction does not stop it, so it must never run under a rider
+        // (manual test 20261110-015153, 01:54:08: 6.5 m in 2 s with the rider's move direction at zero)
+        if (RiddenGate.Refuses(GetComponent<Character>(), "TrollRecovery.LedgeStep"))
+        {
+            return false;
+        }
+
         ZoneSystem zs = ZoneSystem.instance;
         Vector3 pos = transform.position;
         Vector3 flat = LedgeGoal - pos;

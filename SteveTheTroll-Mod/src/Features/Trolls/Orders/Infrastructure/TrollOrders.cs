@@ -14,6 +14,7 @@ using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using SteveTheTroll.Presentation.Notifications;
 using SteveTheTroll.Ui;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Orders.Infrastructure;
@@ -339,7 +340,7 @@ internal static class TrollOrders
                     continue;
                 }
 
-                Vector3 q = col.ClosestPoint(chest);
+                Vector3 q = ColliderPoints.Closest(col, chest, "TrollOrders.Aim"); // T-217 O3
                 float d = (q - chest).sqrMagnitude;
                 if (d < best)
                 {

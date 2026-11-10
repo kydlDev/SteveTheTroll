@@ -10,6 +10,7 @@ using SteveTheTroll.Features.Trolls.Recovery.Domain;
 using SteveTheTroll.Features.Trolls.Recovery.Execution;
 using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
@@ -238,6 +239,11 @@ internal sealed partial class TrollRecovery
 
     private bool Drive(float dt, ITrollCombat combat)
     {
+        if (RiddenGate.Refuses(GetComponent<Character>(), "TrollRecovery.Drive"))
+        {
+            return false;
+        }
+
         ITrollMovement mv = _ctx.Capabilities.Movement;
         if (mv == null)
         {
@@ -268,7 +274,7 @@ internal sealed partial class TrollRecovery
 
         Collider c = _rageTarget.GetComponentInChildren<Collider>();
         Vector3 point = c != null
-            ? c.ClosestPoint(transform.position + Vector3.up * ChestHeight)
+            ? ColliderPoints.Closest(c, transform.position + Vector3.up * ChestHeight, "TrollRecovery.Rage") // T-217 O3: a rock's base_model is a non-convex mesh
             : _rageTarget.transform.position;
         Vector3 flat = point - transform.position;
         flat.y = 0f;

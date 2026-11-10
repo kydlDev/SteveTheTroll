@@ -262,6 +262,12 @@ internal static class ModSettings
     public static readonly Tunable<float> RideRiderRoll = new("TrollRiding", "RiderRoll", 0f, -45f, 45f,
         "Rider leaning to the right (+) / left (-) on the seat (degrees).");
 
+    public static readonly Tunable<bool> RideSeatGlue = new("TrollRiding", "SeatGlue", true,
+        "Rider glued to the chair: the seat point follows the chair's bone exactly in every frame, position and lean (on). Off = the older behaviour: eased while the troll stands, lean only in attacks.");
+
+    public static readonly Tunable<float> RideSeatTilt = new("TrollRiding", "SeatTilt", 1f, 0f, 1f,
+        "Share of the seat's lean the rider takes over while the troll attacks or staggers (0 = the rider stays upright, 1 = leans exactly like the seat).");
+
     public static readonly Tunable<float> RideSeatWidth = new("TrollRiding", "SeatWidth", 1f, 0.3f, 1.5f,
         "Width of the seat (1 = as modelled, smaller = narrower).");
 

@@ -6,6 +6,7 @@ using SteveTheTroll.Features.Trolls.Contracts;
 using SteveTheTroll.Features.Trolls.Core;
 using SteveTheTroll.Features.Trolls.Orders.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Combat.Infrastructure;
@@ -102,6 +103,12 @@ internal sealed class TrollRage : MonoBehaviour
     internal bool Step(MonsterAI ai, float dt)
     {
         Humanoid me = GetComponent<Humanoid>();
+        // T-217 R1: no autonomous step under a rider (false = this step did not drive the troll)
+        if (RiddenGate.Refuses(me, "TrollRage.Step"))
+        {
+            return false;
+        }
+
         float hit;
         bool wasHit = HitAt.TryGetValue(_owner, out hit);
         if (RageRules.CalmsDown(me != null && !me.IsDead(), wasHit, Time.time - hit, ModSettings.RageCalmSeconds.Value))

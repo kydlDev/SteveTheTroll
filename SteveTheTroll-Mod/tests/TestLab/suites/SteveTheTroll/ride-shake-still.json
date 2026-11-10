@@ -1,96 +1,96 @@
 ﻿{
-    "name":  "ride-shake-still",
-    "description":  "T-213: the rider does not shake while the ridden troll stands.",
-    "timeout":  60,
-    "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  true,
-                                   "slippers":  true,
-                                   "hub":  true
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dx":  0,
-                                   "dz":  16
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  1
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideVerdict",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideGiveHalter"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideAlt",
-                      "args":  {
-                                   "troll":  "troll"
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  2
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.rideSample",
-                      "args":  {
-                                   "troll":  "troll",
-                                   "on":  1
-                               }
-                  },
-                  {
-                      "do":  "wait",
-                      "seconds":  4
-                  }
-              ],
-    "asserts":  [
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideRidden",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "expect":  true,
-                        "label":  "still riding"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideGap",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "max":  1,
-                        "label":  "the rider sits exactly on the seat point in every frame (cm)"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.rideStep",
-                        "args":  {
-                                     "troll":  "troll"
-                                 },
-                        "max":  10,
-                        "label":  "biggest jump of the rider between two frames, in the troll frame (cm)"
-                    },
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+    "name": "ride-shake-still",
+    "description": "T-213: the rider does not shake while the ridden troll stands. D-222 (user 2026-11-10 10:37: the rider must be glued to the chair): the old limit 'the rider jumps at most 10 cm between two frames in the troll's frame' is gone - a glued rider moves exactly as the chair does, also when an idle clip moves the chair fast; what is asserted instead is that the rider is ON the chair in every frame (position and lean).",
+    "timeout": 60,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": true,
+                "slippers": true,
+                "hub": true
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 0,
+                "dz": 16
+            },
+            "as": "troll"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "use",
+            "block": "rideMount"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideSample",
+            "args": {
+                "troll": "troll",
+                "on": 1
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 4
+        }
+    ],
+    "asserts": [
+        {
+            "check": "hook",
+            "name": "stt.rideRidden",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": true,
+            "label": "still riding"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideGap",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 1,
+            "label": "the rider sits exactly on the seat point in every frame (cm)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideDrift",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 50,
+            "label": "T-217 R6: the TROLL's root did not move either (cm; the old asserts only looked at the rider inside the troll's frame)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideAnchorGap",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 2,
+            "label": "USER 2026-11-10 10:37 (\"the player's ass is not glued to the chair ... the chair follows the troll but the player goes too much forward and slides into the troll\"): the rider's seat point is ON the seat bone in every frame, also while the troll only sways (cm; measured 23.5 / 43.4 cm in run a26-full1 with the idle easing of D-202..D-208 = FAILS until the rider is glued to the chair, PLAN T-217 R10)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideTiltGap",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 5,
+            "label": "USER 2026-11-10 10:37: the rider leans exactly as the chair does in every frame (degrees; the rider kept a fixed rotation while the chair swayed = FAILS until R10 is done)"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
 }

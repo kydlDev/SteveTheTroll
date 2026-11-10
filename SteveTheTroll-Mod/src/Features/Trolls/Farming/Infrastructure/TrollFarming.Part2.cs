@@ -11,6 +11,7 @@ using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Movement.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Domain;
 using SteveTheTroll.Ui;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Farming.Infrastructure;
@@ -287,8 +288,21 @@ internal static partial class TrollFarming
                 return true;
             }
 
+            // performance: this prefix runs for every creature's AI step; everything below (slam, rage, chase, guard, hold, return, farmer) exists on trolls only, so a
+            // boar or a greydwarf leaves here after one table lookup instead of nine component searches
+            if (!SteveTheTroll.Features.Trolls.Taming.Infrastructure.TrollTaming.IsTroll(__instance))
+            {
+                return true;
+            }
+
             ZNetView view0 = __instance.GetComponent<ZNetView>();
             if (view0 == null || !view0.IsValid() || !view0.IsOwner())
+            {
+                return true;
+            }
+
+            // T-217 R1: a ridden troll has no autonomous driver; RidingPatch_SkipAi (Priority.First) already skips the game's AI and normally this prefix with it - the gate holds whatever the patch order is
+            if (RiddenGate.Refuses(__instance.GetComponent<Character>(), "TrollFarming.Steer"))
             {
                 return true;
             }

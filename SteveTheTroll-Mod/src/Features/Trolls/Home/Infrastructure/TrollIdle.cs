@@ -8,6 +8,7 @@ using SteveTheTroll.Features.Trolls.Orders.Commands;
 using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using SteveTheTroll.Ui;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Home.Infrastructure;
@@ -87,6 +88,15 @@ internal static class TrollIdle
             }
 
             int id = c.GetInstanceID();
+            // T-217 R1 / O6 (manual test 01:58:36: a ridden troll was reported as "wandered 14 m in 10 s with no job"): a ridden troll has a job - its rider. No wander watch,
+            // no walk-back check, no automatic farm / unload order while it is ridden; its idle clock starts again at the dismount
+            if (RiddenGate.Refuses(c, "TrollIdle.Tick"))
+            {
+                Since.Remove(id);
+                Seen.Remove(id);
+                continue;
+            }
+
             TrollRegistry.IdOf(c); // D-145: every own troll has its permanent id (normally given at taming)
             if (TrollReturn.Check(c, c.GetComponent<MonsterAI>()))
             {

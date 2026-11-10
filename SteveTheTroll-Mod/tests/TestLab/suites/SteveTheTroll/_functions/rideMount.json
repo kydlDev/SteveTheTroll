@@ -1,0 +1,31 @@
+{
+  "description": "T-217 (lint: the same mount steps stood in 9 riding tests): the player gets the halter + seat and mounts the troll tagged `troll` through the real alt-key path, then waits `settle` s for the mount to finish. The verdict before the mount is logged in the report.",
+  "params": {
+    "settle": 2
+  },
+  "steps": [
+    {
+      "do": "hook",
+      "name": "stt.rideVerdict",
+      "args": {
+        "troll": "troll"
+      }
+    },
+    {
+      "do": "hook",
+      "name": "stt.rideGiveHalter"
+    },
+    {
+      "do": "hook",
+      "name": "stt.rideAlt",
+      "args": {
+        "troll": "troll"
+      }
+    },
+    {
+      "if": "{{settle}}",
+      "do": "wait",
+      "seconds": "{{settle}}"
+    }
+  ]
+}

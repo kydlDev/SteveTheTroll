@@ -32,6 +32,12 @@ internal static class HubGeometry
         return best;
     }
 
+    /// D-217: flat metres from the hub's OUTER edge to `at` (0 inside the building) - what every hub rule is given (HubRules.EdgeDistance).
+    internal static float FromEdge(Vector3 hubPos, Vector3 at)
+    {
+        return Domain.HubRules.EdgeDistance(Flat(hubPos - at));
+    }
+
     internal static float Flat(Vector3 v)
     {
         v.y = 0f;

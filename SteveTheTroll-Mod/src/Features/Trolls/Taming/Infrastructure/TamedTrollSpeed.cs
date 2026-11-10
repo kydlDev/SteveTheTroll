@@ -55,6 +55,44 @@ internal static class TamedTrollSpeed
         return HubSpeed.Factor(c, Factor);
     }
 
+    private const int PruneFromCount = 16;
+
+    /// T-217 R7: entries of trolls that no longer exist are dropped when a new troll is added (the table had no removal path: it grew for the whole session, and a reused
+    /// instance id would have read another troll's speeds). Expected outcome: how many entries were dropped (0 below PruneFromCount entries).
+    private static int Prune()
+    {
+        if (Bases.Count < PruneFromCount)
+        {
+            return 0;
+        }
+
+        var alive = new HashSet<int>();
+        foreach (Character other in Character.GetAllCharacters())
+        {
+            if (other != null)
+            {
+                alive.Add(other.gameObject.GetInstanceID());
+            }
+        }
+
+        var gone = new List<int>();
+        foreach (int known in Bases.Keys)
+        {
+            if (!alive.Contains(known))
+            {
+                gone.Add(known);
+            }
+        }
+
+        foreach (int id in gone)
+        {
+            Bases.Remove(id);
+        }
+
+        ModLog.Verbose("TamedTrollSpeed: " + gone.Count + " speed entr(ies) of trolls that are gone dropped, " + Bases.Count + " kept (" + alive.Count + " characters loaded)");
+        return gone.Count;
+    }
+
     /// The instance's own vanilla speeds, taken the first time the troll is seen (by the animation callback or the swim update, whichever
     /// comes first - both run before this mod changes anything on it). Expected outcome: the Base of this troll.
     private static Base BaseOf(Character c)
@@ -66,6 +104,7 @@ internal static class TamedTrollSpeed
             return b;
         }
 
+        Prune();
         b = new Base
         {
             Speed = c.m_speed,

@@ -101,7 +101,7 @@ internal sealed class FarmSpotMemory
         Func<Vector3, bool> farSkip = p => IsBad(p)
                                            || TrollNoHit.InsideAny(noHitCircles, p)
                                            || (hub != null &&
-                                               !HubRules.FarmAllowed(true, HubGeometry.Flat(p - hub.Pos)));
+                                               !HubRules.FarmAllowed(true, HubGeometry.FromEdge(hub.Pos, p)));
         bool found = TrollFarming.FindFar(from, new TrollFarming.SearchRange(ModSettings.FarmLongRange.Value, ModSettings.FarmMaxRange.Value), tier,
             goals, farSkip, out pos, out item);
         ModLog.Verbose("TrollFarmer: " + TrollTaming.Tag(_troll) + " long-range search: " + TrollFarming.LastFar);

@@ -17,6 +17,7 @@ using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using SteveTheTroll.Presentation.Notifications;
 using SteveTheTroll.Ui;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Home.Infrastructure;
@@ -74,7 +75,7 @@ internal sealed class TrollReturn : MonoBehaviour
 
         if (h != null)
         {
-            distance = HubGeometry.Flat(h.Pos - c.transform.position);
+            distance = HubGeometry.FromEdge(h.Pos, c.transform.position); // D-217: AutoReach / FarmLeash count from the hub's outer edge
         }
 
         return h;
@@ -169,6 +170,12 @@ internal sealed class TrollReturn : MonoBehaviour
     internal bool Step(MonsterAI ai, float dt)
     {
         Character c = GetComponent<Character>();
+        // T-217 R1: a ridden troll is not walked back to its hub (false = this step did not drive the troll)
+        if (RiddenGate.Refuses(c, "TrollReturn.Step"))
+        {
+            return false;
+        }
+
         if (c == null || c.IsDead())
         {
             Destroy(this);
@@ -181,7 +188,7 @@ internal sealed class TrollReturn : MonoBehaviour
             return true;
         }
 
-        float d = _hub != null ? HubGeometry.Flat(_hub.Pos - transform.position) : -1f;
+        float d = _hub != null ? HubGeometry.FromEdge(_hub.Pos, transform.position) : -1f;
         bool fighting = ai.GetTargetCreature() != null || GetComponent<TrollRage>() != null ||
                         GetComponent<TrollChase>() != null || GetComponent<TrollSlam>() != null;
         ZNetView view = GetComponent<ZNetView>();

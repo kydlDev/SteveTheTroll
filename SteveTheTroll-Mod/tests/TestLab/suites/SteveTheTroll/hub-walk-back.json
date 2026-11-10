@@ -1,6 +1,6 @@
-{
+﻿{
     "name": "hub-walk-back",
-    "description": "A troll past 1000 m from its hub with no follow order walks back into the 950 m farm zone and farms again (D-162)",
+    "description": "A troll past 1000 m from its hub's OUTER EDGE (D-217) with no follow order walks back into the 950 m farm zone (also from the edge) and farms again (D-162)",
     "timeout": 200,
     "steps": [
         {
@@ -18,7 +18,7 @@
             "args": {
                 "number": 1,
                 "dx": 0,
-                "dz": 1040
+                "dz": 1060
             }
         },
         {
@@ -57,7 +57,7 @@
                 "min": 1001
             },
             "timeout": 1,
-            "label": "the only hub is about 1030 m from the troll (past the 1000 m reach; the troll stands about 32 m in front of the player so TrollHold, which pauses a troll the player looks at within 4 m, does not apply)"
+            "label": "D-217: the only hub is about 1028 m (middle) = about 1012 m (outer edge) from the troll - past the 1000 m reach, which counts from the edge; the troll stands about 32 m in front of the player so TrollHold does not hold it"
         },
         {
             "do": "hook",

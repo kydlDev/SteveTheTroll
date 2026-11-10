@@ -176,6 +176,28 @@ internal static class LedgerRules
         return list;
     }
 
+    /// T-217 O2 (manual test 20261110: the same 28, then 36 ids were logged and the "N trolls are missing" message shown again at every join): of the missing entries, the ones
+    /// the file has NOT flagged as missing yet - those are reported (log line + message); the flagged ones were reported at an earlier visit and stay in the file as evidence.
+    /// Expected outcome: only entries with Missing == false, in the order given; empty for null or an empty list.
+    internal static List<LedgerEntry> NewlyMissing(IList<LedgerEntry> missing)
+    {
+        var list = new List<LedgerEntry>();
+        if (missing == null)
+        {
+            return list;
+        }
+
+        foreach (LedgerEntry e in missing)
+        {
+            if (!e.Missing)
+            {
+                list.Add(e);
+            }
+        }
+
+        return list;
+    }
+
     private static LedgerEntry Find(IList<LedgerEntry> list, string id)
     {
         foreach (LedgerEntry e in list)

@@ -2,8 +2,14 @@
 
 ## 2.0.1
 
+- New: **ride your troll.** Craft the **Troll Halter and Seat** (workbench level 3: 15 Wolf pelt, 15 Linen thread, 10 Iron, 10 Round log), keep it in your inventory and press the alternative interact key on one of your tamed trolls. The halter and a seat basket go on the troll and you sit in the basket. You steer with the movement keys and the camera, Shift (or autorun) makes it run, the left mouse button swings its weapon and the right one does the overhead chop; the same key (or the Use key) gets you off. A ridden troll takes no farm, guard or hub orders, your other trolls still guard you. The item is never used up; after a death it is in your tombstone. Other players do not see the halter and seat yet. Config `[Riding] Enable`.
+- While you ride, the rider sits on the seat in every frame: the seat hangs on the troll's back and moves with its breathing, walking and swings, and the rider moves and leans with it. A ridden troll is moved only by its rider: its own farming, way-finding and idle behaviour are off until you get off, then it takes up its work again.
+- Trolls no longer swing at anything within 15 m of a Troll Hub's outer edge (trees, rocks and creatures there are left alone, like around the bed).
+- Trolls walk around plain rocks that give nothing instead of smashing them.
+- Trolls no longer pick up Stone and Grausten into their backpack.
+- Names of targets in the troll messages are in English.
 - Fixed: with lower graphics settings, a troll far away from you no longer stops moving. The mod now follows the game's own simulation distance and keeps every zone the game does not run around your far trolls.
-- New: no wild creature spawns within 50 m of a Troll Hub, the same protected base area a workbench gives (config `[TrollHub] NoSpawnRadius`, 0 = off, applies after a restart).
+- New: no wild creature spawns within 50 m of a Troll Hub's outer edge, the same protected base area a workbench gives (config `[TrollHub] NoSpawnRadius`, 0 = off, applies after a restart).
 - A troll that stands still on its way somewhere is now noticed after 10 s: you get a message, its map pin shows "stuck", and the mod tries to free it (keeps its area loaded, rebuilds it, then moves it along its way). The trolls are also listed in `BepInEx/config/SteveTheTroll/<world name>_<world uid>/trolls.json`.
 - Trolls now walk down and up cliffs: when the game finds no path to a tree, rock, far farm place or the way home, the troll walks the straight line itself over the terrain (up to 80 m, up to 40 m height difference) instead of giving the target up. It works in every walk a troll makes, not only on the way home.
 - A troll with a hub that has farmed everything around it now walks on to look for more (150 m at a time, the zones load around it) until it is 950 m from its hub; when nothing is left it tells you once and suggests planting trees or building a new hub elsewhere.
@@ -11,6 +17,10 @@
 - A troll no longer stands guard over a creature it cannot hit inside the bed no-hit zone; it goes back to farming after 5 s.
 - Added a flight recorder to the diagnostics: when a troll stalls, the facts of every troll are saved to a file next to the log (needs KydlCore 1.1.0).
 - The developer console commands (`stt_...`, test helpers) now stay locked until you type `stt_unlock <word>`; the word is the new setting `[General] UnlockWord` in your config (empty = they stay locked). The `stt_freeze` / `stt_unfreeze` commands are gone.
+- Changed: every Troll Hub distance (the 500 m circle a hub serves, the 950 m farm limit, the 1000 m reach, the 1250 m half-speed limit and the 1000 m between two hubs) now counts from the hub's outer edge instead of its middle. Each one reaches about 15 m further out; two hubs need about 1031 m between their middles.
+- The "trolls from your last visit are missing" message is shown once for each missing troll, not again at every login.
+- Performance: unloading a full backpack into the depot no longer stops the game for a moment (96 stacks took about 0.05 s instead of about 1.5 s in the test world), and the search for trees and rocks drops far-away objects earlier.
+- Fixed: the game log is no longer flooded with "Physics.ClosestPoint can only be used with ..." warnings while a troll works its way past rocks (0 in the lab runs of 2026-11-10; not yet checked in a long session by hand).
 - Every error the mod catches is now written to the log with the exact exception type and what the mod did instead, so the next bug report names the exception.
 
 ## 2.0.0

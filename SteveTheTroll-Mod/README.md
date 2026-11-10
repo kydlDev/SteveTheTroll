@@ -29,6 +29,7 @@ with up to 5 trolls at your side.
 - **Troll Mascot costume**: head, suit and trousers.
 - **Troll Club**: a whole tree trunk as a weapon.
 - **Troll Hub**: a big building made with the hammer (category KY-Items).
+- **Troll Halter and Seat** (workbench level 3): 15 Wolf pelt, 15 Linen thread, 10 Iron, 10 Round log. Lets you ride a tamed troll; it is never used up.
 
 The slipper recipe shows up as soon as you pick up one of its materials. The costume and the club come after the
 slippers: their recipes
@@ -158,6 +159,17 @@ durability 500. Secondary attack: a wide horizontal swing for double damage. At 
 scorched trees
 and Timberwood trees and breaks giant remains and petrified Gammeltrolls; fortress walls are too much even for the club.
 
+## Riding a troll
+
+With the **Troll Halter and Seat** in your inventory, press the alternative interact key on one of your own tamed trolls: the halter and a seat basket go on the troll and you sit in the basket. The same key (or the Use key) gets you off again.
+
+- Steer with the movement keys and the camera. Shift or autorun makes the troll run (it needs no stamina); S or block stops autorun.
+- Left mouse button: a swing with the troll's weapon. Right mouse button: the overhead chop.
+- You sit on the seat the whole time: it moves with the troll's back when it breathes, walks or swings, and you move and lean with it.
+- A ridden troll does only what its rider says: no farming, no guard duty, no walk back to its hub. Your other trolls still guard you. When you get off it goes back to work.
+- One rider per troll, and you can only ride your own trolls. The item stays in your inventory (after a death it is in your tombstone).
+- Other players do not see the halter and the seat yet (they see you on the troll's back).
+
 ## Troll Hubs
 
 A hub is a base for your trolls far from your bed. You can build one with the hammer once the Steve The Troll set bonus
@@ -166,10 +178,11 @@ active (50 wood, 20 copper ore, 20 tin ore, 20 resin, 50 stone); look for the HU
 Removing a hub with the hammer gives back what it cost.
 
 - Up to 10 hubs per player, at least 1000 m apart. Each serves a 500 m circle.
+- Every hub distance on this page counts from the hub's outer edge (the building reaches about 15 m from its middle), not from its middle.
 - Trolls go to their hub when you log out or take the slippers off, unload there and heal there like at the bed.
 - A troll uses the hub you assigned in the **Troll Hub** tab (F6), or the nearest one within 1000 m (
   `[TrollHub] AutoAssign`).
-- No wild creatures spawn within 50 m of a hub, the same protected base area a workbench gives (`[TrollHub] NoSpawnRadius`, 0 = off, restart after a change).
+- No wild creatures spawn within 50 m of a hub's outer edge, the same protected base area a workbench gives (`[TrollHub] NoSpawnRadius`, 0 = off, restart after a change).
 - Each hub has a sign (HUB 1, 2, 3 ...). Rename and style it with the pen in the tab or with E on the sign.
 - A troll with a hub does not farm further than 950 m from it. If it ends up more than 1000 m away (and you have not
   told it to
@@ -201,6 +214,7 @@ Removing a hub with the hammer gives back what it cost.
 | Trolls   | AttackKey  | Mouse 4 | Orders your nearest troll                                                                                                                                                                            |
 | TrollHub | Enable     | true    | Troll hubs. Off: trolls use the bed and the Troll Hub tab goes away at once; turning it on needs a restart                                                                                           |
 | TrollHub | AutoAssign | true    | A troll without a chosen hub uses the nearest one within 1000 m                                                                                                                                      |
+| Riding   | Enable     | true    | The Troll Halter and Seat (riding a tamed troll). Off: riding stops at once; turning it on needs a restart                                                                                         |
 | DebugLog | Enable     | false   | Detailed lines in the BepInEx log for bug reports                                                                                                                                                    |
 
 Edits to the file are picked up while the game runs.

@@ -1,138 +1,138 @@
 ﻿{
-    "name":  "hub-choice-ranges",
-    "description":  "Which hub a troll uses: the nearest own hub within 1000 m, else the bed (D-159); the real HubRegistry.For",
-    "timeout":  60,
-    "steps":  [
-                  {
-                      "do":  "use",
-                      "block":  "start",
-                      "args":  {
-                                   "clearTrolls":  false,
-                                   "slippers":  false,
-                                   "hub":  false
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.spawnTroll",
-                      "args":  {
-                                   "dz":  16,
-                                   "dx":  0
-                               },
-                      "as":  "troll"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.hubFor",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "expect":  0,
-                      "label":  "no hubs: the bed"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.addHub",
-                      "args":  {
-                                   "number":  1,
-                                   "dx":  0,
-                                   "dz":  1100
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.hubFor",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "expect":  0,
-                      "label":  "only a hub 1100 m away: not auto-assigned"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.addHub",
-                      "args":  {
-                                   "number":  2,
-                                   "dx":  800,
-                                   "dz":  0
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.hubFor",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "expect":  2,
-                      "label":  "800 m hub beats the 1100 m one"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.addHub",
-                      "args":  {
-                                   "number":  3,
-                                   "dx":  0,
-                                   "dz":  -990
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.hubFor",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "expect":  2,
-                      "label":  "the nearer (800 m) stays"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.clearHubs"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.addHub",
-                      "args":  {
-                                   "number":  4,
-                                   "dx":  0,
-                                   "dz":  990
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.hubFor",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "expect":  4,
-                      "label":  "about 974 m from the troll (990 from the player, troll 16 m ahead) is in reach"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.clearHubs"
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.addHub",
-                      "args":  {
-                                   "number":  5,
-                                   "dx":  0,
-                                   "dz":  1020
-                               }
-                  },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.hubFor",
-                      "args":  {
-                                   "troll":  "troll"
-                               },
-                      "expect":  0,
-                      "label":  "1004 m from the troll (1020 from the player, troll 16 m ahead): out of reach"
-                  }
-              ],
-    "asserts":  [
-                    {
-                        "check":  "noErrors",
-                        "source":  "SteveTheTroll"
-                    }
-                ]
+    "name": "hub-choice-ranges",
+    "description": "Which hub a troll uses: the nearest own hub within 1000 m of the hub's OUTER EDGE (D-217: every hub distance counts from the edge, 15.5 m from the hub's middle), else the bed (D-159); the real HubRegistry.For",
+    "timeout": 60,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": false,
+                "slippers": false,
+                "hub": false
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dz": 16,
+                "dx": 0
+            },
+            "as": "troll"
+        },
+        {
+            "do": "hook",
+            "name": "stt.hubFor",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 0,
+            "label": "no hubs: the bed"
+        },
+        {
+            "do": "hook",
+            "name": "stt.addHub",
+            "args": {
+                "number": 1,
+                "dx": 0,
+                "dz": 1100
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.hubFor",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 0,
+            "label": "only a hub 1100 m away: not auto-assigned"
+        },
+        {
+            "do": "hook",
+            "name": "stt.addHub",
+            "args": {
+                "number": 2,
+                "dx": 800,
+                "dz": 0
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.hubFor",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 2,
+            "label": "800 m hub beats the 1100 m one"
+        },
+        {
+            "do": "hook",
+            "name": "stt.addHub",
+            "args": {
+                "number": 3,
+                "dx": 0,
+                "dz": -990
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.hubFor",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 2,
+            "label": "the nearer (800 m) stays"
+        },
+        {
+            "do": "hook",
+            "name": "stt.clearHubs"
+        },
+        {
+            "do": "hook",
+            "name": "stt.addHub",
+            "args": {
+                "number": 4,
+                "dx": 0,
+                "dz": 1025
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.hubFor",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 4,
+            "label": "D-217: 1009 m from the hub's middle = 993.5 m from its outer edge (hub 1025 m from the player, troll 16 m ahead) is in reach - it was out of reach while the middle counted"
+        },
+        {
+            "do": "hook",
+            "name": "stt.clearHubs"
+        },
+        {
+            "do": "hook",
+            "name": "stt.addHub",
+            "args": {
+                "number": 5,
+                "dx": 0,
+                "dz": 1040
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.hubFor",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": 0,
+            "label": "D-217: 1024 m from the hub's middle = 1008.5 m from its outer edge (hub 1040 m from the player, troll 16 m ahead): out of reach"
+        }
+    ],
+    "asserts": [
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
 }

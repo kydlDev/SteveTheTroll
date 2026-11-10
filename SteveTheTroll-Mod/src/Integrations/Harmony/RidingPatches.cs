@@ -14,6 +14,12 @@ internal static class RidingPatch_SkipAi
     [HarmonyPriority(Priority.First)]
     private static bool Prefix(MonsterAI __instance)
     {
+        // performance: this runs for every creature's AI step - nobody rides (the usual case) = no component lookup at all
+        if (RideSession.Troll == null)
+        {
+            return RideSession.Troll == null;
+        }
+
         var c = __instance.GetComponent<Character>();
         return !RideSession.IsRidden(c);
     }
@@ -100,6 +106,12 @@ internal static class RidingPatch_MoveDirTrace
         }
 
         TrollSaddle.ForeignMoveSets++;
+        // T-217 R8: the stack is only walked when the line is due (it was built on every call and thrown away by the rate limit)
+        if (!global::KydlCore.Common.ModLog.IsDue("RidingPatch.moveDirTrace", 1d))
+        {
+            return;
+        }
+
         var st = new System.Diagnostics.StackTrace(2, false);
         string who = "";
         for (int i = 0; i < st.FrameCount && i < 5; i++)
@@ -107,7 +119,7 @@ internal static class RidingPatch_MoveDirTrace
             System.Reflection.MethodBase m = st.GetFrame(i).GetMethod();
             who += (i > 0 ? " <- " : "") + m.DeclaringType + "." + m.Name;
         }
-        global::KydlCore.Common.ModLog.Every("RidingPatch.moveDirTrace", 1d, $"RidingPatch: the ridden troll's move direction was set to {dir:F2} by {who}");
+        global::KydlCore.Common.ModLog.Every("RidingPatch.moveDirTrace", 1d, $"RidingPatch: the ridden troll's move direction was set to {dir:F2} by {who} ({TrollSaddle.ForeignMoveSets} foreign set(s) since the last count reset; expected 0 - every driver asks RiddenGate first)");
     }
 }
 
@@ -117,7 +129,8 @@ internal static class RidingBlock
 {
     internal static bool Ridden(BaseAI ai)
     {
-        if (ai == null)
+        // performance: MoveTo / MoveTowards / StopMoving / LookAt / LookTowards of EVERY creature come through here - nobody rides (the usual case) = no component lookup
+        if (ai == null || RideSession.Troll == null)
         {
             return false;
         }

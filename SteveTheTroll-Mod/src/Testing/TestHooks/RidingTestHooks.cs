@@ -161,6 +161,106 @@ internal static class RidingTestHooks
         return TrollSaddle.ForeignMoveSets;
     }
 
+    /// T-217 R3: the biggest angle (whole degrees, rounded up) between the rider's lean and the seat's lean in attack frames since the sampling started. Expected outcome: a few
+    /// degrees when the rider leans with the seat; about the seat's own lean (stt.rideSeatTiltAttack) when the rider stays upright.
+    [TestHook("stt.rideTiltGapAttack")]
+    private static int TiltGapAttack(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.CeilToInt(s.Tilt.GapDegMax);
+    }
+
+    /// User 2026-11-10 10:37 (the rider is not glued to the chair): the biggest angle (whole degrees, rounded up) between the rider's lean and the seat's lean in ANY
+    /// sampled frame since stt.rideSample. Expected outcome: about 0 for a rider who sits ON the chair whatever the troll's body does.
+    [TestHook("stt.rideTiltGap")]
+    private static int TiltGap(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.CeilToInt(s.Tilt.GapDegAllMax);
+    }
+
+    /// T-217 R3: how far (whole degrees, rounded down) the seat itself leaned in attack frames - 0 means the attack never leaned the seat and the tilt gap proves nothing.
+    [TestHook("stt.rideSeatTiltAttack")]
+    private static int SeatTiltAttack(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.FloorToInt(s.Tilt.AnchorTiltDegMax);
+    }
+
+    /// T-217 R2 / R5: the biggest flat distance (cm) of the ridden troll's root from the place where it settled, in any period without rider input since the last
+    /// stt.rideSample / stt.rideStillReset. Expected outcome: a few cm for a standing troll; metres when something else moves it.
+    [TestHook("stt.rideDrift")]
+    private static int Drift(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.CeilToInt(s.Still.DriftCm);
+    }
+
+    /// T-217 R5: the ridden troll's flat (XZ) speed now, cm/s.
+    [TestHook("stt.rideSpeedXZ")]
+    private static int SpeedXZ(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.CeilToInt(s.Still.SpeedXZCm);
+    }
+
+    /// T-217 R5: what the saddle's standing watch says now: "Driven", "Settling", "Still" or "Drifting".
+    [TestHook("stt.rideStill")]
+    private static string StillNow(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? "no saddle" : s.Still.Last.ToString();
+    }
+
+    /// T-217 R5: forgets the biggest drift (a new standing measurement starts). Expected outcome: 0.
+    [TestHook("stt.rideStillReset")]
+    private static int StillReset(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.RoundToInt(s.Still.Reset());
+    }
+
+    /// T-217 R5: is the saddle's autorun toggle on (1) or off (0)? A latched autorun is "driven", not drift.
+    [TestHook("stt.rideAutoRun")]
+    private static int AutoRun(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : s.AutoRunOn ? 1 : 0;
+    }
+
+    /// T-217 R1: how often an autonomous driver (farming, recovery, idle, return, rage, chase, slam) was refused on a ridden troll since stt.riddenGateReset.
+    /// Expected outcome: above 0 when a busy troll is mounted (its brains asked and were refused), together with stt.rideForeignMoveSets == 0 and no drift.
+    [TestHook("stt.riddenGateRefusals")]
+    private static int GateRefusals() => SteveTheTroll.Features.Trolls.Infrastructure.RiddenGate.Refusals;
+
+    /// T-217 R1: starts both counts again - the gate refusals and the foreign move-direction sets (stt.rideForeignMoveSets). Expected outcome: 0.
+    [TestHook("stt.riddenGateReset")]
+    private static int GateReset()
+    {
+        TrollSaddle.ForeignMoveSets = 0;
+        return SteveTheTroll.Features.Trolls.Infrastructure.RiddenGate.ResetRefusals();
+    }
+
+    /// T-217 R2, negative test only (meta-ride-shove-fails): moves the ridden troll's root `metres` forward by writing transform.position and Rigidbody.position directly,
+    /// exactly what TrollRecovery.LedgeStep did under the rider in the manual test. Expected outcome: the metres moved; the standing watch must call it Drifting.
+    [TestHook("stt.rideShove")]
+    private static float Shove(GameObject troll, float metres)
+    {
+        Vector3 before = troll.transform.position;
+        Vector3 target = before + troll.transform.forward * metres;
+        troll.transform.position = target;
+        Rigidbody body = troll.GetComponent<Rigidbody>();
+        if (body != null)
+        {
+            body.position = target;
+            body.linearVelocity = Vector3.zero;
+        }
+
+        float moved = Vector3.Distance(before, troll.transform.position);
+        ModLog.Info($"RidingTestHooks: rideShove moved the root of {troll.name} by {moved:F2} m (asked {metres:F2} m) from {before:F1} - a deliberate foreign root write for the negative test");
+        return moved;
+    }
+
     [TestHook("stt.rideAnchorGap")]
     private static int AnchorGap(GameObject troll)
     {

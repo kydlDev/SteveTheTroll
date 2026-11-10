@@ -63,7 +63,7 @@ internal static partial class TrollRegistry
         if (hub != null)
         {
             t.Dest = hub.Name;
-            t.BedDistance = HubGeometry.Flat(hub.Pos - pos);
+            t.BedDistance = HubGeometry.FromEdge(hub.Pos, pos); // D-217: shown as the rules count it, from the hub's outer edge
         }
         else
         {

@@ -1,0 +1,95 @@
+﻿{
+    "name": "meta-ride-shove-fails",
+    "description": "T-217 R2 negative test (DrakesTestLab expectFailure): the ridden troll's root is moved 3 m by a direct transform / Rigidbody write while its rider asks for nothing - exactly what TrollRecovery.LedgeStep did in the manual test. The drift assertion of ride-stop MUST fail on it; passes only when it fails (a drift check that cannot see a root write proves nothing).",
+    "expectFailure": "root drift",
+    "timeout": 60,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": true,
+                "slippers": true,
+                "hub": true
+            }
+        },
+        {
+            "do": "use",
+            "block": "openGround",
+            "args": {
+                "metres": 100,
+                "radius": 30
+            }
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 0,
+                "dz": 16
+            },
+            "as": "troll"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "use",
+            "block": "rideMount"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideSample",
+            "args": {
+                "troll": "troll",
+                "on": 1
+            }
+        },
+        {
+            "do": "wait",
+            "until": {
+                "check": "hook",
+                "name": "stt.rideStill",
+                "args": {
+                    "troll": "troll"
+                },
+                "expect": "Still"
+            },
+            "timeout": 8,
+            "label": "the mounted troll stands"
+        },
+        {
+            "do": "hook",
+            "name": "stt.rideShove",
+            "args": {
+                "troll": "troll",
+                "metres": 3
+            },
+            "label": "a foreign root write of 3 m"
+        },
+        {
+            "do": "wait",
+            "seconds": 2
+        }
+    ],
+    "asserts": [
+        {
+            "check": "hook",
+            "name": "stt.rideDrift",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 50,
+            "label": "root drift with no rider input (cm) - must FAIL here: the root was moved 300 cm"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
+}

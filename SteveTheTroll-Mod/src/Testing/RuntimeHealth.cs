@@ -98,10 +98,10 @@ internal static class RuntimeHealth
             }
 
             if (hub != null && HealthRules.FarmingBeyondLeash(farmer != null && !farmer.Unloading, following, true,
-                    HubGeometry.Flat(hub.Pos - c.transform.position), HubRules.FarmLeash))
+                    HubGeometry.FromEdge(hub.Pos, c.transform.position), HubRules.FarmLeash))
             {
                 problems += Report(c, "farm-leash",
-                    "farming " + HubGeometry.Flat(hub.Pos - c.transform.position).ToString("F0") + " m from " +
+                    "farming " + HubGeometry.FromEdge(hub.Pos, c.transform.position).ToString("F0") + " m from the outer edge of " +
                     hub.Name + " (leash " + HubRules.FarmLeash.ToString("F0") + " m)", text);
             }
 

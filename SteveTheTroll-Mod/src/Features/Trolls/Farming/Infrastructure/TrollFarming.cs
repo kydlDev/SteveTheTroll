@@ -52,7 +52,7 @@ internal static partial class TrollFarming
     internal static bool LastScanFull;
 
     private static long _gatherTicks, _gatherWorst;
-    private static int _gatherCalls, _gatherScene, _gatherCands;
+    private static int _gatherCalls, _gatherScene, _gatherCands, _gatherNear;
     private static float _nextGatherLog;
 
     private static readonly Dictionary<int, FarInfo> FarKnown = new();
@@ -196,6 +196,7 @@ internal static partial class TrollFarming
     /// objects once per goal and range - up to 30 passes over ~5000 objects). Expected outcome: the list filled (cleared first).
     internal static List<Candidate> Gather(Vector3 center, float range, List<Candidate> into)
     {
+        const float GatherSlackMetres = 4f;
         into.Clear();
         ZNetScene scene = ZNetScene.instance;
         Dictionary<ZDO, ZNetView> all = scene != null ? Instances(scene) : null;
@@ -208,13 +209,25 @@ internal static partial class TrollFarming
         float r2 = range * range;
         List<NoHitCircle> noHitCircles = TrollNoHit.Circles(); // D-214: the bed's circle and every Troll Hub's
         bool noHit = noHitCircles.Count > 0;
-        foreach (ZNetView v in all.Values)
+        // T-217 O5 (manual test 20261110: 13 .. 25 ms per call with 24,000 .. 29,000 scene objects): the far objects are thrown out by their ZDO position - a plain field,
+        // no call into the engine - before the object itself is touched; only what lies within the range (plus GatherSlackMetres for an object that moved since its
+        // last sync, e.g. a rolling log) pays for the Unity null check and transform.position
+        float coarse2 = (range + GatherSlackMetres) * (range + GatherSlackMetres);
+        int near = 0;
+        foreach (KeyValuePair<ZDO, ZNetView> kv in all)
         {
+            if ((kv.Key.GetPosition() - center).sqrMagnitude > coarse2)
+            {
+                continue;
+            }
+
+            ZNetView v = kv.Value;
             if (v == null)
             {
                 continue;
             }
 
+            near++;
             Vector3 pos = v.transform.position;
             if ((pos - center).sqrMagnitude > r2)
             {
@@ -241,6 +254,7 @@ internal static partial class TrollFarming
         _gatherCalls++;
         _gatherScene += all.Count;
         _gatherCands += into.Count;
+        _gatherNear += near;
         if (took > _gatherWorst)
         {
             _gatherWorst = took;
@@ -254,10 +268,10 @@ internal static partial class TrollFarming
                            (_gatherTicks * perMs).ToString("F2") + " ms, avg " +
                            (_gatherTicks * perMs / _gatherCalls).ToString("F3") + " ms, worst " +
                            (_gatherWorst * perMs).ToString("F2")
-                           + " ms; scene " + _gatherScene / _gatherCalls + " object(s), " +
+                           + " ms; scene " + _gatherScene / _gatherCalls + " object(s), " + _gatherNear / _gatherCalls + " within range by their ZDO position, " +
                            _gatherCands / _gatherCalls + " candidate(s) per call");
             _gatherTicks = _gatherWorst = 0;
-            _gatherCalls = _gatherScene = _gatherCands = 0;
+            _gatherCalls = _gatherScene = _gatherCands = _gatherNear = 0;
         }
 
         return into;

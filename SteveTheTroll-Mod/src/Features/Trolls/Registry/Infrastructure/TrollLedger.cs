@@ -17,7 +17,7 @@ namespace SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 ///     NEXT_STEPS item 4, step 4: the troll ledger, BepInEx/config/SteveTheTroll/&lt;world name&gt;_&lt;world uid&gt;/trolls.json - every own troll with its last known place, health and whether it is
 ///     frozen, written by the client that plays the troll's owner (every WriteSeconds, only when the content changed, never throws). The file survives a crash and a relog.
 ///     READ-BACK (2026-11-06): ReconcileDelay seconds after joining, the SERVER compares the file with the trolls that exist in the world (a client does not know every ZDO and does nothing):
-///     an entry without a troll is reported once (log + a message) and kept in the file as "missing" (with the time it was first noticed) so the evidence survives. A file of another world
+///     an entry without a troll is reported once (log + a message, at the first read-back that misses it: LedgerRules.NewlyMissing) and kept in the file as "missing" (with the time it was first noticed) so the evidence survives. A file of another world
 ///     (name or uid differs) is never used. The rules are LedgerRules; this part reads and writes the file and the world.
 /// </summary>
 internal static class TrollLedger
@@ -189,16 +189,27 @@ internal static class TrollLedger
         _previous = file;
         List<LedgerEntry> missing = LedgerRules.MissingEntries(file, ids);
         LastMissing = missing;
-        ModLog.Info("TrollLedger: read-back - " + file.Count + " troll(s) in the file, " + ids.Count + " troll ZDO(s) in the world, " + missing.Count + " missing" + (why.Length > 0 ? " (" + why + ")" : ""));
-        foreach (LedgerEntry e in missing)
+        // T-217 O2: "reported once" - only entries the file has not flagged yet get their line and the message; the ones flagged at an earlier visit are counted, not repeated
+        List<LedgerEntry> fresh = LedgerRules.NewlyMissing(missing);
+        ModLog.Info("TrollLedger: read-back - " + file.Count + " troll(s) in the file, " + ids.Count + " troll ZDO(s) in the world, " + missing.Count + " missing: " + fresh.Count + " new, " +
+                    (missing.Count - fresh.Count) + " already reported at an earlier visit" + (why.Length > 0 ? " (" + why + ")" : ""));
+        foreach (LedgerEntry e in fresh)
         {
-            ModLog.Info("TrollLedger: " + e.Name + " [" + e.Id + "] last seen at " + e.X.ToString("0") + " / " + e.Z.ToString("0") + (e.Missing ? ", missing since " + e.MissingSince : "") + " is not in this world now");
+            ModLog.Info("TrollLedger: " + e.Name + " [" + e.Id + "] last seen at " + e.X.ToString("0") + " / " + e.Z.ToString("0") + " is not in this world now (first time noticed)");
         }
 
-        if (missing.Count > 0)
+        foreach (LedgerEntry e in missing)
         {
-            LedgerEntry first = missing[0];
-            Notify.Show(Loc.T("stevethetroll_ledger_missing", missing.Count.ToString(), first.Name, first.X.ToString("0"), first.Z.ToString("0")), Notify.Kind.Farm);
+            if (e.Missing)
+            {
+                ModLog.Verbose("TrollLedger: " + e.Name + " [" + e.Id + "] still missing since " + e.MissingSince + " (reported before, kept as evidence)");
+            }
+        }
+
+        if (fresh.Count > 0)
+        {
+            LedgerEntry first = fresh[0];
+            Notify.Show(Loc.T("stevethetroll_ledger_missing", fresh.Count.ToString(), first.Name, first.X.ToString("0"), first.Z.ToString("0")), Notify.Kind.Farm);
         }
 
         return missing.Count;

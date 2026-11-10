@@ -132,8 +132,8 @@ public class Plugin : BaseUnityPlugin
                 _installer.Refresh();
             }
         };
-        ModLog.Verbose("Plugin: features " + (installed ? "started" : "had failures") + " (architecture " +
-                       Architecture.Tag + ")");
+        ModLog.Verbose("Plugin: features " + (installed ? "started" : "had failures") + " (layout " +
+                       Architecture.Tag + ", architecture marker " + Architecture.Marker + ")");
         CommandManager.Instance.AddConsoleCommand(new BuildDumpCommand()); // T-008b: stt_dumpbuild (backpack model)
         CommandManager.Instance.AddConsoleCommand(new ClearCommand()); // D-093: stt_clear (clean test area)
         CommandManager.Instance.AddConsoleCommand(new ClearDepotsCommand()); // D-104: stt_cleardepots (start clean)

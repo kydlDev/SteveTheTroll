@@ -1,0 +1,196 @@
+﻿{
+    "name": "perf-working-trolls",
+    "description": "User 2026-11-10 (goal: as close to 140 fps as possible with everything on high, vsync on, debug log off; about 160 fps without the mod): what the mod's WORK costs in frames - the average fps of the test scene without any troll (15 s, the baseline), then of the same scene with 4 tamed trolls walking to and felling 4 trees (30 s). The numbers (average, 1 % low, worst frame, vsync, display rate, debug log on / off) are written to the log by stt.perfFps; a run with the debug log ON (every normal lab run) only shows the trend.",
+    "timeout": 120,
+    "steps": [
+        {
+            "do": "use",
+            "block": "start",
+            "args": {
+                "clearTrolls": true,
+                "slippers": true,
+                "hub": true
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.perfStart"
+        },
+        {
+            "do": "wait",
+            "seconds": 15
+        },
+        {
+            "do": "hook",
+            "name": "stt.perfFps",
+            "args": {
+                "what": "the scene with no troll"
+            }
+        },
+        {
+            "do": "hook",
+            "name": "stt.perfBaseline"
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": -15,
+                "dz": 18
+            },
+            "as": "t0"
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": -5,
+                "dz": 18
+            },
+            "as": "t1"
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 5,
+                "dz": 18
+            },
+            "as": "t2"
+        },
+        {
+            "do": "hook",
+            "name": "stt.spawnTroll",
+            "args": {
+                "dx": 15,
+                "dz": 18
+            },
+            "as": "t3"
+        },
+        {
+            "do": "wait",
+            "seconds": 1
+        },
+        {
+            "do": "hook",
+            "name": "stt.plantTree",
+            "args": {
+                "dx": -15,
+                "dz": 40
+            },
+            "as": "tree0"
+        },
+        {
+            "do": "hook",
+            "name": "stt.plantTree",
+            "args": {
+                "dx": -5,
+                "dz": 40
+            },
+            "as": "tree1"
+        },
+        {
+            "do": "hook",
+            "name": "stt.plantTree",
+            "args": {
+                "dx": 5,
+                "dz": 40
+            },
+            "as": "tree2"
+        },
+        {
+            "do": "hook",
+            "name": "stt.plantTree",
+            "args": {
+                "dx": 15,
+                "dz": 40
+            },
+            "as": "tree3"
+        },
+        {
+            "do": "hook",
+            "name": "stt.observe",
+            "args": {
+                "back": 15
+            },
+            "label": "the player watches from 15 m back"
+        },
+        {
+            "do": "hook",
+            "name": "stt.farmOn",
+            "args": {
+                "troll": "t0",
+                "source": "tree0"
+            },
+            "expect": true,
+            "label": "troll 1 takes its tree"
+        },
+        {
+            "do": "hook",
+            "name": "stt.farmOn",
+            "args": {
+                "troll": "t1",
+                "source": "tree1"
+            },
+            "expect": true,
+            "label": "troll 2 takes its tree"
+        },
+        {
+            "do": "hook",
+            "name": "stt.farmOn",
+            "args": {
+                "troll": "t2",
+                "source": "tree2"
+            },
+            "expect": true,
+            "label": "troll 3 takes its tree"
+        },
+        {
+            "do": "hook",
+            "name": "stt.farmOn",
+            "args": {
+                "troll": "t3",
+                "source": "tree3"
+            },
+            "expect": true,
+            "label": "troll 4 takes its tree"
+        },
+        {
+            "do": "hook",
+            "name": "stt.perfStart"
+        },
+        {
+            "do": "wait",
+            "seconds": 30
+        },
+        {
+            "do": "check",
+            "check": "hook",
+            "name": "stt.perfPercentOfBaseline",
+            "args": {
+                "what": "4 trolls walking to and felling 4 trees"
+            },
+            "min": 1,
+            "label": "frame rate with 4 working trolls as a percentage of the same scene without trolls (logged; the limit is set once two runs have measured it - no guessed limit)"
+        },
+        {
+            "do": "hook",
+            "name": "stt.perfFps",
+            "args": {
+                "what": "4 trolls walking to and felling 4 trees"
+            }
+        }
+    ],
+    "asserts": [
+        {
+            "check": "hook",
+            "name": "stt.perfStop",
+            "expect": true,
+            "label": "the frame meter is removed again"
+        },
+        {
+            "check": "noErrors",
+            "source": "SteveTheTroll"
+        }
+    ]
+}

@@ -78,18 +78,24 @@ internal static partial class TrollDepot
             yield break;
         }
 
-        float r2 = SearchRadius * SearchRadius;
-        foreach (ZNetView v in all.Values)
+        // T-217 O4 / O5: the prefab and the distance are read from the ZDO first (plain fields); only objects of that prefab near the place are touched in the engine.
+        // Before, every networked object of the scene (13,000 .. 29,000) paid for a Unity null check, transform.position and a prefab-name string per call
+        float r2 = SearchRadius * SearchRadius, coarse2 = (SearchRadius + 4f) * (SearchRadius + 4f);
+        int hash = prefab.GetStableHashCode();
+        foreach (KeyValuePair<ZDO, ZNetView> kv in all)
         {
+            if (kv.Key.GetPrefab() != hash || (kv.Key.GetPosition() - at).sqrMagnitude > coarse2)
+            {
+                continue;
+            }
+
+            ZNetView v = kv.Value;
             if (v == null || !v.IsValid() || (v.transform.position - at).sqrMagnitude > r2)
             {
                 continue;
             }
 
-            if (Utils.GetPrefabName(v.gameObject) == prefab)
-            {
-                yield return v;
-            }
+            yield return v;
         }
     }
 
@@ -248,13 +254,18 @@ internal static partial class TrollDepot
             return 0;
         }
 
+        // T-217 O4 (manual test 00:27:45: a 1,538 ms frame 59 ms after "moved 96 stack(s)"; lab full-backpack-unloads 1,594 ms): the depot chests were searched in the whole
+        // scene and sorted again for EVERY stack. They are found and sorted once per unload and again only after a depot was built
+        long t0 = System.Diagnostics.Stopwatch.GetTimestamp();
+        Vector3 from = troll.transform.position;
+        List<Container> chests = SortedChests(bed, owner, from);
         int moved = 0, built = 0;
         for (int i = 0; i < BackpackStore.ChestCount; i++)
         {
             Inventory inv = BackpackStore.Read(zdo, i);
             foreach (ItemDrop.ItemData item in new List<ItemDrop.ItemData>(inv.GetAllItems()))
             {
-                Container into = Room(bed, owner, item, troll.transform.position);
+                Container into = Room(chests, item);
                 UnloadStep step = Unloads.Evaluate(new UnloadInput(trollOwner, true, into != null, built, MaxNewDepots))
                     .Value;
                 while (step == UnloadStep.BuildDepot)
@@ -267,7 +278,8 @@ internal static partial class TrollDepot
                     }
 
                     built++;
-                    into = Room(bed, owner, item, troll.transform.position);
+                    chests = SortedChests(bed, owner, from);
+                    into = Room(chests, item);
                     step = Unloads.Evaluate(new UnloadInput(trollOwner, true, into != null, built, MaxNewDepots)).Value;
                 }
 
@@ -286,21 +298,28 @@ internal static partial class TrollDepot
         }
 
         Release(troll);
+        double tookMs = (System.Diagnostics.Stopwatch.GetTimestamp() - t0) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
         ModLog.Info("TrollDepot: " + TrollTaming.Tag(troll) + " moved " + moved + " stack(s) into the depot, " + left +
-                    " left, " + built + " depot(s) built");
+                    " left, " + built + " depot(s) built, " + chests.Count + " depot chest(s) in reach, took " + tookMs.ToString("F1") + " ms");
         return moved;
     }
 
     // A depot chest that takes the whole stack, nearest to the troll first (D-107: the stack it walked to), this client takes ownership
     // of it when nobody has it open.
-    private static Container Room(Vector3 bed, long owner, ItemDrop.ItemData item, Vector3 from)
+    private static List<Container> SortedChests(Vector3 bed, long owner, Vector3 from)
     {
         List<Container> list = Chests(bed, owner);
         list.Sort((a, b) =>
             (a.transform.position - from).sqrMagnitude.CompareTo((b.transform.position - from).sqrMagnitude));
-        foreach (Container c in list)
+        return list;
+    }
+
+    // `sorted` = SortedChests of this unload (nearest first)
+    private static Container Room(List<Container> sorted, ItemDrop.ItemData item)
+    {
+        foreach (Container c in sorted)
         {
-            if (c.IsInUse() || !c.GetInventory().CanAddItem(item))
+            if (c == null || c.IsInUse() || !c.GetInventory().CanAddItem(item))
             {
                 continue;
             }

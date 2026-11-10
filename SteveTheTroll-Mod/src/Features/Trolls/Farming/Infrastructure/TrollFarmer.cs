@@ -18,6 +18,7 @@ using SteveTheTroll.Features.Trolls.Taming.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using SteveTheTroll.Presentation.Notifications;
 using SteveTheTroll.Ui;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Farming.Infrastructure;
@@ -428,6 +429,13 @@ internal sealed partial class TrollFarmer : MonoBehaviour
     /// false = fighting / done -> the game's AI runs.
     internal bool Step(MonsterAI ai, float dt)
     {
+        // T-217 R1: never farms, walks or recovers under a rider (false = farming did not drive the troll)
+        if (RiddenGate.Refuses(_ctx.Humanoid, "TrollFarmer.Step"))
+        {
+            _lastStep = Time.time; // the Part3 watchdog: a ridden troll is not a stalled farmer
+            return false;
+        }
+
         if (_stallLogged)
         {
             _stallLogged = false;

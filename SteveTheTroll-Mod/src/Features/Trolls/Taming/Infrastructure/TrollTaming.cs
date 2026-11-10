@@ -218,8 +218,33 @@ internal static class TrollTaming
     /// The troll's prefab is Troll (not Troll_Summoned or other mods' trolls).
     public static bool IsTroll(Component c)
     {
-        return c != null && Utils.GetPrefabName(c.gameObject) == TrollPrefab;
+        if (c == null)
+        {
+            return c != null;
+        }
+
+        // Performance (user 2026-11-10, fps goal): Utils.GetPrefabName builds a new string on every call, and this question is asked for every tamed character in several
+        // per-physics-step patches (speed, swimming, lava, damage modifiers) and for every creature in the AI patches. An object's prefab never changes, so the answer is
+        // remembered per GameObject (instance ids are not handed out twice in a session; the table is emptied at TrollCacheLimit entries anyway)
+        int id = c.gameObject.GetInstanceID();
+        bool troll;
+        if (!TrollById.TryGetValue(id, out troll))
+        {
+            if (TrollById.Count >= TrollCacheLimit)
+            {
+                ModLog.Verbose("TrollTaming: the is-a-troll table reached " + TrollById.Count + " objects - emptied, it fills again as creatures are asked about");
+                TrollById.Clear();
+            }
+
+            troll = Utils.GetPrefabName(c.gameObject) == TrollPrefab;
+            TrollById[id] = troll;
+        }
+
+        return troll;
     }
+
+    private const int TrollCacheLimit = 4096;
+    private static readonly System.Collections.Generic.Dictionary<int, bool> TrollById = new();
 
     /// D-066 (TEST-029: Mouse 4 / Go farm right after E-follow - "got a follow order" again at once): the game keeps the follow order
     /// in the ZDO too (s_follow, the player's name) and puts it back; clearing it means clearing both. Owner of the ZDO only.

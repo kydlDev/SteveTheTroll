@@ -8,6 +8,7 @@ using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Movement.Infrastructure;
 using SteveTheTroll.Features.Trolls.Orders.Infrastructure;
+using SteveTheTroll.Features.Trolls.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Features.Trolls.Combat.Infrastructure;
@@ -278,6 +279,12 @@ internal sealed class TrollChase : MonoBehaviour
     internal bool Step(MonsterAI ai, float dt)
     {
         Humanoid me = GetComponent<Humanoid>();
+        // T-217 R1: no autonomous step under a rider (false = this step did not drive the troll)
+        if (RiddenGate.Refuses(me, "TrollChase.Step"))
+        {
+            return false;
+        }
+
         bool over = me == null || me.IsDead() || _target == null || _target.IsDead() ||
                     Time.time - _start > ModSettings.CounterChaseSeconds.Value
                     || Vector3.Distance(transform.position, _target.transform.position) > ChaseRange;
