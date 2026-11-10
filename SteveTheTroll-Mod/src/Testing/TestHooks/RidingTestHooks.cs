@@ -154,6 +154,13 @@ internal static class RidingTestHooks
         return s == null ? -1 : Mathf.RoundToInt(s.SpeedMaxCm);
     }
 
+    /// D-216: how often something other than the saddle set the ridden troll's move direction since the last stt.rideDrive (the farming brain used to do it every tick).
+    [TestHook("stt.rideForeignMoveSets")]
+    private static int ForeignMoveSets(GameObject troll)
+    {
+        return TrollSaddle.ForeignMoveSets;
+    }
+
     [TestHook("stt.rideAnchorGap")]
     private static int AnchorGap(GameObject troll)
     {
@@ -237,6 +244,7 @@ internal static class RidingTestHooks
 
         s.TestDrive = forward != 0;
         s.TestRun = forward == 2;
+        TrollSaddle.ForeignMoveSets = 0;
         return $"drive {s.TestDrive}, run {s.TestRun}";
     }
 }

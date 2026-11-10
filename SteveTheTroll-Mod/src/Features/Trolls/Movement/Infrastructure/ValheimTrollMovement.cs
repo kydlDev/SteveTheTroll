@@ -52,6 +52,12 @@ internal sealed class ValheimTrollMovement : ITrollMovement
 
     public void Stop()
     {
+        // D-216: a ridden troll is steered only by the saddle; nothing of the mod's own brains may zero its move direction or its run flag (the rider's Shift)
+        if (TrollRiding.Is(_body))
+        {
+            return;
+        }
+
         _ai.StopMoving();
         // 2026-11-07 (review of full run 3, ledge walk pushed sideways): the character's own movement intent is cleared as well, whatever the game's StopMoving leaves of it
         if (_body != null)

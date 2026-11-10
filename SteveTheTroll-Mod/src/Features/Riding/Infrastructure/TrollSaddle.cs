@@ -214,6 +214,9 @@ internal sealed class TrollSaddle : MonoBehaviour, IDoodadController
     /// Lab: the rider holds the run key while the saddle drives the troll (D-214: a ridden troll must reach its run speed, 125 % / 150 % of vanilla).
     internal bool TestRun { get; set; }
 
+    /// D-216: how many times something other than the saddle set the ridden troll's move direction (the trace patch counts them); must stay 0.
+    internal static int ForeignMoveSets;
+
     /// Expected outcome: the troll and the seat transform are remembered.
     internal bool Setup(Character troll, Transform seat)
     {

@@ -9,6 +9,9 @@ namespace SteveTheTroll.Integrations.Harmony;
 [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.UpdateAI))]
 internal static class RidingPatch_SkipAi
 {
+    // D-216 (user 2026-11-10: "I pressed Shift, nothing happened"): this prefix must run BEFORE TrollFarming.Steer (another UpdateAI prefix). Harmony skips the later prefixes only when an
+    // earlier one returns false; with the default priority the farming brain ran first on the ridden troll and called Movement.Stop() (move dir 0, SetRun(false)) every tick, wiping what the saddle had just set.
+    [HarmonyPriority(Priority.First)]
     private static bool Prefix(MonsterAI __instance)
     {
         var c = __instance.GetComponent<Character>();
@@ -96,6 +99,7 @@ internal static class RidingPatch_MoveDirTrace
             return;
         }
 
+        TrollSaddle.ForeignMoveSets++;
         var st = new System.Diagnostics.StackTrace(2, false);
         string who = "";
         for (int i = 0; i < st.FrameCount && i < 5; i++)
