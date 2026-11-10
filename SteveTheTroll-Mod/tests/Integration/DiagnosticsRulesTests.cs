@@ -38,13 +38,15 @@ public class DiagnosticsRulesTests
         return files.Distinct();
     }
 
-    [Test] public void PerFrameCode_HasAThrottledStatusLine()
+    [Test]
+    public void PerFrameCode_HasAThrottledStatusLine()
     {
         var silent = GameSideFiles().Where(f => { var c = Code(f); return PerFrame.IsMatch(c) && !Throttled.IsMatch(c); }).Select(Path.GetFileName).ToList();
         Assert.That(silent, Is.Empty, "PROJECT_RULES 28: per-frame code (Update / FixedUpdate / LateUpdate / Tick) writes ModLog.Every(key, seconds, \"what it does now, with values and units\")");
     }
 
-    [Test] public void CreatureCode_IsTrackedByTheFlightRecorder()
+    [Test]
+    public void CreatureCode_IsTrackedByTheFlightRecorder()
     {
         var files = GameSideFiles().ToList();
         var driving = files.Where(f => CreatureType.IsMatch(Code(f))).Select(Path.GetFileName).ToList();

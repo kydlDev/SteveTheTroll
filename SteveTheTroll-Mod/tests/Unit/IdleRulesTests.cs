@@ -28,7 +28,11 @@ public class IdleRulesTests
     [Test] public void FullTroll_Following_GoesToTheDepotAnyway() { Assert.That(IdleRules.Gate(IdleRules.FollowReason, true, false), Is.EqualTo(IdleGate.Unload)); }
     [Test] public void FullTroll_FollowingButJustSent_IsNotSentAgain() { Assert.That(IdleRules.Gate(IdleRules.FollowReason, true, true), Is.EqualTo(IdleGate.Skip)); }
     [Test] public void TrollWithRoom_Following_IsLeftAlone() { Assert.That(IdleRules.Gate(IdleRules.FollowReason, false, false), Is.EqualTo(IdleGate.Skip)); }
-    [TestCase(0f, true)] [TestCase(12f, true)] [TestCase(-12f, true)] [TestCase(12.1f, false)] [TestCase(-34f, false)]
+    [TestCase(0f, true)]
+    [TestCase(12f, true)]
+    [TestCase(-12f, true)]
+    [TestCase(12.1f, false)]
+    [TestCase(-34f, false)]
     public void Reachable(float dy, bool expected) { Assert.That(IdleRules.Reachable(dy), Is.EqualTo(expected)); }
     [Test] public void TrollWithRoom_GoesOnToTheFarmDecision() { Assert.That(IdleRules.Gate(null, false, false), Is.EqualTo(IdleGate.Continue)); }
     [Test] public void TrollWithRoomAndAJob_IsLeftAlone() { Assert.That(IdleRules.Gate("TrollFarmer is active", false, false), Is.EqualTo(IdleGate.Skip)); }

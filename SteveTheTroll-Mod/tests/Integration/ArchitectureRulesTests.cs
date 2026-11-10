@@ -51,7 +51,8 @@ public class ArchitectureRulesTests
 
     [Test] public void PureLayersExist() { Assert.That(PureFiles().Count(), Is.GreaterThanOrEqualTo(25), "src/Core + Features/**/{Domain,Application,Execution}"); }
 
-    [Test] public void PureLayers_ReferenceNoGameOrEngine()
+    [Test]
+    public void PureLayers_ReferenceNoGameOrEngine()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -60,7 +61,8 @@ public class ArchitectureRulesTests
         }
     }
 
-    [Test] public void KydlCoreContracts_ArePure()
+    [Test]
+    public void KydlCoreContracts_ArePure()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -69,7 +71,8 @@ public class ArchitectureRulesTests
         }
     }
 
-    [Test] public void HarmonyPatches_LiveOnlyIn_IntegrationsHarmony()
+    [Test]
+    public void HarmonyPatches_LiveOnlyIn_IntegrationsHarmony()
     {
         var harmonyDir = Path.Combine(Src, "Integrations", "Harmony") + Path.DirectorySeparatorChar;
         var outside = Directory.GetFiles(Src, "*.cs", SearchOption.AllDirectories)
@@ -78,7 +81,8 @@ public class ArchitectureRulesTests
         Assert.That(outside, Is.Empty, "MIGRATION_DECISIONS A5: Harmony patches go into src/Integrations/Harmony");
     }
 
-    [Test] public void Plugin_HardKydlCore_ExactNetworkVersion()
+    [Test]
+    public void Plugin_HardKydlCore_ExactNetworkVersion()
     {
         string plugin = File.ReadAllText(Path.Combine(Src, "Bootstrap", "Plugin.cs"));
         string proj = File.ReadAllText(Directory.GetFiles(TestPaths.ModDir, "*.csproj").Single());
@@ -91,7 +95,8 @@ public class ArchitectureRulesTests
         }
     }
 
-    [Test] public void EveryFeature_HasAnAdapterImplementingIFeature()
+    [Test]
+    public void EveryFeature_HasAnAdapterImplementingIFeature()
     {
         foreach (var feature in Directory.GetDirectories(Path.Combine(Src, "Features")))
         {
@@ -101,13 +106,15 @@ public class ArchitectureRulesTests
         }
     }
 
-    [Test] public void ArchitectureMarker_IsPresent()
+    [Test]
+    public void ArchitectureMarker_IsPresent()
     {
         Assert.That(File.ReadAllText(Path.Combine(Src, "Core", "Architecture.cs")), Does.Contain("Tag = \"SteveTheTroll-KYDL-SPEC-V1\""));
     }
 
     // the V1 guard (D-169): the marker the lab wrapper searches for, and the lab suite proves V2 before anything else runs
-    [Test] public void V2Marker_AndTheLabTestThatRunsFirst()
+    [Test]
+    public void V2Marker_AndTheLabTestThatRunsFirst()
     {
         Assert.That(File.ReadAllText(Path.Combine(Src, "Core", "Architecture.cs")), Does.Contain("Marker = \"STT-ARCH-V2\"").And.Contain("Version = 2"));
         string suite = File.ReadAllText(Path.Combine(TestPaths.SuiteDir, "suite.json"));
@@ -120,7 +127,8 @@ public class ArchitectureRulesTests
     }
 
     // D-170: every order command has exactly one handler (the dispatcher would answer Failed for a command without one)
-    [Test] public void EveryOrderCommand_HasAHandler()
+    [Test]
+    public void EveryOrderCommand_HasAHandler()
     {
         System.Type[] types;
         try { types = ModAssembly.Load().GetTypes(); }
@@ -135,7 +143,8 @@ public class ArchitectureRulesTests
     }
 
     // D-171 (P9 audit): one definition of the game's private BaseAI.MoveTo delegate, and no order facade left (every caller sends a command)
-    [Test] public void P9_OneMoveToDelegate_NoOrderFacade()
+    [Test]
+    public void P9_OneMoveToDelegate_NoOrderFacade()
     {
         var all = Directory.GetFiles(Src, "*.cs", SearchOption.AllDirectories).Select(File.ReadAllText).ToList();
         using (Assert.EnterMultipleScope())
@@ -146,7 +155,8 @@ public class ArchitectureRulesTests
     }
 
     // D-175: behaviour components walk / turn through the movement capability (TrollContext); no Step(...) takes the game's MoveTo / LookAt delegates as parameters any more
-    [Test] public void D175_NoStepTakesMoveDelegates()
+    [Test]
+    public void D175_NoStepTakesMoveDelegates()
     {
         foreach (var f in Directory.GetFiles(Src, "*.cs", SearchOption.AllDirectories))
             Assert.That(Regex.IsMatch(File.ReadAllText(f), @"\bStep\([^)]*System\.(Func<BaseAI|Action<BaseAI)"), Is.False, Rel(f) + " still passes BaseAI move delegates into a Step");

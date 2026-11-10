@@ -199,7 +199,7 @@ public static class SlipperFit
                 ? FitGeometry.ToeWeight(FitGeometry.ToeAlong(toPart.MultiplyPoint3x4(verts[i]), toe.position, fwd))
                 : 0f;
             weights[i] = new BoneWeight
-                { boneIndex0 = 0, weight0 = 1f - w, boneIndex1 = toe != null ? 1 : 0, weight1 = w };
+            { boneIndex0 = 0, weight0 = 1f - w, boneIndex1 = toe != null ? 1 : 0, weight1 = w };
         }
 
         return weights;

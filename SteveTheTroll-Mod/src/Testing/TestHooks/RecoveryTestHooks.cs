@@ -305,38 +305,38 @@ internal static class RecoveryTestHooks
         int n = Mathf.CeilToInt(length / 4f), made = 0;
         long creator = Me != 0L ? Me : 4711L;
         for (int layer = 0; layer < 2; layer++)
-        for (int i = 0; i < n; i++)
-        {
-            Vector3 at = centre + side * ((i - (n - 1) * 0.5f) * 4f);
-            float low = Mathf.Min(ZoneSystem.instance.GetGroundHeight(at),
-                Mathf.Min(ZoneSystem.instance.GetGroundHeight(at + side * 2f),
-                    ZoneSystem.instance.GetGroundHeight(at - side * 2f)));
-            at.y = low - 0.3f + layer * 2f;
-            GameObject wall = Object.Instantiate(wallPrefab, at, Quaternion.LookRotation(fwd));
-            ZNetView view = wall.GetComponent<ZNetView>();
-            Piece piece = wall.GetComponent<Piece>();
-            WearNTear wnt = wall.GetComponent<WearNTear>();
-            if (view != null && view.IsValid())
+            for (int i = 0; i < n; i++)
             {
-                view.GetZDO().Set(ZDOVars.s_creator, creator);
-            }
+                Vector3 at = centre + side * ((i - (n - 1) * 0.5f) * 4f);
+                float low = Mathf.Min(ZoneSystem.instance.GetGroundHeight(at),
+                    Mathf.Min(ZoneSystem.instance.GetGroundHeight(at + side * 2f),
+                        ZoneSystem.instance.GetGroundHeight(at - side * 2f)));
+                at.y = low - 0.3f + layer * 2f;
+                GameObject wall = Object.Instantiate(wallPrefab, at, Quaternion.LookRotation(fwd));
+                ZNetView view = wall.GetComponent<ZNetView>();
+                Piece piece = wall.GetComponent<Piece>();
+                WearNTear wnt = wall.GetComponent<WearNTear>();
+                if (view != null && view.IsValid())
+                {
+                    view.GetZDO().Set(ZDOVars.s_creator, creator);
+                }
 
-            if (piece != null)
-            {
-                CreatorField(piece) = creator;
-            }
+                if (piece != null)
+                {
+                    CreatorField(piece) = creator;
+                }
 
-            if (wnt != null)
-            {
-                wnt.m_noSupportWear = false;
-                wnt.m_noRoofWear = false;
-            }
+                if (wnt != null)
+                {
+                    wnt.m_noSupportWear = false;
+                    wnt.m_noRoofWear = false;
+                }
 
-            Walls.Add(wall);
-            Built.Add(wall);
-            WallIds.Add(wall.GetInstanceID());
-            made++;
-        }
+                Walls.Add(wall);
+                Built.Add(wall);
+                WallIds.Add(wall.GetInstanceID());
+                made++;
+            }
 
         ModLog.Info("RecoveryTestHooks: wall line of " + n + " x 2 player-built walls (" + length.ToString("F0") +
                     " m) " + ahead.ToString("F0") + " m in front of " +

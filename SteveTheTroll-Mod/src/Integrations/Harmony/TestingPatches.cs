@@ -1,5 +1,6 @@
 using HarmonyLib;
 using SteveTheTroll.Testing.TestHooks;
+using UnityEngine;
 
 namespace SteveTheTroll.Integrations.Harmony;
 // MIGRATION_DECISIONS A5: every Harmony patch of the Testing feature, declared here; each one only forwards to the feature's own method
@@ -23,6 +24,26 @@ internal static class CombatTestHooks_HoldStill
     private static void Postfix(MonsterAI __instance)
     {
         CombatTestHooks.HoldStill(__instance);
+    }
+}
+
+// MobSpawnBlock (Testing/TestHooks/MobSpawnBlock.cs) - skips the game's own creature spawns near the player while a test has armed it (stt.keepMobsClear); the prefix returns false = no spawn
+[HarmonyPatch(typeof(SpawnSystem), "Spawn")]
+internal static class MobSpawnBlock_Patch
+{
+    private static bool Prefix(SpawnSystem.SpawnData critter, Vector3 spawnPoint)
+    {
+        return MobSpawnBlock.Allows(critter, spawnPoint);
+    }
+}
+
+// MobSpawnBlock.ReportAppeared (D-207 diagnostics): while the block is armed, every creature that comes into being within the radius is logged with the call chain that created it
+[HarmonyPatch(typeof(Character), "Awake")]
+internal static class MobSpawnBlock_Appeared
+{
+    private static void Postfix(Character __instance)
+    {
+        MobSpawnBlock.ReportAppeared(__instance);
     }
 }
 

@@ -220,7 +220,15 @@ internal static class TrollLedger
             TrollInfo t = trolls[i];
             live.Add(new LedgerEntry
             {
-                Id = t.Id, Name = t.Name, X = t.X, Y = t.Y, Z = t.Z, Health = t.Health, Loaded = t.Loaded, Frozen = TrollFrozenWatch.IsFrozen(t.Id), Dead = t.DiedTicks > 0
+                Id = t.Id,
+                Name = t.Name,
+                X = t.X,
+                Y = t.Y,
+                Z = t.Z,
+                Health = t.Health,
+                Loaded = t.Loaded,
+                Frozen = TrollFrozenWatch.IsFrozen(t.Id),
+                Dead = t.DiedTicks > 0
             });
         }
 

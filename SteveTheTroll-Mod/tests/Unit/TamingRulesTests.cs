@@ -75,8 +75,16 @@ public class TamingRulesTests
     }
 
     // D-042: tamed trolls are at least Resistant (DamageModifier ints of 1.0.20)
-    [TestCase(0, 1)] [TestCase(2, 1)] [TestCase(6, 1)] [TestCase(7, 1)] [TestCase(8, 1)]
-    [TestCase(1, 1)] [TestCase(3, 3)] [TestCase(4, 4)] [TestCase(5, 5)] [TestCase(42, 42)]
+    [TestCase(0, 1)]
+    [TestCase(2, 1)]
+    [TestCase(6, 1)]
+    [TestCase(7, 1)]
+    [TestCase(8, 1)]
+    [TestCase(1, 1)]
+    [TestCase(3, 3)]
+    [TestCase(4, 4)]
+    [TestCase(5, 5)]
+    [TestCase(42, 42)]
     public void AtLeastResistant(int before, int after) { Assert.That((int)ModAssembly.Call(T, "AtLeastResistant", before), Is.EqualTo(after)); }
 
     [Test]

@@ -352,8 +352,11 @@ internal sealed partial class TrollRecovery
         Piece piece = c.GetComponentInParent<Piece>();
         bool playerBuilt = piece != null && piece.IsPlacedByPlayer();
         bool breakable = c.GetComponentInParent<IDestructible>() != null;
+        // D-214 (user 2026-11-10): a plain rock (Stone / Flint only) is walked around, never smashed - only ore rocks, logs, stumps and small natural things are
+        string plainRock;
+        bool plain = breakable && ch == null && piece == null && PlainRocks.Is(c, out plainRock);
         _kind = StuckRules.Classify(ch != null, ch != null && ch.IsPlayer(), ch != null && ch.IsTamed(), playerBuilt,
-            breakable);
+            breakable && !plain);
         GameObject root = ch != null ? ch.gameObject : piece != null ? piece.gameObject : c.gameObject;
         _obstacleName = root.name + " (" + c.name + ", " + bestD.ToString("F1") + " m)";
         rageable = StuckRules.Rageable(_kind);

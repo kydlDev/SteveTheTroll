@@ -342,12 +342,12 @@ internal static partial class TrollZones
 
         int n = 0;
         for (int dx = -1; dx <= 1; dx++)
-        for (int dz = -1; dz <= 1; dz++)
-        {
-            PokeArgs[0] = ZoneSystem.GetZone(position + new Vector3(dx * ZoneSize, 0f, dz * ZoneSize));
-            Poke.Invoke(zs, PokeArgs);
-            n++;
-        }
+            for (int dz = -1; dz <= 1; dz++)
+            {
+                PokeArgs[0] = ZoneSystem.GetZone(position + new Vector3(dx * ZoneSize, 0f, dz * ZoneSize));
+                Poke.Invoke(zs, PokeArgs);
+                n++;
+            }
 
         return n;
     }

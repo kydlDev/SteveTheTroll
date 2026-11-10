@@ -114,8 +114,11 @@ internal static class CostumeMenuData
         ItemDrop.ItemData.SharedData s = drop.m_itemData.m_shared;
         var piece = new CostumeData.Piece
         {
-            Name = Loc.T(s.m_name.TrimStart('$')), SlotKey = slotKey, Armor = s.m_armor,
-            ArmorPerLevel = s.m_armorPerLevel, MaxQuality = s.m_maxQuality
+            Name = Loc.T(s.m_name.TrimStart('$')),
+            SlotKey = slotKey,
+            Armor = s.m_armor,
+            ArmorPerLevel = s.m_armorPerLevel,
+            MaxQuality = s.m_maxQuality
         };
         if (p != null)
         {

@@ -8,17 +8,23 @@ namespace SteveTheTroll.Tests.Unit;
 public class HomeRulesTests
 {
     // D-173 (user: "go home and unload there"): after the home unload - left-overs stop, slippers on resume the farm spot, no slippers stay home
-    [TestCase(0, true, "ResumeSpot")] [TestCase(0, false, "StayHome")] [TestCase(3, true, "Stop")] [TestCase(3, false, "Stop")]
+    [TestCase(0, true, "ResumeSpot")]
+    [TestCase(0, false, "StayHome")]
+    [TestCase(3, true, "Stop")]
+    [TestCase(3, false, "Stop")]
     public void AfterUnloading(int left, bool wears, string expected)
     { Assert.That(SteveTheTroll.Features.Trolls.Home.Domain.HomeRules.AfterUnloading(left, wears).ToString(), Is.EqualTo(expected)); }
 
-    [Test] public void HealRange() {
+    [Test]
+    public void HealRange()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(HomeRules.InHealRange(30f, 40f, 2500f), Is.True); Assert.That(HomeRules.InHealRange(30f, 40.1f, 2500f), Is.False);
         }
     }
-    [Test] public void Holds_OnlyWhileLookedAtLately()
+    [Test]
+    public void Holds_OnlyWhileLookedAtLately()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -27,7 +33,8 @@ public class HomeRulesTests
             Assert.That(HomeRules.Holds(4f, false, false, 3f, false, 0f, 3f), Is.False, "never looked at");
         }
     }
-    [Test] public void Holds_NotWhenOff_Following_Fighting_OrFar()
+    [Test]
+    public void Holds_NotWhenOff_Following_Fighting_OrFar()
     {
         using (Assert.EnterMultipleScope())
         {

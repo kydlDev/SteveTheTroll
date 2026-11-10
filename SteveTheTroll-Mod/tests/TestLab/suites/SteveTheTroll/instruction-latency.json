@@ -23,6 +23,14 @@
                   },
                   {
                       "do":  "hook",
+                      "name":  "stt.keepMobsClear",
+                      "args":  {
+                                   "radius":  80
+                               },
+                      "label":  "2026-11-09 (g16a-3: two wild Boars were spawned by the game 3 s AFTER the clean check; the troll fights a target before it follows an order, by design, and ran 11 m away): the arena stays free of wild creatures for the whole test, not only at the start"
+                  },
+                  {
+                      "do":  "hook",
                       "name":  "stt.addHub",
                       "args":  {
                                    "number":  1,
@@ -39,13 +47,13 @@
                                     "args":  {
                                                  "fromDx":  15,
                                                  "fromDz":  30,
-                                                 "toDx":  -12,
-                                                 "toDz":  -2
+                                                 "toDx":  -4,
+                                                 "toDz":  8
                                              },
                                     "expect":  true
                                 },
                       "timeout":  30,
-                      "label":  "2026-11-07 (agent24-part4: the troll moved 2.8 m AWAY from its hub): the game has a navmesh path from the troll's spawn point to 4 m in front of the hub BEFORE the troll exists - fresh open ground has none for the first seconds; the game then stops a troll in place and the 3 s stuck rule sends it 20 m sideways. The test times the order, not the navmesh build"
+                      "label":  "2026-11-07 (agent24-part4: the troll moved 2.8 m AWAY from its hub): the game has a navmesh path from the troll's spawn point to the edge of the hub's home area BEFORE the troll exists - fresh open ground has none for the first seconds; the game then stops a troll in place and the 3 s stuck rule sends it 20 m sideways. The test times the order, not the navmesh build. 2026-11-09 (il-mob1..3): the end point is 17 m from the hub (a troll waits within the 15 m HomeRadius); it was 4 m, which is INSIDE the hub's own floor (355 pieces, up to 13.5 m wide), where the navmesh is gone as soon as the hub object exists - the wait then failed for the whole 30 s whenever the hub object appeared before the navmesh answered"
                   },
                   {
                       "do":  "hook",
@@ -122,6 +130,19 @@
                                 },
                       "timeout":  1,
                       "label":  "latency: within 1 s of the order the troll is in its home mode (a state, not a distance - analysis option A)"
+                  },
+                  {
+                      "do":  "wait",
+                      "until":  {
+                                    "check":  "hook",
+                                    "name":  "stt.gateGoesHome",
+                                    "args":  {
+                                                 "troll":  "troll"
+                                             },
+                                    "expect":  true
+                                },
+                      "timeout":  1,
+                      "label":  "2026-11-09 (analysis of g16a-3): eligibility, not only the flag - the farming gate chooses GoHome within 1 s of the order (no fight target, no follow order, no running recovery in front of it); when it does not, the log names which one. Separates a home order that was not executed from a troll that walked badly"
                   },
                   {
                       "do":  "wait",

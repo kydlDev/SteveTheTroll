@@ -19,12 +19,16 @@ internal readonly struct DepotCandidate
     /// Metres from the troll.
     internal float Distance { get; }
 
-    internal DepotCandidate(bool hasEmptySlot, bool crowded, bool reservedByOther, float distance)
+    /// #30: the game's path search finds a way to within reach of the chest. A candidate that is not asked about is reachable.
+    internal bool Reachable { get; }
+
+    internal DepotCandidate(bool hasEmptySlot, bool crowded, bool reservedByOther, float distance, bool reachable = true)
     {
         HasEmptySlot = hasEmptySlot;
         Crowded = crowded;
         ReservedByOther = reservedByOther;
         Distance = distance;
+        Reachable = reachable;
     }
 }
 
@@ -54,16 +58,18 @@ internal readonly struct DepotPlan
 
 /// <summary>
 ///     D-173 (P6, spec "DepotPlanner"): where a full troll unloads - the nearest depot chest with room that no other troll
-///     is at or walks to (D-064 / D-107 / D-149),
+///     is at or walks to (D-064 / D-107 / D-149), #30: among the chests the troll can find a way to; when none of them can be
+///     reached, the nearest of the others (as before - the walk has its own recovery and a depot is never abandoned),
 ///     else a new depot. Game-free, unit-tested.
 /// </summary>
 internal static class DepotPlanner
 {
-    /// Expected outcome: the nearest usable chest (first of equal distances), or Chosen -1 with the count of chests skipped for another troll.
+    /// Expected outcome: the nearest usable reachable chest (first of equal distances); with no reachable one the nearest usable chest; or Chosen -1 with the count of chests
+    /// skipped for another troll.
     internal static DepotPlan Choose(IList<DepotCandidate> chests)
     {
-        int chosen = -1, skipped = 0;
-        float best = float.MaxValue;
+        int nearestReachable = -1, nearestAny = -1, skipped = 0;
+        float bestReachable = float.MaxValue, bestAny = float.MaxValue;
         if (chests == null)
         {
             return new DepotPlan(-1, 0);
@@ -83,14 +89,20 @@ internal static class DepotPlanner
                 continue;
             }
 
-            if (c.Distance < best)
+            if (c.Distance < bestAny)
             {
-                best = c.Distance;
-                chosen = i;
+                bestAny = c.Distance;
+                nearestAny = i;
+            }
+
+            if (c.Reachable && c.Distance < bestReachable)
+            {
+                bestReachable = c.Distance;
+                nearestReachable = i;
             }
         }
 
-        return new DepotPlan(chosen, skipped);
+        return new DepotPlan(nearestReachable >= 0 ? nearestReachable : nearestAny, skipped);
     }
 }
 

@@ -8,13 +8,16 @@ namespace SteveTheTroll.Tests.Unit;
 public class RideRulesTests
 {
     // Decide(unlocked, hasHalter, tamed, mine, dead, hasOtherRider, ridingTroll, thisTroll)
-    [Test] public void Mounts_AFreeOwnTamedTroll_WithTheHalter()
+    [Test]
+    public void Mounts_AFreeOwnTamedTroll_WithTheHalter()
     { Assert.That(RideRules.Decide(true, true, true, true, false, false, 0, 7), Is.EqualTo(MountVerdict.Mount)); }
 
-    [Test] public void SameKeyDismounts_TheTrollItRides()
+    [Test]
+    public void SameKeyDismounts_TheTrollItRides()
     { Assert.That(RideRules.Decide(true, true, true, true, false, false, 7, 7), Is.EqualTo(MountVerdict.Dismount)); }
 
-    [Test] public void NoPrompt_OnAnotherTroll_WhileMounted()
+    [Test]
+    public void NoPrompt_OnAnotherTroll_WhileMounted()
     {
         MountVerdict v = RideRules.Decide(true, true, true, true, false, false, 7, 8);
         using (Assert.EnterMultipleScope())
@@ -24,7 +27,8 @@ public class RideRulesTests
         }
     }
 
-    [Test] public void NoHalter_NoPrompt()
+    [Test]
+    public void NoHalter_NoPrompt()
     {
         MountVerdict v = RideRules.Decide(true, false, true, true, false, false, 0, 7);
         using (Assert.EnterMultipleScope())
@@ -34,7 +38,8 @@ public class RideRulesTests
         }
     }
 
-    [Test] public void Locked_BeforeTheRecipeIsUnlocked_EvenWithTheItem()
+    [Test]
+    public void Locked_BeforeTheRecipeIsUnlocked_EvenWithTheItem()
     { Assert.That(RideRules.Decide(false, true, true, true, false, false, 0, 7), Is.EqualTo(MountVerdict.Locked)); }
 
     [TestCase(false, true, false)] // wild
@@ -43,20 +48,29 @@ public class RideRulesTests
     public void NotRideable_WildForeignOrDead(bool tamed, bool mine, bool dead)
     { Assert.That(RideRules.Decide(true, true, tamed, mine, dead, false, 0, 7), Is.EqualTo(MountVerdict.NotRideable)); }
 
-    [Test] public void OneRiderPerTroll()
+    [Test]
+    public void OneRiderPerTroll()
     { Assert.That(RideRules.Decide(true, true, true, true, false, true, 0, 7), Is.EqualTo(MountVerdict.Occupied)); }
 
-    [TestCase(MountVerdict.Mount, true)] [TestCase(MountVerdict.Dismount, true)]
-    [TestCase(MountVerdict.NoHalter, false)] [TestCase(MountVerdict.Locked, false)] [TestCase(MountVerdict.NotRideable, false)]
-    [TestCase(MountVerdict.Occupied, false)] [TestCase(MountVerdict.RidingAnother, false)]
+    [TestCase(MountVerdict.Mount, true)]
+    [TestCase(MountVerdict.Dismount, true)]
+    [TestCase(MountVerdict.NoHalter, false)]
+    [TestCase(MountVerdict.Locked, false)]
+    [TestCase(MountVerdict.NotRideable, false)]
+    [TestCase(MountVerdict.Occupied, false)]
+    [TestCase(MountVerdict.RidingAnother, false)]
     public void PromptOnlyWhenTheKeyDoesSomething(MountVerdict v, bool shown)
     { Assert.That(RideRules.PromptVisible(v), Is.EqualTo(shown)); }
 
-    [TestCase(true, true, true)] [TestCase(true, false, false)] [TestCase(false, true, false)] [TestCase(false, false, false)]
+    [TestCase(true, true, true)]
+    [TestCase(true, false, false)]
+    [TestCase(false, true, false)]
+    [TestCase(false, false, false)]
     public void CollectingPauses_OnlyWhenRiddenAndFull(bool ridden, bool full, bool paused)
     { Assert.That(RideRules.CollectingPaused(ridden, full), Is.EqualTo(paused)); }
 
-    [Test] public void RiddenTroll_TakesNoOrders_IgnoresMouse4_OthersFollow()
+    [Test]
+    public void RiddenTroll_TakesNoOrders_IgnoresMouse4_OthersFollow()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -67,11 +81,15 @@ public class RideRulesTests
         }
     }
 
-    [TestCase(false, true, 10f, 20f, true)] [TestCase(false, true, 25f, 20f, false)] [TestCase(false, false, 5f, 20f, false)] [TestCase(true, true, 5f, 20f, false)]
+    [TestCase(false, true, 10f, 20f, true)]
+    [TestCase(false, true, 25f, 20f, false)]
+    [TestCase(false, false, 5f, 20f, false)]
+    [TestCase(true, true, 5f, 20f, false)]
     public void ASecondTroll_GuardsTheRider(bool ridden, bool attacked, float distance, float range, bool guards)
     { Assert.That(RideRules.GuardsTheRider(ridden, attacked, distance, range), Is.EqualTo(guards)); }
 
-    [Test] public void Damage_GoesToThePlayerOnlyWhenThePlayerWasHit()
+    [Test]
+    public void Damage_GoesToThePlayerOnlyWhenThePlayerWasHit()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -80,13 +98,16 @@ public class RideRulesTests
         }
     }
 
-    [TestCase(EndReason.PlayerDismounted, EndOutcome.ItemToInventory)] [TestCase(EndReason.TrollDied, EndOutcome.ItemToInventory)]
-    [TestCase(EndReason.Teleported, EndOutcome.ItemToInventory)] [TestCase(EndReason.LoggedOut, EndOutcome.ItemToInventory)]
+    [TestCase(EndReason.PlayerDismounted, EndOutcome.ItemToInventory)]
+    [TestCase(EndReason.TrollDied, EndOutcome.ItemToInventory)]
+    [TestCase(EndReason.Teleported, EndOutcome.ItemToInventory)]
+    [TestCase(EndReason.LoggedOut, EndOutcome.ItemToInventory)]
     [TestCase(EndReason.PlayerDied, EndOutcome.ItemToTombstone)]
     public void TheItemGoesBack_ExceptAfterDeath(EndReason why, EndOutcome outcome)
     { Assert.That(RideRules.End(why), Is.EqualTo(outcome)); }
 
-    [Test] public void Login_RecoversOnlyWhenAMountWasStored()
+    [Test]
+    public void Login_RecoversOnlyWhenAMountWasStored()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -95,7 +116,8 @@ public class RideRulesTests
         }
     }
 
-    [Test] public void Recipe_IsWhatTheUserAsked()
+    [Test]
+    public void Recipe_IsWhatTheUserAsked()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -112,7 +134,8 @@ public class RideRulesTests
         }
     }
 
-    [Test] public void MountFile_RoundTrips_ForThisPlayerOnly()
+    [Test]
+    public void MountFile_RoundTrips_ForThisPlayerOnly()
     {
         string line = MountFile.Write(42, "af105cfd5369");
         string troll;
@@ -126,17 +149,25 @@ public class RideRulesTests
         }
     }
 
-    [TestCase("")] [TestCase("   ")] [TestCase("garbage")] [TestCase("player=x;troll=a")] [TestCase("player=42;troll=")] [TestCase("player=42")] [TestCase("troll=a;player=42")]
+    [TestCase("")]
+    [TestCase("   ")]
+    [TestCase("garbage")]
+    [TestCase("player=x;troll=a")]
+    [TestCase("player=42;troll=")]
+    [TestCase("player=42")]
+    [TestCase("troll=a;player=42")]
     public void MountFile_DamagedOrEmpty_IsNotMounted(string text)
     {
         string troll;
         Assert.That(MountFile.TryRead(text, 42, out troll), Is.False);
     }
 
-    [Test] public void MountFile_Dismounted_WritesAnEmptyFile()
+    [Test]
+    public void MountFile_Dismounted_WritesAnEmptyFile()
     { Assert.That(MountFile.Write(42, ""), Is.Empty); }
 
-    [Test] public void MountFile_ReadsOnlyTheFirstLine()
+    [Test]
+    public void MountFile_ReadsOnlyTheFirstLine()
     {
         string troll;
         Assert.That(MountFile.TryRead("player=42;troll=ab\r\nplayer=43;troll=cd\r\n", 42, out troll), Is.True);

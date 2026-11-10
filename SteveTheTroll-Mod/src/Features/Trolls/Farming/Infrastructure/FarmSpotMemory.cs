@@ -4,6 +4,7 @@ using KydlCore.Common;
 using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Hubs.Domain;
 using SteveTheTroll.Features.Hubs.Infrastructure;
+using SteveTheTroll.Features.Trolls.Combat.Domain;
 using SteveTheTroll.Features.Trolls.Combat.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using SteveTheTroll.Ui;
@@ -96,12 +97,9 @@ internal sealed class FarmSpotMemory
     internal bool FindFar(Vector3 from, int tier, IList<TrollFocus.Goal> goals, HubInfo hub, out Vector3 pos,
         out string item)
     {
-        Vector3 bedPos;
-        bool hasBedPos = TrollNoHit.Bed(out bedPos);
-        float noHitR = ModSettings.NoHitRadius.Value;
+        var noHitCircles = new List<NoHitCircle>(TrollNoHit.Circles()); // D-214: the bed's circle and every Troll Hub's (a copy - the shared list is rebuilt by every zone check)
         Func<Vector3, bool> farSkip = p => IsBad(p)
-                                           || (ModSettings.On && hasBedPos && noHitR > 0f &&
-                                               TrollNoHit.Inside(bedPos, p, noHitR))
+                                           || TrollNoHit.InsideAny(noHitCircles, p)
                                            || (hub != null &&
                                                !HubRules.FarmAllowed(true, HubGeometry.Flat(p - hub.Pos)));
         bool found = TrollFarming.FindFar(from, new TrollFarming.SearchRange(ModSettings.FarmLongRange.Value, ModSettings.FarmMaxRange.Value), tier,

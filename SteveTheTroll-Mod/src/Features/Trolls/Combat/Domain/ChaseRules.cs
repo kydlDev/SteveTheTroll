@@ -19,6 +19,25 @@ internal static class ChaseRules
         return drySwings >= DrySwingsBeforeClosing ? reach * CloseFactor : reach;
     }
 
+    /// A target at least this far below the troll's feet gets the downward swing at once (D-180: a frozen creature 4 m below was swung over, 7 swings, no damage).
+    internal const float LowTargetMetres = -1.5f;
+
+    /// A target at least this far below (but not LowTargetMetres) gets the downward swing as soon as a swing in a row did not hurt it.
+    internal const float SlightlyLowTargetMetres = -0.5f;
+
+    /// D-201 (g16b-2, guard-mob-kills-open: the troll stood 1.2 - 1.5 m above a Greydwarf, i.e. just inside the old -1.5 m limit, and swung horizontally 5 times without one hit; the
+    /// chase only stepped closer): which swing the chase uses. heightDifference = target y - troll y. A clearly lower target gets the downward swing; a slightly lower one
+    /// gets it after an odd number of dry swings, so a missing swing type is switched, and switched back if the other one misses too.
+    internal static bool UseDownwardSwing(float heightDifference, int drySwings)
+    {
+        if (heightDifference < LowTargetMetres)
+        {
+            return true;
+        }
+
+        return heightDifference < SlightlyLowTargetMetres && drySwings % 2 == 1;
+    }
+
     /// Whether a finished swing counts as dry: the target's health did not drop since the swing started (a hit resets the count).
     internal static bool IsDry(float healthBefore, float healthAfter)
     {

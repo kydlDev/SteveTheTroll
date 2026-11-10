@@ -65,11 +65,11 @@ internal static partial class TrollFarming
         try
         {
             for (int zx = -reachZones; zx <= reachZones; zx++)
-            for (int zy = -reachZones; zy <= reachZones; zy++)
-            {
-                FindObjectsMethod.Invoke(man,
-                    new[] { new Vector2s((short)(zone.x + zx), (short)(zone.y + zy)), FarZdos, visited });
-            }
+                for (int zy = -reachZones; zy <= reachZones; zy++)
+                {
+                    FindObjectsMethod.Invoke(man,
+                        new[] { new Vector2s((short)(zone.x + zx), (short)(zone.y + zy)), FarZdos, visited });
+                }
         }
         catch (Exception e)
         {

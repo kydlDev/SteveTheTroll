@@ -32,8 +32,20 @@ public class PreviewAndSettingsQualityTests
     {
         var s = new ViewerSettings
         {
-            RotateSpeed = 9f, ZoomStep = 9f, ZoomMax = 99f, ZoomMin = 9f, PitchLimit = 99f, FrameHeight = 9999f, Margin = 9f, StartYaw = 999f,
-            StartPitch = 99f, PanSpeed = 9f, PanLimit = 9f, KeyLight = 9f, FillLight = 9f, Ambient = 9f,
+            RotateSpeed = 9f,
+            ZoomStep = 9f,
+            ZoomMax = 99f,
+            ZoomMin = 9f,
+            PitchLimit = 99f,
+            FrameHeight = 9999f,
+            Margin = 9f,
+            StartYaw = 999f,
+            StartPitch = 99f,
+            PanSpeed = 9f,
+            PanLimit = 9f,
+            KeyLight = 9f,
+            FillLight = 9f,
+            Ambient = 9f,
         };
         var log = new List<string>();
         int changed = s.Clamp(log.Add);

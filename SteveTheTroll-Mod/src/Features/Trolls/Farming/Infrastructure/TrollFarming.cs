@@ -6,6 +6,7 @@ using System.Reflection;
 using HarmonyLib;
 using KydlCore.Common;
 using SteveTheTroll.Configuration;
+using SteveTheTroll.Features.Trolls.Combat.Domain;
 using SteveTheTroll.Features.Trolls.Combat.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Movement.Infrastructure;
@@ -205,10 +206,8 @@ internal static partial class TrollFarming
 
         long t0 = Stopwatch.GetTimestamp();
         float r2 = range * range;
-        Vector3 bed;
-        bool hasBed = TrollNoHit.Bed(out bed);
-        float noHitR = ModSettings.NoHitRadius.Value;
-        bool noHit = ModSettings.On && hasBed && noHitR > 0f;
+        List<NoHitCircle> noHitCircles = TrollNoHit.Circles(); // D-214: the bed's circle and every Troll Hub's
+        bool noHit = noHitCircles.Count > 0;
         foreach (ZNetView v in all.Values)
         {
             if (v == null)
@@ -222,9 +221,9 @@ internal static partial class TrollFarming
                 continue;
             }
 
-            if (noHit && TrollNoHit.Inside(bed, pos, noHitR))
+            if (noHit && TrollNoHit.InsideAny(noHitCircles, pos))
             {
-                continue; // D-097: nothing near the house is farmed
+                continue; // D-097 / D-214: nothing near the house or a hub is farmed
             }
 
             FarmSourceCache src = Source(v);

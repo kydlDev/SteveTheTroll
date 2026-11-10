@@ -4,9 +4,9 @@ using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Trolls.Combat.Domain;
 using SteveTheTroll.Features.Trolls.Contracts;
 using SteveTheTroll.Features.Trolls.Core;
+using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Movement.Infrastructure;
-using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using SteveTheTroll.Features.Trolls.Orders.Infrastructure;
 using UnityEngine;
 
@@ -222,7 +222,7 @@ internal sealed class TrollChase : MonoBehaviour
     // from 9 feelers (TrollPath.Feelers) instead of a fixed 6 m side-step - the two-side cast below stays as the fallback; 4 every stall is a bad spot (TrollPath).
     // D-181 (fix13 attack-key-farming-creature: swings were allowed up to reach + 1 m; the troll stopped 5.6 m from a frozen creature with a 4.9 m reach, swung every 0.05 s,
     // was always in an attack, so it never stepped closer - 20 s of missed swings): a swing only within reach + SwingSlack; beyond that it walks on (MoveTo arrives at 0.8 x reach)
-    private const float PushSeconds = 4f, PushSwingGap = 0.6f, LowTargetMetres = -1.5f, SwingSlack = 0.3f;
+    private const float PushSeconds = 4f, PushSwingGap = 0.6f, SwingSlack = 0.3f;
     private float _nextLowLog;
     private GameObject _push;
     private float _pushUntil, _nextPushSwing;
@@ -232,6 +232,9 @@ internal sealed class TrollChase : MonoBehaviour
 
     /// The last reason the troll did not swing ("" = none yet).
     internal string LastBlocker { get; private set; } = "";
+
+    /// The swing the chase chose last and why ("" = none yet): type, how far below the target is, dry swings before it (D-201, shown in the combat snapshot).
+    internal string LastSwing { get; private set; } = "";
 
     /// `guard` = started by TrollGuard (a creature that goes for the player), not by a hit on the troll: the end does not start TrollCounter's ignore window.
     internal static TrollChase Begin(Character troll, Character target, bool guard = false)
@@ -390,14 +393,17 @@ internal sealed class TrollChase : MonoBehaviour
         // D-180 (fix12 attack-key-farming-creature: after a detour the troll stood 4 m ABOVE the frozen creature, 4.0 m away, and its horizontal swings passed over it -
         // 7 swings, no damage): a creature well below the troll gets the downward swing first, as the farmer does for a low target
         float dy = point.y - transform.position.y;
-        bool low = dy < LowTargetMetres;
+        // D-201 (g16b-2 guard-mob-kills-open: 1.2 - 1.5 m below, 5 horizontal swings, no hit): a slightly lower target that a swing missed gets the other swing type (ChaseRules.UseDownwardSwing)
+        bool low = ChaseRules.UseDownwardSwing(dy, _drySwings);
         ItemDrop.ItemData weapon = TrollWeapons.Pick(me, low ? Attack.AttackType.Vertical : Attack.AttackType.Horizontal, false) ??
                                    TrollWeapons.Pick(me, low ? Attack.AttackType.Horizontal : Attack.AttackType.Vertical, false);
-        if (low && Time.time >= _nextLowLog)
+        // every swing says which type it is and why (the g16b-2 log did not show the swing type of a level swing, so a "swings that do not hurt" case could not be told from a wrong type)
+        LastSwing = (low ? "downward" : "level") + " swing, target " + (-dy).ToString("F1") + " m below, " + _drySwings + " dry swing(s) before";
+        if ((low || _drySwings > 0) && Time.time >= _nextLowLog)
         {
-            _nextLowLog = Time.time + 5f;
-            ModLog.Info("TrollChase: " + TrollOrders.Shown(me) + " - " + _target.name + " is " + (-dy).ToString("F1") + " m below: downward swing first (" +
-                        (weapon != null ? weapon.m_shared.m_name : "no weapon") + ")");
+            _nextLowLog = Time.time + 2f;
+            ModLog.Info("TrollChase: " + TrollOrders.Shown(me) + " - " + _target.name + " is " + (-dy).ToString("F1") + " m below, " + _drySwings + " dry swing(s): " + (low ? "downward" : "level") +
+                        " swing (" + (weapon != null ? weapon.m_shared.m_name : "no weapon") + ")");
         }
 
         if (weapon == null)

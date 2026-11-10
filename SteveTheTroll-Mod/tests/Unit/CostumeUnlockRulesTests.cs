@@ -13,7 +13,8 @@ public class CostumeUnlockRulesTests
     [TestCase(false, false, true, ExpectedResult = false, TestName = "Worn but no material known: still hidden")]
     public bool Discoverable(bool gameSays, bool anyMaterial, bool worn) { return CostumeUnlockRules.Discoverable(gameSays, anyMaterial, worn); }
 
-    [Test] public void Discoverable_NeverWithoutTheSlippers_AllInputs()
+    [Test]
+    public void Discoverable_NeverWithoutTheSlippers_AllInputs()
     {
         foreach (bool g in new[] { false, true })
             foreach (bool a in new[] { false, true })

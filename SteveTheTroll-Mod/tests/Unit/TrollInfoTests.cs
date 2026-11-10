@@ -11,8 +11,24 @@ public class TrollInfoTests
 
     static TrollInfo Sample()
     {
-        return new TrollInfo { Id = "a1b2c3", Name = "Steve", Number = 2, Status = "stevethetroll_status_staying", Focus = "CopperOre", Farming = "",
-            Health = 1234.5f, MaxHealth = 1800f, Stars = 1, DamageFactor = 3f, X = 412.4f, Y = 77f, Z = -268.2f, BedDistance = 35.5f, LastSeenTicks = 638000000000000000L };
+        return new TrollInfo
+        {
+            Id = "a1b2c3",
+            Name = "Steve",
+            Number = 2,
+            Status = "stevethetroll_status_staying",
+            Focus = "CopperOre",
+            Farming = "",
+            Health = 1234.5f,
+            MaxHealth = 1800f,
+            Stars = 1,
+            DamageFactor = 3f,
+            X = 412.4f,
+            Y = 77f,
+            Z = -268.2f,
+            BedDistance = 35.5f,
+            LastSeenTicks = 638000000000000000L
+        };
     }
 
     [Test]

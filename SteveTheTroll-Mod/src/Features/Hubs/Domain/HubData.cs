@@ -21,6 +21,11 @@ internal static class HubData
     /// Farthest piece from the centre (flat) and the height of the building, rounded up: placement / levelling use them.
     internal const float Radius = 13.6f, Height = 15f;
 
+    /// D-214 (user 2026-11-10: "any distance specific from the hub should be from the outer bound of the hub, not the centre - the hub is 15-16 m from its centre to its edge"): the OUTER edge
+    /// of the building from its middle - Radius is the farthest piece's own middle, the pieces (stairs, floors, walls) reach about 2 m further. Every distance "from the hub" that is
+    /// meant for the player's eyes (no-hit ring, no-spawn area) is measured from this edge, not from the middle.
+    internal const float OuterRadius = 15.5f;
+
     /// The sign: where the user put it (on the roof beam, facing out) - local position and yaw.
     internal const float SignX = 6.44f, SignY = 11.885f, SignZ = -5.671f, SignYaw = 135f;
 

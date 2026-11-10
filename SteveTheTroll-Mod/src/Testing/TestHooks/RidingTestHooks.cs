@@ -144,6 +144,53 @@ internal static class RidingTestHooks
         return s == null ? -1 : Mathf.RoundToInt(s.GapCm);
     }
 
+    /// D-214 (user 2026-11-10: the rider clipped through the seat while the troll attacked, no test saw it): the biggest distance between the rider's seat point and the bone anchor it follows,
+    /// since the sampling started, in cm. Expected outcome: 0 when the seat is exactly on the bone, a few cm when idle easing is on.
+    /// The fastest ground speed of the ridden troll since the last stt.rideDrive, in cm/s.
+    [TestHook("stt.rideSpeedMax")]
+    private static int SpeedMax(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.RoundToInt(s.SpeedMaxCm);
+    }
+
+    [TestHook("stt.rideAnchorGap")]
+    private static int AnchorGap(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.RoundToInt(s.AnchorGapCm);
+    }
+
+    /// D-214: the same, counted only in frames where the troll was attacking. Expected outcome: at most 2 cm - the seat follows an attack exactly.
+    [TestHook("stt.rideAnchorGapAttack")]
+    private static int AnchorGapAttack(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : Mathf.RoundToInt(s.AnchorGapAttackCm);
+    }
+
+    /// D-214: how many sampled frames the ridden troll spent in an attack (a gap of 0 over 0 frames proves nothing).
+    [TestHook("stt.rideAttackFrames")]
+    private static int AttackFrames(GameObject troll)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        return s == null ? -1 : s.AttackFrames;
+    }
+
+    /// D-214: the saddle presses the attack button by itself (on = 1) or stops (0). Expected outcome: the ridden troll swings again and again while on.
+    [TestHook("stt.rideAttack")]
+    private static string RideAttack(GameObject troll, int on)
+    {
+        var s = troll.GetComponent<TrollSaddle>();
+        if (s == null)
+        {
+            return "no saddle";
+        }
+
+        s.TestAttack = on != 0;
+        return $"attack {s.TestAttack}";
+    }
+
     /// The biggest jump of the rider inside the troll's frame between two frames, in cm (a shaking rider jumps).
     [TestHook("stt.rideStep")]
     private static int Step(GameObject troll)
@@ -189,6 +236,7 @@ internal static class RidingTestHooks
         }
 
         s.TestDrive = forward != 0;
-        return $"drive {s.TestDrive}";
+        s.TestRun = forward == 2;
+        return $"drive {s.TestDrive}, run {s.TestRun}";
     }
 }

@@ -1,10 +1,11 @@
 {
-    "description":  "Every SteveTheTroll test starts here: the arena spot (MIGRATION_DECISIONS C26), stt.reset (bed on the player\u0027s spot, hub closed, ghost trolls dropped, costume off, proximity watch on), no test trolls, and - unless switched off - the slippers on and HUB 1 25 m in front. clearMobs (default TRUE since 2026-11-09, agent24: every test starts in an arena without wild creatures and VERIFIES it; a test that needs a wild creature spawns it itself after this block): no wild creature within 80 m.",
+    "description":  "Every SteveTheTroll test starts here: the arena spot (MIGRATION_DECISIONS C26), stt.reset (bed on the player\u0027s spot, hub closed, ghost trolls dropped, costume off, proximity watch on), no test trolls, and - unless switched off - the slippers on and HUB 1 25 m in front. clearMobs (default TRUE since 2026-11-09, agent24: every test starts in an arena without wild creatures and VERIFIES it; a test that needs a wild creature spawns it itself after this block): no wild creature within 80 m. blockSpawns (default TRUE since 2026-11-09, agent25): the game's own SpawnSystem spawns within 80 m are skipped from before the clearing (stt.blockSpawns, until stt.reset or 180 s), so a creature cannot appear between the clearing, the verification and the test itself; a test that needs the game's real spawns passes blockSpawns=false.",
     "params":  {
                    "clearTrolls":  true,
                    "slippers":  true,
                    "hub":  false,
-                   "clearMobs":  true
+                   "clearMobs":  true,
+                   "blockSpawns":  true
                },
     "steps":  [
                   {
@@ -21,6 +22,15 @@
                       "if":  "{{clearTrolls}}",
                       "do":  "hook",
                       "name":  "stt.clearTrolls"
+                  },
+                  {
+                      "if":  "{{blockSpawns}}",
+                      "do":  "hook",
+                      "name":  "stt.blockSpawns",
+                      "args":  {
+                                   "radius":  80
+                               },
+                      "label":  "2026-11-09 (g16c-3 ledge-forced-medium-up: the game spawned a Deer in the same second the arena was cleared, the precondition below failed with 1): the game's own creature spawns within 80 m are skipped from here on (until stt.reset or 180 s); creatures a test spawns itself are not touched"
                   },
                   {
                       "if":  "{{clearMobs}}",

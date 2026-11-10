@@ -77,6 +77,47 @@ internal static class StuckRules
         return breakable ? Obstruction.Destructible : Obstruction.Indestructible;
     }
 
+    /// D-214 (user 2026-11-10: "they should only attack copper rocks / tin rocks, not any normal rock, there is a difference"): words in a prefab name that make a rock an ORE rock.
+    private static readonly string[] OreWords = { "copper", "tin", "silver", "iron", "obsidian", "ore", "scrap", "coal" };
+
+    /// D-214: a PLAIN rock - a boulder or stone that gives only Stone / Flint, no ore. A stuck troll walks around it and never smashes it (it only breaks small natural things, ore rocks,
+    /// logs, stumps, bushes). `prefab` = the object's prefab name, `isMineRock` = it is a MineRock / MineRock5 object, `dropNames` = the item prefabs it drops (may be empty: unknown).
+    /// Expected outcome: false for anything that is not rock-like (a stump called "model", a log), false for a rock whose name says ore or that drops anything but Stone / Flint, true for a
+    /// rock with no known ore drop (an unknown rock is never attacked).
+    internal static bool IsPlainRock(string prefab, bool isMineRock, IEnumerable<string> dropNames)
+    {
+        string n = string.IsNullOrEmpty(prefab) ? "" : prefab.ToLowerInvariant();
+        bool rockLike = isMineRock || n.Contains("rock") || n.Contains("boulder");
+        if (!rockLike)
+        {
+            return false;
+        }
+
+        foreach (string w in OreWords)
+        {
+            if (n.Contains(w))
+            {
+                return false;
+            }
+        }
+
+        if (dropNames != null)
+        {
+            foreach (string d in dropNames)
+            {
+                if (string.IsNullOrEmpty(d) || d.Equals("Stone", StringComparison.OrdinalIgnoreCase) ||
+                    d.Equals("Flint", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                return false; // drops something else (copper ore, tin ore, silver, obsidian ...): an ore rock, a troll may mine it
+            }
+        }
+
+        return true;
+    }
+
     /// Rage mode is for destructible obstructions only (spec 1).
     internal static bool Rageable(Obstruction o)
     {

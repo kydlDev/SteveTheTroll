@@ -194,8 +194,14 @@ internal static class TrollSpawnBoost
 
                 Changed.Add(new Saved
                 {
-                    Data = s, Interval = s.m_spawnInterval, Chance = s.m_spawnChance, Day = s.m_spawnAtDay,
-                    Night = s.m_spawnAtNight, Max = s.m_maxSpawned, Biome = s.m_biome, Area = s.m_biomeArea
+                    Data = s,
+                    Interval = s.m_spawnInterval,
+                    Chance = s.m_spawnChance,
+                    Day = s.m_spawnAtDay,
+                    Night = s.m_spawnAtNight,
+                    Max = s.m_maxSpawned,
+                    Biome = s.m_biome,
+                    Area = s.m_biomeArea
                 });
                 // D-077 (TEST-032: no troll spawned with the set): the game counts the wearer's tamed trolls nearby against max spawned (1)
                 if (full)

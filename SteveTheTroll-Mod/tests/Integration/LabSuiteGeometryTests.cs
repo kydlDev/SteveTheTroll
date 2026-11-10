@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -20,7 +20,8 @@ public class LabSuiteGeometryTests
 
     static string SuiteDir { get { return Path.Combine(TestPaths.SuiteDir); } }
 
-    [Test] public void EveryTrollSpawn_IsInFront_AndFarEnough()
+    [Test]
+    public void EveryTrollSpawn_IsInFront_AndFarEnough()
     {
         int seen = 0;
         // D-181: the blocks / functions in _functions spawn trolls for many tests - they follow the same rule
@@ -46,7 +47,8 @@ public class LabSuiteGeometryTests
     }
 
     // D-174: every test in suite.json has its file and every test file is in the suite (a forgotten file never runs); renamed hooks are gone from the suite
-    [Test] public void Suite_ListsEveryTestFile_AndOnlyThose()
+    [Test]
+    public void Suite_ListsEveryTestFile_AndOnlyThose()
     {
         string suite = File.ReadAllText(Path.Combine(SuiteDir, "suite.json"));
         var listed = Regex.Matches(Regex.Match(suite, @"""tests""\s*:\s*\[(?<t>[^\]]*)\]").Groups["t"].Value, @"""([^""]+)""").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
@@ -60,19 +62,22 @@ public class LabSuiteGeometryTests
     }
 
     // D-175 (DrakesTestLab authoring guide: "noErrors ... in every test"): every test asserts that SteveTheTroll logged no error
-    [Test] public void EveryTest_AssertsNoErrors()
+    [Test]
+    public void EveryTest_AssertsNoErrors()
     {
         foreach (var f in Directory.GetFiles(SuiteDir, "*.json").Where(x => Path.GetFileName(x) != "suite.json"))
             Assert.That(Regex.IsMatch(File.ReadAllText(f), @"""check""\s*:\s*""noErrors""\s*,\s*""source""\s*:\s*""SteveTheTroll"""), Is.True, Path.GetFileName(f) + " has no noErrors assert for SteveTheTroll");
     }
 
-    [Test] public void Suite_UsesNoRenamedHooks()
+    [Test]
+    public void Suite_UsesNoRenamedHooks()
     {
         foreach (var f in Directory.GetFiles(SuiteDir, "*.json"))
             Assert.That(File.ReadAllText(f), Does.Not.Contain("\"stt.unloading\""), Path.GetFileName(f) + ": stt.unloading was renamed stt.returningToUnload (D-174)");
     }
 
-    [Test] public void TheHook_UsesTheSameMinimum()
+    [Test]
+    public void TheHook_UsesTheSameMinimum()
     {
         // the class is split over TestHooks*.cs (class-size gate), so read all its parts
         string hooks = string.Concat(Directory.GetFiles(Path.Combine(TestPaths.Src, "Testing", "TestHooks"), "TestHooks*.cs").Select(File.ReadAllText));

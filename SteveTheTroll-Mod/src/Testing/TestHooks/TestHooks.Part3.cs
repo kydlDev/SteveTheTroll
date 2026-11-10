@@ -481,8 +481,17 @@ internal static partial class TestHooks
     {
         Player p = Player.m_localPlayer;
         long who = owner == "other" ? Me + 777 : Me;
-        ZDO z = ZDOMan.instance.CreateNewZDO(p.transform.position + new Vector3(dx, 0f, dz),
-            HubData.PrefabName.GetStableHashCode());
+        // 2026-11-09 (analysis of instruction-latency): the player's height was copied, so on sloping ground the hub floated up to ~1.8 m above the terrain; the troll's home goal then had no
+        // navmesh path while the ground beneath had one. The hub stands on the ground like a built one. Where the zone is not loaded the game has no ground height to give (-10000, or 0): an
+        // answer more than 15 m from the player's height is not taken, the player's height stays as before.
+        Vector3 hubAt = p.transform.position + new Vector3(dx, 0f, dz);
+        float ground = ZoneSystem.instance.GetGroundHeight(hubAt);
+        if (Mathf.Abs(ground - hubAt.y) < 15f)
+        {
+            hubAt.y = ground;
+        }
+
+        ZDO z = ZDOMan.instance.CreateNewZDO(hubAt, HubData.PrefabName.GetStableHashCode());
         z.SetPrefab(HubData.PrefabName
             .GetStableHashCode()); // CreateNewZDO ignores its prefab argument in this game version
         z.Persistent =

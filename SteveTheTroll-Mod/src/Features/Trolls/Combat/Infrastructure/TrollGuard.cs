@@ -1,4 +1,3 @@
-using SteveTheTroll.Features.Trolls.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,6 +5,7 @@ using HarmonyLib;
 using KydlCore.Common;
 using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Trolls.Combat.Domain;
+using SteveTheTroll.Features.Trolls.Contracts;
 using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Orders.Infrastructure;

@@ -92,17 +92,17 @@ internal static class HubPlacement
 
         float lo = float.MaxValue, hi = float.MinValue;
         for (int ix = -4; ix <= 4; ix++)
-        for (int iz = -4; iz <= 4; iz++)
-        {
-            float h;
-            if (!zs.GetGroundHeight(at + new Vector3(ix, 0f, iz) * (HubData.Radius / 4f), out h))
+            for (int iz = -4; iz <= 4; iz++)
             {
-                continue;
-            }
+                float h;
+                if (!zs.GetGroundHeight(at + new Vector3(ix, 0f, iz) * (HubData.Radius / 4f), out h))
+                {
+                    continue;
+                }
 
-            lo = Mathf.Min(lo, h);
-            hi = Mathf.Max(hi, h);
-        }
+                lo = Mathf.Min(lo, h);
+                hi = Mathf.Max(hi, h);
+            }
 
         return hi >= lo ? hi - lo : 0f;
     }

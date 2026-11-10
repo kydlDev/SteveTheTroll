@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Jotunn.Configs;
@@ -235,7 +235,9 @@ internal static partial class CostumeItems
 
         var cfg = new ItemConfig
         {
-            Name = "$" + token, Description = "$" + token + "_desc", CraftingStation = CraftingStations.Workbench,
+            Name = "$" + token,
+            Description = "$" + token + "_desc",
+            CraftingStation = CraftingStations.Workbench,
             MinStationLevel = 1
         };
         // D-070: the slipper recipe (SlipperItem) for every piece

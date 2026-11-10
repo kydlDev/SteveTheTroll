@@ -91,6 +91,12 @@ internal sealed class FarmHomeTrip
         return point;
     }
 
+    /// 2026-11-09 (agent25-rep02, spot-return: the depot walk ended 11.7 m short behind a log - the ledge walk refused every step, and while the recovery machine is busy the farmer lets
+    /// IT drive and never calls GoHome, so the 60 s walk limit below was never looked at for 80 s; TrollFrozenWatch rebuilt the troll, the new trip announced DepotWalk a second time
+    /// and the journal was illegal): the walk to the depot has used up its UnloadWalkSeconds. The farmer does not let a busy recovery drive past this point - the unload happens where
+    /// the troll stands, as the limit has always promised (full11: 96 stacks delivered 12.9 m from the depot). Expected outcome: true only while unloading and past the limit.
+    internal bool UnloadWalkExpired => _unloading && Time.time - _unloadStart > UnloadWalkSeconds;
+
     /// A new home trip (after ResumeAtSpot). Expected outcome: not unloading, no best distance.
     internal bool Reset()
     {
@@ -221,7 +227,7 @@ internal sealed class FarmHomeTrip
     {
         Vector3 flat = _unloadAt - _f.transform.position;
         flat.y = 0f;
-        bool late = Time.time - _unloadStart > UnloadWalkSeconds;
+        bool late = UnloadWalkExpired;
         // D-106 (user: "empty their backpacks when they are 5-10m away from the depot, so that they don't all stumble into each other"): unloads within UnloadMetres, walks only
         // until UnloadStopMetres, never into the depot
         if (flat.magnitude > UnloadMetres && !late)
@@ -254,6 +260,10 @@ internal sealed class FarmHomeTrip
             if (ru != null)
             {
                 ru.Reached();
+                if (late)
+                {
+                    ru.Forget(); // the walk was ended by the limit, not by arriving: a running rage / detour / ledge walk is cut short, the next walk starts clean
+                }
             }
         } // at the depot (or the walk ended): its counter starts again
         _f.Movement.Stop();

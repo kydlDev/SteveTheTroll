@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using KydlCore.Common;
-using KydlCore.Features.Diagnostics.Contracts;
 using KydlCore.Core;
+using KydlCore.Features.Diagnostics.Contracts;
 using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Hubs.Application;
 using SteveTheTroll.Features.Hubs.Domain;
@@ -108,9 +108,13 @@ internal sealed class TrollReturn : MonoBehaviour
         ZNetView view = c.GetComponent<ZNetView>();
         OperationResponse<bool> start = Returns.Start(new HubReturnInput
         {
-            TrollOwner = view != null && view.IsValid() && view.IsOwner(), HasHub = hub != null, Distance = d,
-            FollowOrder = ai.GetFollowTarget() != null, Arriving = c.GetComponent<TrollArrival>() != null,
-            OwnerWears = TrollHome.OwnerWears(c), Fighting = ai.GetTargetCreature() != null || c.GetComponent<TrollRage>() != null,
+            TrollOwner = view != null && view.IsValid() && view.IsOwner(),
+            HasHub = hub != null,
+            Distance = d,
+            FollowOrder = ai.GetFollowTarget() != null,
+            Arriving = c.GetComponent<TrollArrival>() != null,
+            OwnerWears = TrollHome.OwnerWears(c),
+            Fighting = ai.GetTargetCreature() != null || c.GetComponent<TrollRage>() != null,
             Unloading = farmer != null && farmer.Unloading
         });
         if (!start.IsSuccess || !start.Value)
@@ -184,8 +188,14 @@ internal sealed class TrollReturn : MonoBehaviour
         // D-173 (Architecture V2, P7): HubReturnPipeline.Step decides (owner, hub, then HubRules.ReturnNext)
         OperationResponse<HubRules.ReturnStep> step = Returns.Step(new HubReturnInput
         {
-            TrollOwner = view != null && view.IsValid() && view.IsOwner(), HasHub = _hub != null, Distance = d,
-            FollowOrder = ai.GetFollowTarget() != null, Arriving = false, OwnerWears = true, Fighting = fighting, Unloading = false
+            TrollOwner = view != null && view.IsValid() && view.IsOwner(),
+            HasHub = _hub != null,
+            Distance = d,
+            FollowOrder = ai.GetFollowTarget() != null,
+            Arriving = false,
+            OwnerWears = true,
+            Fighting = fighting,
+            Unloading = false
         });
         if (step.Status == ResponseStatus.Rejected)
         {

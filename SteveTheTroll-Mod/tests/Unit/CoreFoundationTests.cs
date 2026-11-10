@@ -10,7 +10,8 @@ namespace SteveTheTroll.Tests.Unit;
 public class CoreFoundationTests
 {
     // ---- OperationResponse ----
-    [Test] public void Success_CarriesTheValue()
+    [Test]
+    public void Success_CarriesTheValue()
     {
         var r = OperationResponse<int>.Success(4, "2+2");
         using (Assert.EnterMultipleScope())
@@ -21,7 +22,9 @@ public class CoreFoundationTests
             Assert.That(r.Reason, Is.EqualTo("2+2"));
         }
     }
-    [TestCase("Rejected")] [TestCase("Ignored")] [TestCase("Failed")]
+    [TestCase("Rejected")]
+    [TestCase("Ignored")]
+    [TestCase("Failed")]
     public void NonSuccess_HasDefaultValue_AndIsNotSuccess(string kind)
     {
         var s = (ResponseStatus)Enum.Parse(typeof(ResponseStatus), kind);
@@ -35,7 +38,8 @@ public class CoreFoundationTests
         }
     }
     [Test] public void NullReason_BecomesEmpty() { Assert.That(new OperationResponse<int>(ResponseStatus.Failed, 0, null).Reason, Is.EqualTo("")); }
-    [Test] public void DefaultResponse_IsSuccessWithEmptyReason_SoNeverReturnDefault()
+    [Test]
+    public void DefaultResponse_IsSuccessWithEmptyReason_SoNeverReturnDefault()
     {
         // documents the trap: default(OperationResponse) reads as Success; code must always use the factories
         var r = default(OperationResponse<int>);
@@ -45,7 +49,8 @@ public class CoreFoundationTests
             Assert.That(r.Reason, Is.Null);
         }
     }
-    [Test] public void As_KeepsStatusAndReason()
+    [Test]
+    public void As_KeepsStatusAndReason()
     {
         var r = OperationResponse<int>.Rejected("not owner").As<string>();
         using (Assert.EnterMultipleScope())
@@ -57,7 +62,8 @@ public class CoreFoundationTests
     }
 
     // ---- ValidationResult ----
-    [Test] public void Validation_Helpers()
+    [Test]
+    public void Validation_Helpers()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -79,13 +85,17 @@ public class CoreFoundationTests
         if (trace != null) p.Trace = trace.Add;
         return p;
     }
-    [Test] public void Pipeline_AllValid_Decides() { var r = Doubler().Run(3);
+    [Test]
+    public void Pipeline_AllValid_Decides()
+    {
+        var r = Doubler().Run(3);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(r.IsSuccess, Is.True); Assert.That(r.Value, Is.EqualTo(6));
         }
     }
-    [Test] public void Pipeline_FirstInvalidStops_WithItsStatus()
+    [Test]
+    public void Pipeline_FirstInvalidStops_WithItsStatus()
     {
         var r = Doubler().Run(-1);
         using (Assert.EnterMultipleScope())
@@ -95,7 +105,8 @@ public class CoreFoundationTests
             Assert.That(Doubler().Run(0).Status, Is.EqualTo(ResponseStatus.Ignored));
         }
     }
-    [Test] public void Pipeline_StepsRunInOrder_AndLaterStepsDoNotRunAfterAStop()
+    [Test]
+    public void Pipeline_StepsRunInOrder_AndLaterStepsDoNotRunAfterAStop()
     {
         var seen = new List<string>();
         var p = new OperationPipeline<int, int>("order", x => { seen.Add("decide"); return OperationResponse<int>.Success(x); })
@@ -109,7 +120,8 @@ public class CoreFoundationTests
             Assert.That(p.StepCount, Is.EqualTo(3));
         }
     }
-    [Test] public void Pipeline_TraceNamesTheStoppingStep()
+    [Test]
+    public void Pipeline_TraceNamesTheStoppingStep()
     {
         var t = new List<string>();
         Doubler(t).Run(-5);
@@ -121,13 +133,17 @@ public class CoreFoundationTests
         }
     }
     sealed class Halver : IOperationStep<int, int> { public OperationResponse<int> Run(int x) { return x % 2 == 0 ? OperationResponse<int>.Success(x / 2) : OperationResponse<int>.Rejected("odd"); } }
-    [Test] public void Pipeline_WithAStepObject() { var p = new OperationPipeline<int, int>("halver", new Halver());
+    [Test]
+    public void Pipeline_WithAStepObject()
+    {
+        var p = new OperationPipeline<int, int>("halver", new Halver());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(p.Run(8).Value, Is.EqualTo(4)); Assert.That(p.Run(3).Status, Is.EqualTo(ResponseStatus.Rejected));
         }
     }
-    [Test] public void Pipeline_NullArguments_Throw()
+    [Test]
+    public void Pipeline_NullArguments_Throw()
     {
         Assert.Throws<ArgumentNullException>(() => new OperationPipeline<int, int>("x", (Func<int, OperationResponse<int>>)null));
         Assert.Throws<ArgumentNullException>(() => new OperationPipeline<int, int>("x", (IOperationStep<int, int>)null));
@@ -145,7 +161,8 @@ public class CoreFoundationTests
     }
     sealed class BoomHandler : ICommandHandler<Boom, int> { public OperationResponse<int> Handle(Boom c) { throw new InvalidOperationException("kaputt"); } }
 
-    [Test] public void Dispatcher_RoutesByCommandType()
+    [Test]
+    public void Dispatcher_RoutesByCommandType()
     {
         var d = new CommandDispatcher();
         Assert.That(d.Register(new AddHandler()), Is.True);
@@ -158,14 +175,18 @@ public class CoreFoundationTests
             Assert.That(d.Dispatch(new Shout("")).Status, Is.EqualTo(ResponseStatus.Ignored));
         }
     }
-    [Test] public void Dispatcher_NoHandler_Failed() { var r = new CommandDispatcher().Dispatch(new Add(1, 1));
+    [Test]
+    public void Dispatcher_NoHandler_Failed()
+    {
+        var r = new CommandDispatcher().Dispatch(new Add(1, 1));
         using (Assert.EnterMultipleScope())
         {
             Assert.That(r.Status, Is.EqualTo(ResponseStatus.Failed)); Assert.That(r.Reason, Does.Contain("Add"));
         }
     }
     [Test] public void Dispatcher_NullCommand_Failed() { Assert.That(new CommandDispatcher().Dispatch<int>(null).Status, Is.EqualTo(ResponseStatus.Failed)); }
-    [Test] public void Dispatcher_ThrowingHandler_FailedNotThrown()
+    [Test]
+    public void Dispatcher_ThrowingHandler_FailedNotThrown()
     {
         var d = new CommandDispatcher();
         d.Register(new BoomHandler());
@@ -176,7 +197,8 @@ public class CoreFoundationTests
             Assert.That(r.Reason, Does.Contain("InvalidOperationException").And.Contain("kaputt"));
         }
     }
-    [Test] public void Dispatcher_ReRegister_Replaces_AndTraces()
+    [Test]
+    public void Dispatcher_ReRegister_Replaces_AndTraces()
     {
         var t = new List<string>();
         var d = new CommandDispatcher(t.Add);

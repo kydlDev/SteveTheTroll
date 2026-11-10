@@ -25,6 +25,14 @@
     },
     {
       "do": "hook",
+      "name": "stt.keepRouteClear",
+      "args": {
+        "halfWidth": 8
+      },
+      "label": "#29: no tree, rock, stump or bush within 8 m of the way home, in the part that is loaded now and in every part that loads while the troll walks (stt.clearRoute checks terrain only)"
+    },
+    {
+      "do": "hook",
       "name": "stt.clearAround",
       "args": {
         "radius": 30

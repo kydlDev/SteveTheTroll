@@ -140,7 +140,7 @@ public class Plugin : BaseUnityPlugin
         CommandManager.Instance.AddConsoleCommand(new LevelGroundCommand()); // D-105: stt_levelground (repair)
         CommandManager.Instance.AddConsoleCommand(new ComingPreviewCommand()); // D-058 preview: stt_coming [name]
         CommandManager.Instance.AddConsoleCommand(new UnlockCommand()); // stt_unlock <word> (the other stt_ commands need the Steam account or this)
-            CommandManager.Instance.AddConsoleCommand(new FillBackpackCommand()); // D-064 test: stt_fillbackpack [item]
+        CommandManager.Instance.AddConsoleCommand(new FillBackpackCommand()); // D-064 test: stt_fillbackpack [item]
         ModLog.Verbose(
             "Plugin: console commands stt_unlock, stt_dumpbuild, stt_clear, stt_cleardepots, stt_levelground, stt_coming, stt_fillbackpack registered");
         ModLog.Verbose("Plugin: Awake finished (Harmony patches applied)");

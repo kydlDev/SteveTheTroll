@@ -4,9 +4,9 @@ using KydlCore.Common;
 using KydlCore.Core;
 using SteveTheTroll.Features.Trolls.Contracts;
 using SteveTheTroll.Features.Trolls.Core;
+using SteveTheTroll.Features.Trolls.Farming.Domain;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Movement.Infrastructure;
-using SteveTheTroll.Features.Trolls.Farming.Domain;
 using SteveTheTroll.Features.Trolls.Recovery.Application;
 using SteveTheTroll.Features.Trolls.Recovery.Domain;
 using SteveTheTroll.Features.Trolls.Recovery.Execution;
@@ -262,8 +262,17 @@ internal sealed partial class TrollRecovery : MonoBehaviour
         OperationResponse<RecoveryDecision> response =
             _pipeline.Evaluate(new RecoveryInput
             {
-                Now = now, StuckSeconds = stuck, SustainedSeconds = sustained, Rageable = rageable, HeadOn = headOn,
-                LegDone = legDone, CliffAhead = cliffAhead, LedgeOk = ledgeOk, LedgeDone = ledgeDone, IsAlive = alive, IsOwner = _ctx.IsOwner
+                Now = now,
+                StuckSeconds = stuck,
+                SustainedSeconds = sustained,
+                Rageable = rageable,
+                HeadOn = headOn,
+                LegDone = legDone,
+                CliffAhead = cliffAhead,
+                LedgeOk = ledgeOk,
+                LedgeDone = ledgeDone,
+                IsAlive = alive,
+                IsOwner = _ctx.IsOwner
             });
         if (!response.IsSuccess)
         {

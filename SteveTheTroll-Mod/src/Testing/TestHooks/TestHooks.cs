@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using KydlCore.Common;
@@ -10,8 +10,8 @@ using SteveTheTroll.Features.Trolls.Backpack.Domain;
 using SteveTheTroll.Features.Trolls.Backpack.Infrastructure;
 using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
-using SteveTheTroll.Features.Trolls.Orders.Infrastructure;
 using SteveTheTroll.Features.Trolls.Orders.Commands;
+using SteveTheTroll.Features.Trolls.Orders.Infrastructure;
 using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using SteveTheTroll.Ui;
@@ -81,6 +81,10 @@ internal static partial class TestHooks
         }
 
         TestProximityWatch.ResetCounts();
+        SteveTheTroll.Features.Trolls.Combat.Infrastructure.TrollNoHit.HubRingsOffForTests = true; // D-214: the hub no-hit circles are off in the lab unless the test hub-no-hit-ring asks for them (see TrollNoHit)
+        RouteClearWatch.Disarm(p); // #29: a route clearing of the test before does not touch this one
+        MobClearWatch.Disarm(p); // 2026-11-09: nor does the creature clearing of the test before
+        MobSpawnBlock.Disarm(); // ... nor its spawn block: the next test spawns as the game does
         SteveTheTroll.Features.Trolls.Movement.Infrastructure.TrollPath.ForgetBadSpots(); // D-179: bad spots of an earlier test do not steer this one
         int tabs = SteveTheTroll.Presentation.Hub.Registration.HubTabs.ResetGatesForTests(p); // D-181: every test starts with a fresh character's hub tabs
         if (tabs > 0)

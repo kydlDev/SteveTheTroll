@@ -214,20 +214,20 @@ internal static partial class TrollZones
 
             Centres.Add(pos);
             for (int dx = -1; dx <= 1; dx++)
-            for (int dz = -1; dz <= 1; dz++)
-            {
-                Vector2s zone = ZoneSystem.GetZone(pos + new Vector3(dx * ZoneSize, 0f, dz * ZoneSize));
-                Vector3 c = ZoneSystem.GetZonePos(zone);
-                float ex = Mathf.Max(Mathf.Abs(pos.x - c.x) - ZoneSize / 2f, 0f),
-                    ez = Mathf.Max(Mathf.Abs(pos.z - c.z) - ZoneSize / 2f, 0f);
-                if (ex * ex + ez * ez > r * r || KeptSet.Contains(zone) || GameRuns(zone, refPos, centre, sim))
+                for (int dz = -1; dz <= 1; dz++)
                 {
-                    continue;
-                }
+                    Vector2s zone = ZoneSystem.GetZone(pos + new Vector3(dx * ZoneSize, 0f, dz * ZoneSize));
+                    Vector3 c = ZoneSystem.GetZonePos(zone);
+                    float ex = Mathf.Max(Mathf.Abs(pos.x - c.x) - ZoneSize / 2f, 0f),
+                        ez = Mathf.Max(Mathf.Abs(pos.z - c.z) - ZoneSize / 2f, 0f);
+                    if (ex * ex + ez * ez > r * r || KeptSet.Contains(zone) || GameRuns(zone, refPos, centre, sim))
+                    {
+                        continue;
+                    }
 
-                KeptSet.Add(zone);
-                Kept.Add(zone);
-            }
+                    KeptSet.Add(zone);
+                    Kept.Add(zone);
+                }
         }
 
         foreach (ZDOID id in gone)

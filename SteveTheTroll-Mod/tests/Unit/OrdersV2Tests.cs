@@ -13,13 +13,20 @@ public class OrdersV2Tests
     {
         return new OrderInput
         {
-            KeyPressed = key, PlayerAlive = alive, UiBlocked = blocked, HasTroll = troll, CanSteer = steer,
-            HasCreature = creature, HasSource = source, SourceIsWall = wall
+            KeyPressed = key,
+            PlayerAlive = alive,
+            UiBlocked = blocked,
+            HasTroll = troll,
+            CanSteer = steer,
+            HasCreature = creature,
+            HasSource = source,
+            SourceIsWall = wall
         };
     }
 
     [Test] public void Rules_CreatureBeatsSource() { Assert.That(OrderRules.Decide(I(creature: true, source: true)), Is.EqualTo(OrderKind.Attack)); }
-    [Test] public void Rules_Wall_Source_Nothing()
+    [Test]
+    public void Rules_Wall_Source_Nothing()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -29,13 +36,17 @@ public class OrdersV2Tests
         }
     }
 
-    [Test] public void Pipeline_NoKey_Ignored_Silently() { var r = new OrderPipeline().Evaluate(I(key: false, troll: false));
+    [Test]
+    public void Pipeline_NoKey_Ignored_Silently()
+    {
+        var r = new OrderPipeline().Evaluate(I(key: false, troll: false));
         using (Assert.EnterMultipleScope())
         {
             Assert.That(r.Status, Is.EqualTo(ResponseStatus.Ignored)); Assert.That(r.Reason, Is.EqualTo(OrderPipeline.NoKey));
         }
     }
-    [Test] public void Pipeline_DeadOrMenu_Ignored()
+    [Test]
+    public void Pipeline_DeadOrMenu_Ignored()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -44,7 +55,8 @@ public class OrdersV2Tests
             Assert.That(new OrderPipeline().Evaluate(I(blocked: true)).Status, Is.EqualTo(ResponseStatus.Ignored));
         }
     }
-    [Test] public void Pipeline_NoTroll_Rejected_BeforeSteer()
+    [Test]
+    public void Pipeline_NoTroll_Rejected_BeforeSteer()
     {
         var r = new OrderPipeline().Evaluate(I(troll: false, steer: false));
         using (Assert.EnterMultipleScope())
@@ -54,7 +66,10 @@ public class OrdersV2Tests
             Assert.That(new OrderPipeline().Evaluate(I(steer: false)).Reason, Is.EqualTo(OrderPipeline.NoSteer));
         }
     }
-    [Test] public void Pipeline_Valid_Decides() { var r = new OrderPipeline().Evaluate(I(source: true));
+    [Test]
+    public void Pipeline_Valid_Decides()
+    {
+        var r = new OrderPipeline().Evaluate(I(source: true));
         using (Assert.EnterMultipleScope())
         {
             Assert.That(r.IsSuccess, Is.True); Assert.That(r.Value, Is.EqualTo(OrderKind.BreakSource));
@@ -73,7 +88,8 @@ public class OrdersV2Tests
         return "FarmFocus";
     }
 
-    [Test] public void Pipeline_EqualsTheOldTick_ForEveryCombination()
+    [Test]
+    public void Pipeline_EqualsTheOldTick_ForEveryCombination()
     {
         var p = new OrderPipeline();
         for (int b = 0; b < 256; b++)

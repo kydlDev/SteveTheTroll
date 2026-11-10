@@ -21,6 +21,14 @@ internal static class HubRules
         return configured <= 0f || float.IsNaN(configured) ? 0f : configured > MaxNoSpawn ? MaxNoSpawn : configured;
     }
 
+    /// D-214 (user 2026-11-10): the no-spawn area is measured from the hub's OUTER edge, so the sphere around its middle is the configured metres + the building's outer radius (HubData.OuterRadius).
+    /// Expected outcome: 0 when the setting is 0 (off), else NoSpawnRadius(configured) + OuterRadius.
+    internal static float NoSpawnSphereRadius(float configured)
+    {
+        float r = NoSpawnRadius(configured);
+        return r <= 0f ? 0f : r + HubData.OuterRadius;
+    }
+
     internal const int MaxHubs = 10;
 
     internal const float MinSpacing = 1000f,

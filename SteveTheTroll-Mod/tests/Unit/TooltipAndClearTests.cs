@@ -24,7 +24,9 @@ public class TooltipAndClearTests
     }
 
     [Test] public void SetTooltip_NoStamina_Unchanged() { Assert.That(Compact("a\nb: +1"), Is.EqualTo("a\nb: +1")); }
-    [Test] public void SetTooltip_Empty_NoThrow() {
+    [Test]
+    public void SetTooltip_Empty_NoThrow()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(Compact(null), Is.EqualTo("")); Assert.That(Compact(""), Is.EqualTo(""));

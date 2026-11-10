@@ -94,7 +94,7 @@ internal static class HubPrefab
 
         int lanterns = AddLanterns(go);
         bool sign = AddSign(go);
-        bool noSpawn = AddNoSpawnArea(go, HubRules.NoSpawnRadius(ModSettings.HubNoSpawnRadius.Value));
+        bool noSpawn = AddNoSpawnArea(go, HubRules.NoSpawnSphereRadius(ModSettings.HubNoSpawnRadius.Value));
         go.AddComponent<TrollHubPiece>();
         Piece piece = go.AddComponent<Piece>();
         piece.m_name = "Troll Hub";
@@ -196,7 +196,7 @@ internal static class HubPrefab
         var sphere = copy.AddComponent<SphereCollider>();
         sphere.isTrigger = true;
         sphere.radius = radius;
-        ModLog.Info("HubPrefab: no-spawn area " + radius.ToString("F0") + " m (copy of the workbench's PlayerBase area, type " + source.m_type + ", its own collider: " +
+        ModLog.Info("HubPrefab: no-spawn area " + radius.ToString("F1") + " m from the middle = " + (radius - HubData.OuterRadius).ToString("F0") + " m beyond the hub's outer edge (copy of the workbench's PlayerBase area, type " + source.m_type + ", its own collider: " +
                     (had.Length > 0 ? had.Trim() : "none") + ", layer " + LayerMask.LayerToName(copy.layer) + ")");
         return true;
     }

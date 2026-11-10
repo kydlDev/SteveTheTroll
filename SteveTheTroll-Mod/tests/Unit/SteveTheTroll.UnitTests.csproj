@@ -40,6 +40,7 @@
     <Compile Include="..\..\src\Features\Riding\Domain\RideRules.cs" Link="Mod\RideRules.cs" />
     <Compile Include="..\..\src\Features\Riding\Domain\RideRecipe.cs" Link="Mod\RideRecipe.cs" />
     <Compile Include="..\..\src\Features\Riding\Domain\MountFile.cs" Link="Mod\MountFile.cs" />
+    <Compile Include="..\..\src\Features\Riding\Domain\SeatFollow.cs" Link="Mod\SeatFollow.cs" />
     <Compile Include="..\..\src\Features\Trolls\Backpack\Domain\DepotRules.cs" Link="Mod\DepotRules.cs" />
     <Compile Include="..\..\src\Features\Trolls\Taming\Domain\HealthRules.cs" Link="Mod\HealthRules.cs" />
     <!-- D-167 stuck detection and recovery: pure rules, the escalation ladder, the per troll + resource failure book (TargetRules: head-on test) -->

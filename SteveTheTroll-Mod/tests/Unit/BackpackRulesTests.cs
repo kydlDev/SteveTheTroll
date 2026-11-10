@@ -10,7 +10,8 @@ public class BackpackRulesTests
 {
     [Test] public void Full_WhenNoChestHasRoom() { Assert.That(BackpackRules.Full(4, i => false), Is.True); }
     [Test] public void NotFull_WhenAnyChestHasRoom() { Assert.That(BackpackRules.Full(4, i => i == 3), Is.False); }
-    [Test] public void Full_StopsAtTheFirstChestWithRoom()
+    [Test]
+    public void Full_StopsAtTheFirstChestWithRoom()
     {
         var read = new List<int>();
         BackpackRules.Full(4, i => { read.Add(i); return i == 1; });
@@ -20,14 +21,21 @@ public class BackpackRulesTests
             Assert.That(read.Contains(2), Is.False, "chests after the first one with room are not read");
         }
     }
-    [TestCase("Stone", null)] [TestCase("Grausten", null)] [TestCase(null, "$item_stone")] [TestCase(null, "$item_grausten")]
+    [TestCase("Stone", null)]
+    [TestCase("Grausten", null)]
+    [TestCase(null, "$item_stone")]
+    [TestCase(null, "$item_grausten")]
     public void Accepts_NeverStoneOrGrausten(string prefab, string shared) { Assert.That(BackpackRules.Accepts(prefab, shared), Is.False); }
 
-    [TestCase("Wood", "$item_wood")] [TestCase("CopperOre", null)] [TestCase(null, null)] [TestCase("Resin", "$item_resin")]
+    [TestCase("Wood", "$item_wood")]
+    [TestCase("CopperOre", null)]
+    [TestCase(null, null)]
+    [TestCase("Resin", "$item_resin")]
     public void Accepts_OtherItems(string prefab, string shared) { Assert.That(BackpackRules.Accepts(prefab, shared), Is.True); }
 
     [Test] public void Full_NoReader_NotFull() { Assert.That(BackpackRules.Full(4, null), Is.False); }
-    [Test] public void Collects_OnlyOwnerNotBusyNotFull()
+    [Test]
+    public void Collects_OnlyOwnerNotBusyNotFull()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -37,7 +45,9 @@ public class BackpackRulesTests
             Assert.That(BackpackRules.Collects(true, false, true), Is.False);
         }
     }
-    [Test] public void InRange() {
+    [Test]
+    public void InRange()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(BackpackRules.InRange(2500f, 2500f), Is.True); Assert.That(BackpackRules.InRange(2500.1f, 2500f), Is.False);

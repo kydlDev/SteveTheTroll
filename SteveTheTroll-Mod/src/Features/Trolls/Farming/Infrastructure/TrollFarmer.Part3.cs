@@ -1,8 +1,8 @@
-using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using KydlCore.Common;
 using KydlCore.Features.Diagnostics.Contracts;
 using SteveTheTroll.Features.Trolls.Combat.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
+using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using UnityEngine;
 

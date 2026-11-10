@@ -227,7 +227,8 @@ internal static partial class CombatTestHooks
         TrollChase ch = troll.GetComponent<TrollChase>();
         ModLog.Info("CombatTestHooks: snapshot (" + phase + ") - " + TrollGuard.Describe(t) + ", combat state " + CombatState(troll) + ", " + mob + ", troll in no-hit zone " +
                     TrollNoHit.InZone(t.transform.position) + ", troll speed " + t.GetVelocity().magnitude.ToString("F1") + " m/s" +
-                    (ch != null ? ", chase swings " + ch.Swings + ", last blocker '" + ch.LastBlocker + "'" : ", no chase"));
+                    (ch != null ? ", chase swings " + ch.Swings + ", last blocker '" + ch.LastBlocker + "', last swing '" + ch.LastSwing + "', height difference to the creature " +
+                    (m != null ? (m.transform.position.y - t.transform.position.y).ToString("F1") + " m" : "-") : ", no chase"));
     }
 
     private static float _nextNearLog;
@@ -309,6 +310,14 @@ internal static partial class CombatTestHooks
         }
 
         return "none";
+    }
+
+    /// D-214: the hub no-hit circles on (1) or off (0) for this test (stt.reset switches them off). Expected outcome: reads back the state.
+    [TestHook("stt.hubRing")]
+    private static string HubRing(int on)
+    {
+        TrollNoHit.HubRingsOffForTests = on == 0;
+        return $"hub rings {(on != 0 ? "on" : "off")}";
     }
 
     /// One swing attempt of the troll right now (the game's StartAttack through the mod's no-hit patch). Expected outcome: whether the game started an attack.

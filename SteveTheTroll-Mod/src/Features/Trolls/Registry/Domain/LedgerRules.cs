@@ -87,8 +87,17 @@ internal static class LedgerRules
 
             list.Add(new LedgerEntry
             {
-                Id = Unesc(id.Groups[1].Value), Name = Unesc(Str(line, "name")), X = Flt(line, "x"), Y = Flt(line, "y"), Z = Flt(line, "z"), Health = Flt(line, "health"),
-                Loaded = Flag(line, "loaded"), Frozen = Flag(line, "frozen"), Dead = Flag(line, "dead"), Missing = Flag(line, "missing"), MissingSince = Unesc(Str(line, "missingSince"))
+                Id = Unesc(id.Groups[1].Value),
+                Name = Unesc(Str(line, "name")),
+                X = Flt(line, "x"),
+                Y = Flt(line, "y"),
+                Z = Flt(line, "z"),
+                Health = Flt(line, "health"),
+                Loaded = Flag(line, "loaded"),
+                Frozen = Flag(line, "frozen"),
+                Dead = Flag(line, "dead"),
+                Missing = Flag(line, "missing"),
+                MissingSince = Unesc(Str(line, "missingSince"))
             });
         }
 

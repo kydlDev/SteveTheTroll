@@ -25,6 +25,14 @@
     },
     {
       "do": "hook",
+      "name": "stt.keepRouteClear",
+      "args": {
+        "halfWidth": 8
+      },
+      "label": "#29: no natural tree, rock, stump or bush within 8 m of the way home (the player-built walls are pieces and stay) - the wall line is the only obstacle (full11: the troll chopped a beech in its stuck rage)"
+    },
+    {
+      "do": "hook",
       "name": "stt.clearMobs",
       "args": {
         "radius": 80

@@ -1,4 +1,3 @@
-using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using System;
 using System.Collections.Generic;
 using KydlCore.Common;
@@ -12,7 +11,9 @@ using SteveTheTroll.Features.Trolls.Core;
 using SteveTheTroll.Features.Trolls.Farming.Application;
 using SteveTheTroll.Features.Trolls.Farming.Domain;
 using SteveTheTroll.Features.Trolls.Farming.Execution;
+using SteveTheTroll.Features.Trolls.Orders.Domain;
 using SteveTheTroll.Features.Trolls.Recovery.Infrastructure;
+using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using SteveTheTroll.Features.Trolls.Taming.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using SteveTheTroll.Presentation.Notifications;
@@ -129,9 +130,17 @@ internal sealed partial class TrollFarmer : MonoBehaviour
         // the executor owns the actions: bound once here (method groups), never per frame
         _executor = new FarmingExecutor(_ctx, new FarmingActions
         {
-            Stop = OnStop, StopFollow = OnStopFollow, YieldToFight = OnYieldToFight, RecoveryDrives = OnRecovery,
-            CheckFull = Full, GoHome = OnGoHome, NoWeapon = OnNoWeapon, Work = Work,
-            Swing = OnSwing, StepForward = OnStepForward, GiveUp = OnGiveUpDry
+            Stop = OnStop,
+            StopFollow = OnStopFollow,
+            YieldToFight = OnYieldToFight,
+            RecoveryDrives = OnRecovery,
+            CheckFull = Full,
+            GoHome = OnGoHome,
+            NoWeapon = OnNoWeapon,
+            Work = Work,
+            Swing = OnSwing,
+            StepForward = OnStepForward,
+            GiveUp = OnGiveUpDry
         });
         ModLog.Verbose("TrollFarmer: " + TrollTaming.Tag(this) +
                        " set up (Architecture V2: farming pipeline + executor, capabilities complete " +
@@ -354,7 +363,7 @@ internal sealed partial class TrollFarmer : MonoBehaviour
             return col != null;
         }
 
-        string item = Utils.GetPrefabName(source); // shown as is when it yields none of the known items
+        string item = ReadableName.FromPrefab(Utils.GetPrefabName(source)); // D-214: English words when it yields none of the known items
         foreach (TrollFocus.Goal g in TrollFocus.DefaultOrder)
         {
             if (TrollFarming.Yields(source, g.Item))
@@ -376,6 +385,43 @@ internal sealed partial class TrollFarmer : MonoBehaviour
         ModLog.Info("TrollFarmer: " + TrollTaming.Tag(this) + " ordered to break " + source.name + " (" +
                     TrollFarming.KindOf(source) + ", " + item + ")");
         return _target == source;
+    }
+
+    /// The facts the farming gate decides on (D-170), read in one place for Step and for PeekGate. Expected outcome: the input as Step has always built it.
+    private FarmGateInput GateInput(bool alive, bool follow, bool fighting, TrollRecovery rec, bool hasWeapon)
+    {
+        return new FarmGateInput
+        {
+            Alive = alive,
+            IsOwner = _ctx.IsOwner,
+            FollowOrder = follow,
+            Unloading = _home && IsFull,
+            Fighting = fighting,
+            RecoveryBusy = rec != null && rec.Busy && !_trip.UnloadWalkExpired,
+            FullCheckDue = Time.time >= _nextFullCheck && !IsFull,
+            Home = _home,
+            HasWeapon = hasWeapon
+        };
+    }
+
+    /// 2026-11-09 (analysis of instruction-latency: "home flag set" is not "the troll is allowed to walk home"): what the farming gate would decide for this troll now, and the facts behind it,
+    /// WITHOUT driving anything (read-only, for the stt.gateGoesHome test hook). A fight target, a follow order or a running recovery manoeuvre come before GoHome in FarmGateRules.Decide, so a
+    /// home order given then is accepted and the flag is set, but the troll does not walk - this tells a test which of the two failed. Expected outcome: "GoHome (...)" when the troll walks home.
+    internal string PeekGate()
+    {
+        MonsterAI ai = GetComponent<MonsterAI>();
+        Humanoid me = _ctx.Humanoid;
+        bool alive = me != null && !me.IsDead() && ai != null;
+        Character target = alive ? ai.GetTargetCreature() : null;
+        FarmGateInput input = GateInput(alive, alive && ai.GetFollowTarget() != null, target != null, GetComponent<TrollRecovery>(), true);
+        FarmAction action = FarmGateRules.Decide(input);
+        if (action == FarmAction.CheckFull)
+        {
+            input = input.Without(action); // a full check that finds the backpack not full changes nothing else (Step does the same)
+            action = FarmGateRules.Decide(input);
+        }
+
+        return action + " (" + input + ", target " + (target != null ? target.name : "none") + ")";
     }
 
     /// One AI step. Expected outcome: returns whether farming drove the troll this frame (true = the game's AI is skipped: no idling, no feeding animation, D-048);
@@ -400,11 +446,7 @@ internal sealed partial class TrollFarmer : MonoBehaviour
             fighting = alive && ai.GetTargetCreature() != null;
         // the weapon is read only when the gate can get that far (as before D-170: not while dead, following, fighting or going home)
         _weapon = alive && !home && !follow && !fighting ? _tool.For(_me, _target) : null;
-        var input = new FarmGateInput
-        {
-            Alive = alive, IsOwner = _ctx.IsOwner, FollowOrder = follow, Unloading = _home && IsFull, Fighting = fighting,
-            RecoveryBusy = rec != null && rec.Busy, FullCheckDue = Time.time >= _nextFullCheck && !IsFull, Home = home, HasWeapon = _weapon != null
-        };
+        FarmGateInput input = GateInput(alive, follow, fighting, rec, _weapon != null);
         // D-170: decide, then perform; RecoveryDrives / CheckFull that did not drive fall through to the next priority (as the old code did)
         for (int pass = 0; pass < 3; pass++)
         {

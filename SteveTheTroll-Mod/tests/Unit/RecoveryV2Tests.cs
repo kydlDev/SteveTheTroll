@@ -20,19 +20,29 @@ public class RecoveryV2Tests
     {
         return new RecoveryInput
         {
-            Now = now, StuckSeconds = stuck, SustainedSeconds = sustained, Rageable = rageable, HeadOn = headOn,
-            LegDone = legDone, IsAlive = alive, IsOwner = owner
+            Now = now,
+            StuckSeconds = stuck,
+            SustainedSeconds = sustained,
+            Rageable = rageable,
+            HeadOn = headOn,
+            LegDone = legDone,
+            IsAlive = alive,
+            IsOwner = owner
         };
     }
 
     // ---- the pipeline ----
-    [Test] public void NotStuck_SuccessWithNone() { var r = new RecoveryPipeline().Evaluate(In(0f, Stuck - 0.1f));
+    [Test]
+    public void NotStuck_SuccessWithNone()
+    {
+        var r = new RecoveryPipeline().Evaluate(In(0f, Stuck - 0.1f));
         using (Assert.EnterMultipleScope())
         {
             Assert.That(r.IsSuccess, Is.True); Assert.That(r.Value.IsNone, Is.True);
         }
     }
-    [Test] public void DeadTroll_Ignored_MachineUntouched()
+    [Test]
+    public void DeadTroll_Ignored_MachineUntouched()
     {
         var p = new RecoveryPipeline();
         var r = p.Evaluate(In(0f, Stuck, rageable: true, alive: false));
@@ -44,7 +54,8 @@ public class RecoveryV2Tests
             Assert.That(p.Machine.Raged, Is.False);
         }
     }
-    [Test] public void NotOwner_Rejected_MachineUntouched()
+    [Test]
+    public void NotOwner_Rejected_MachineUntouched()
     {
         var p = new RecoveryPipeline();
         var r = p.Evaluate(In(0f, Stuck, rageable: true, owner: false));
@@ -55,7 +66,8 @@ public class RecoveryV2Tests
             Assert.That(p.Machine.Raged, Is.False);
         }
     }
-    [Test] public void Rage_DecisionCarriesTheStage()
+    [Test]
+    public void Rage_DecisionCarriesTheStage()
     {
         var p = new RecoveryPipeline();
         var d = p.Evaluate(In(10f, Stuck, rageable: true)).Value;
@@ -67,7 +79,8 @@ public class RecoveryV2Tests
             Assert.That(p.Evaluate(In(15f)).Value.Command, Is.EqualTo(RecoveryCmd.EndRage));
         }
     }
-    [Test] public void Detour_DecisionCarriesDetourLegAndSide()
+    [Test]
+    public void Detour_DecisionCarriesDetourLegAndSide()
     {
         var p = new RecoveryPipeline();
         var d1 = p.Evaluate(In(0f, Stuck)).Value;
@@ -90,7 +103,8 @@ public class RecoveryV2Tests
         }
     }
     [Test] public void AfterAFailedCycle_TurnsLeftFirst() { var p = new RecoveryPipeline(); p.BeginCycle(1); Assert.That(p.Evaluate(In(0f, Stuck)).Value.LegSide, Is.EqualTo(Side.Left)); }
-    [Test] public void HeadOn_FirstDetourTurnsRight_EvenAfterAFailure()
+    [Test]
+    public void HeadOn_FirstDetourTurnsRight_EvenAfterAFailure()
     {
         var p = new RecoveryPipeline(); p.BeginCycle(1);
         var d = p.Evaluate(In(0f, Stuck, headOn: true)).Value;
@@ -102,7 +116,8 @@ public class RecoveryV2Tests
     }
 
     // behaviour unchanged: a scripted frame sequence gives the same commands through the pipeline as through the bare machine of D-167
-    [Test] public void Pipeline_EqualsTheBareMachine_OnAFullLadder()
+    [Test]
+    public void Pipeline_EqualsTheBareMachine_OnAFullLadder()
     {
         var frames = new List<RecoveryInput>
         {
@@ -135,7 +150,8 @@ public class RecoveryV2Tests
 
     static RecoveryDecision Decide(RecoveryPipeline p, RecoveryInput i) { return p.Evaluate(i).Value; }
 
-    [Test] public void Executor_MapsEachCommandToItsAction()
+    [Test]
+    public void Executor_MapsEachCommandToItsAction()
     {
         var log = new List<string>();
         var x = Exec(new Owner(), log);
@@ -158,7 +174,8 @@ public class RecoveryV2Tests
             Assert.That(log[log.Count - 1], Is.EqualTo("reset"));
         }
     }
-    [Test] public void Executor_None_Ignored_NothingRuns()
+    [Test]
+    public void Executor_None_Ignored_NothingRuns()
     {
         var log = new List<string>();
         var r = Exec(new Owner(), log).Execute(Decide(new RecoveryPipeline(), In(0f)));
@@ -169,7 +186,8 @@ public class RecoveryV2Tests
         }
     }
     // the plan's key test: an executor must not act when the troll is no longer owned by the local client
-    [Test] public void Executor_NotOwner_Rejected_NothingRuns()
+    [Test]
+    public void Executor_NotOwner_Rejected_NothingRuns()
     {
         var log = new List<string>();
         var o = new Owner();
@@ -185,7 +203,8 @@ public class RecoveryV2Tests
         }
     }
     [Test] public void Executor_NullOwner_Rejected() { var log = new List<string>(); Assert.That(new RecoveryExecutor(null, null, null, null, null, null, null).Execute(Decide(new RecoveryPipeline(), In(0f, Stuck))).Status, Is.EqualTo(ResponseStatus.Rejected)); }
-    [Test] public void Executor_MissingAction_Ignored()
+    [Test]
+    public void Executor_MissingAction_Ignored()
     {
         var r = new RecoveryExecutor(new Owner(), null, null, null, null, null, null).Execute(Decide(new RecoveryPipeline(), In(0f, Stuck)));
         Assert.That(r.Status, Is.EqualTo(ResponseStatus.Ignored));

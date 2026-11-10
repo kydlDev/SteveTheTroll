@@ -14,7 +14,8 @@ public class HubRulesTests
     [TestCase(10, 5000f, "TooMany")]
     public void Check(int own, float nearest, string expected) { Assert.That(HubRules.Check(own, nearest).ToString(), Is.EqualTo(expected)); }
 
-    [Test] public void NextNumber_FillsTheGap()
+    [Test]
+    public void NextNumber_FillsTheGap()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -81,7 +82,8 @@ public class HubRulesTests
     [TestCase(false, 5000f, true)]
     public void FarmAllowed(bool hasHub, float spotToHub, bool expected) { Assert.That(HubRules.FarmAllowed(hasHub, spotToHub), Is.EqualTo(expected)); }
 
-    [Test] public void Data_RecipeAndParts()
+    [Test]
+    public void Data_RecipeAndParts()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -102,7 +104,25 @@ public class HubRulesTests
     }
 
     // user 2026-11-06: the hub's no-spawn area (the workbench's base area) - 0 = off, clamped to 0..150 m
-    [TestCase(50f, 50f)] [TestCase(0f, 0f)] [TestCase(-3f, 0f)] [TestCase(150f, 150f)] [TestCase(999f, 150f)] [TestCase(float.NaN, 0f)]
+    [TestCase(50f, 50f)]
+    [TestCase(0f, 0f)]
+    [TestCase(-3f, 0f)]
+    [TestCase(150f, 150f)]
+    [TestCase(999f, 150f)]
+    [TestCase(float.NaN, 0f)]
     public void NoSpawnRadius_IsClamped(float configured, float expected)
     { Assert.That(HubRules.NoSpawnRadius(configured), Is.EqualTo(expected)); }
+
+    [TestCase(50f, 65.5f)]
+    [TestCase(80f, 95.5f)]
+    [TestCase(150f, 165.5f)]
+    [TestCase(999f, 165.5f)]
+    [TestCase(0f, 0f)]
+    [TestCase(-5f, 0f)]
+    public void NoSpawnSphere_IsMeasuredFromTheOuterEdge(float configured, float expected)
+    { Assert.That(HubRules.NoSpawnSphereRadius(configured), Is.EqualTo(expected).Within(1e-4f)); }
+
+    [Test]
+    public void OuterRadius_ReachesPastTheFarthestPiece()
+    { Assert.That(HubData.OuterRadius, Is.GreaterThan(HubData.Radius)); }
 }

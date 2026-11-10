@@ -1,0 +1,69 @@
+﻿{
+    "name":  "hub-no-hit-ring",
+    "description":  "D-214 (user 2026-11-10: Steve 3 farmed a log 15 m from HUB 1): own tamed trolls never swing within the no-hit radius (15 m) beyond the walls of a Troll Hub (15.5 m outer edge from its middle, so 30.5 m from the middle; the bed has the same 15 m circle, D-097); a troll further out swings. stt.reset switches the hub circles off for the other tests (HUB 1 is only their walking target), this test switches them on.",
+    "timeout":  60,
+    "steps":  [
+                  {
+                      "do":  "use",
+                      "block":  "start",
+                      "args":  {
+                                   "clearTrolls":  true,
+                                   "slippers":  true,
+                                   "hub":  true
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.hubRing",
+                      "args":  {
+                                   "on":  1
+                               }
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  0,
+                                   "dz":  30
+                               },
+                      "as":  "nearHub"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.spawnTroll",
+                      "args":  {
+                                   "dx":  -36,
+                                   "dz":  25
+                               },
+                      "as":  "far"
+                  },
+                  {
+                      "do":  "wait",
+                      "seconds":  2
+                  }
+              ],
+    "asserts":  [
+                    {
+                        "check":  "hook",
+                        "name":  "stt.trySwing",
+                        "args":  {
+                                     "troll":  "nearHub"
+                                 },
+                        "expect":  false,
+                        "label":  "no swing 5 m from the hub middle (30 m from the bed, outside the bed circle)"
+                    },
+                    {
+                        "check":  "hook",
+                        "name":  "stt.trySwing",
+                        "args":  {
+                                     "troll":  "far"
+                                 },
+                        "expect":  true,
+                        "label":  "swings 36 m from the hub middle (more than 30.5 m) and 40 m from the bed"
+                    },
+                    {
+                        "check":  "noErrors",
+                        "source":  "SteveTheTroll"
+                    }
+                ]
+}

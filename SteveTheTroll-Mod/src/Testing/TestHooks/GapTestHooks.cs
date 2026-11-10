@@ -96,6 +96,28 @@ internal static partial class GapTestHooks
         return f != null && f.GoingHome;
     }
 
+    /// 2026-11-09 (analysis of instruction-latency: separate "order accepted / home mode set" from "the troll is allowed to walk"): true when the farming gate would now choose GoHome for this
+    /// troll (TrollFarmer.PeekGate, read-only). False when a fight target, a follow order or a running recovery manoeuvre comes first - the reason is logged (once per second) so a failed
+    /// test says which one it was. Expected outcome: true after a home order on a troll that is not fighting, following or recovering.
+    [TestHook("stt.gateGoesHome")]
+    private static bool GateGoesHome(GameObject troll)
+    {
+        TrollFarmer f = troll.GetComponent<TrollFarmer>();
+        if (f == null)
+        {
+            return false;
+        }
+
+        string gate = f.PeekGate();
+        bool goes = gate.StartsWith("GoHome", System.StringComparison.Ordinal);
+        if (!goes && ModLog.IsDue("stt.gateGoesHome", 1d))
+        {
+            ModLog.Info("GapTestHooks: the farming gate would not walk the troll home: " + gate);
+        }
+
+        return goes;
+    }
+
     /// D-179: bad spots remembered now (TrollPath).
     [TestHook("stt.badSpots")]
     private static int BadSpots()

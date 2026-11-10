@@ -35,7 +35,8 @@ public class DepotLifecycleTests
         public void Tick(float dt) { Now += dt; if (Retry.Count > 0) { Retry.Clear(); Check(); } }      // TrollDepot.Tick: everything waiting is checked again
     }
 
-    [Test] public void LastItemTakenWhileOpen_GoesAfterTheWindowClosesAndTheReservationEnds()
+    [Test]
+    public void LastItemTakenWhileOpen_GoesAfterTheWindowClosesAndTheReservationEnds()
     {
         var s = new Sim();
         s.Empty = 4; s.Check();                                       // Container.Save with the window open: waits
@@ -51,7 +52,8 @@ public class DepotLifecycleTests
         Assert.That(s.Removed, Is.EqualTo(1), "removal must not run twice");
     }
 
-    [Test] public void ItemPutBackBeforeTheRetry_CancelsTheWait()
+    [Test]
+    public void ItemPutBackBeforeTheRetry_CancelsTheWait()
     {
         var s = new Sim { ReservedUntil = 0f, InUse = true, Empty = 4 };
         s.Check(); Assert.That(s.Retry.Count, Is.EqualTo(1));
@@ -59,7 +61,8 @@ public class DepotLifecycleTests
         Assert.That(s.Removed, Is.EqualTo(0));
     }
 
-    [Test] public void FrameAboveRemovedLater_ThenTheLowerOneGoes()
+    [Test]
+    public void FrameAboveRemovedLater_ThenTheLowerOneGoes()
     {
         var s = new Sim { ReservedUntil = 0f, InUse = false, Empty = 4, Above = true };
         s.Check(); Assert.That(s.Removed, Is.EqualTo(0));

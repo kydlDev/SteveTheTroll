@@ -68,8 +68,14 @@ internal static class TamedTrollSpeed
 
         b = new Base
         {
-            Speed = c.m_speed, Walk = c.m_walkSpeed, Run = c.m_runSpeed, Factor = 1f, Swim = c.m_swimSpeed,
-            SwimDepth = c.m_swimDepth, SwimAccel = c.m_swimAcceleration, SwimTurn = c.m_swimTurnSpeed
+            Speed = c.m_speed,
+            Walk = c.m_walkSpeed,
+            Run = c.m_runSpeed,
+            Factor = 1f,
+            Swim = c.m_swimSpeed,
+            SwimDepth = c.m_swimDepth,
+            SwimAccel = c.m_swimAcceleration,
+            SwimTurn = c.m_swimTurnSpeed
         };
         Bases[id] = b;
         ModLog.Verbose("TamedTrollSpeed: " + TrollTaming.Tag(c) + " vanilla speeds jog " + b.Speed + ", walk " +

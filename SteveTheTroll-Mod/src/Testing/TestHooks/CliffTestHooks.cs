@@ -126,52 +126,52 @@ internal static class CliffTestHooks
 
         Vector3 c = p.transform.position;
         for (float x = -radius; x <= radius; x += gridStep)
-        for (float z = -radius; z <= radius; z += gridStep)
-        {
-            Vector3 a = c + new Vector3(x, 0f, z);
-            if (!zs.IsZoneLoaded(ZoneSystem.GetZone(a)))
+            for (float z = -radius; z <= radius; z += gridStep)
             {
-                continue;
-            }
-
-            float ha = zs.GetGroundHeight(a);
-            if (ha < zs.m_waterLevel + 1f)
-            {
-                continue;
-            }
-
-            for (int k = 0; k < 8; k++)
-            {
-                float ang = k * 45f * Mathf.Deg2Rad;
-                var dir = new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang));
-                for (float m = minRun; m <= maxRun; m += Mathf.Max(3f, (maxRun - minRun) / 3f))
+                Vector3 a = c + new Vector3(x, 0f, z);
+                if (!zs.IsZoneLoaded(ZoneSystem.GetZone(a)))
                 {
-                    Vector3 b = a + dir * m;
-                    if (!zs.IsZoneLoaded(ZoneSystem.GetZone(b)))
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    float hb = zs.GetGroundHeight(b), rise = hb - ha;
-                    if (Mathf.Abs(rise) < minRise || Mathf.Abs(rise) > maxRise || Mathf.Abs(rise) / m < minSlope || hb < zs.m_waterLevel + 1f
-                        || (flatEnds && (Mathf.Abs(zs.GetGroundHeight(b + dir * 2f) - hb) > 1.5f || Mathf.Abs(zs.GetGroundHeight(a - dir * 2f) - ha) > 1.5f)))
-                    {
-                        continue;
-                    }
+                float ha = zs.GetGroundHeight(a);
+                if (ha < zs.m_waterLevel + 1f)
+                {
+                    continue;
+                }
 
-                    if (!ChestClear(zs, a, b))
+                for (int k = 0; k < 8; k++)
+                {
+                    float ang = k * 45f * Mathf.Deg2Rad;
+                    var dir = new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang));
+                    for (float m = minRun; m <= maxRun; m += Mathf.Max(3f, (maxRun - minRun) / 3f))
                     {
-                        continue;
-                    }
+                        Vector3 b = a + dir * m;
+                        if (!zs.IsZoneLoaded(ZoneSystem.GetZone(b)))
+                        {
+                            continue;
+                        }
 
-                    bool upHill = rise > 0f;
-                    _bottom = new Vector3(upHill ? a.x : b.x, upHill ? ha : hb, upHill ? a.z : b.z);
-                    _top = new Vector3(upHill ? b.x : a.x, upHill ? hb : ha, upHill ? b.z : a.z);
-                    return _bottom.x.ToString("F0", CultureInfo.InvariantCulture) + "," + _bottom.z.ToString("F0", CultureInfo.InvariantCulture) + " | " +
-                           _top.x.ToString("F0", CultureInfo.InvariantCulture) + "," + _top.z.ToString("F0", CultureInfo.InvariantCulture) + " | " + Mathf.Abs(rise).ToString("F1", CultureInfo.InvariantCulture) + " m";
+                        float hb = zs.GetGroundHeight(b), rise = hb - ha;
+                        if (Mathf.Abs(rise) < minRise || Mathf.Abs(rise) > maxRise || Mathf.Abs(rise) / m < minSlope || hb < zs.m_waterLevel + 1f
+                            || (flatEnds && (Mathf.Abs(zs.GetGroundHeight(b + dir * 2f) - hb) > 1.5f || Mathf.Abs(zs.GetGroundHeight(a - dir * 2f) - ha) > 1.5f)))
+                        {
+                            continue;
+                        }
+
+                        if (!ChestClear(zs, a, b))
+                        {
+                            continue;
+                        }
+
+                        bool upHill = rise > 0f;
+                        _bottom = new Vector3(upHill ? a.x : b.x, upHill ? ha : hb, upHill ? a.z : b.z);
+                        _top = new Vector3(upHill ? b.x : a.x, upHill ? hb : ha, upHill ? b.z : a.z);
+                        return _bottom.x.ToString("F0", CultureInfo.InvariantCulture) + "," + _bottom.z.ToString("F0", CultureInfo.InvariantCulture) + " | " +
+                               _top.x.ToString("F0", CultureInfo.InvariantCulture) + "," + _top.z.ToString("F0", CultureInfo.InvariantCulture) + " | " + Mathf.Abs(rise).ToString("F1", CultureInfo.InvariantCulture) + " m";
+                    }
                 }
             }
-        }
 
         return "none within " + radius.ToString("F0") + " m";
     }

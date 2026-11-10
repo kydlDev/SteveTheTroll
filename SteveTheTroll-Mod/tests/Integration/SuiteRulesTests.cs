@@ -19,7 +19,8 @@ public class SuiteRulesTests
     static Dictionary<string, object> Suite() { return Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(Path.Combine(SuiteDir, "suite.json"))); }
     static IEnumerable<string> TestFiles() { return Directory.GetFiles(SuiteDir, "*.json").Where(f => Path.GetFileName(f) != "suite.json"); }
 
-    [Test] public void EveryTestFile_IsListed_AndEveryListedTestExists()
+    [Test]
+    public void EveryTestFile_IsListed_AndEveryListedTestExists()
     {
         var listed = ((System.Collections.ArrayList)Suite()["tests"]).Cast<string>().ToList();
         var files = TestFiles().Select(Path.GetFileNameWithoutExtension).ToList();
@@ -30,13 +31,15 @@ public class SuiteRulesTests
         }
     }
 
-    [Test] public void EveryTest_ChecksNoErrorsOfThisMod()
+    [Test]
+    public void EveryTest_ChecksNoErrorsOfThisMod()
     {
         foreach (var f in TestFiles())
             Assert.That(Regex.IsMatch(File.ReadAllText(f), @"""check""\s*:\s*""noErrors""\s*,\s*""source""\s*:\s*""SteveTheTroll"""), Is.True, Path.GetFileName(f));
     }
 
-    [Test] public void RequireMods_ThisModAndKydlCore_WithTheExactVersions()
+    [Test]
+    public void RequireMods_ThisModAndKydlCore_WithTheExactVersions()
     {
         var mods = ((System.Collections.ArrayList)Suite()["requireMods"]).Cast<Dictionary<string, object>>().ToList();
         var manifest = Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(Path.Combine(TestPaths.ModDir, "manifest.json")));
@@ -50,7 +53,8 @@ public class SuiteRulesTests
         Assert.That(core["minVersion"], Is.EqualTo(dep.Groups["v"].Value), "KydlCore minVersion = the plugin's [BepInDependency] version");
     }
 
-    [Test] public void ConfigOverrides_FixEveryPlayerSetting()
+    [Test]
+    public void ConfigOverrides_FixEveryPlayerSetting()
     {
         var src = Regex.Replace(File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs")), @"//.*$", "", RegexOptions.Multiline);   // examples in comments are not entries
         var bound = Regex.Matches(src, @"\.Bind\(\s*""(?<s>[^""]+)""\s*,\s*""(?<k>[^""]+)""").Cast<Match>().Select(m => m.Groups["s"].Value + "/" + m.Groups["k"].Value).ToList();
@@ -59,37 +63,51 @@ public class SuiteRulesTests
         Assert.That(bound.Except(fixedOnes), Is.Empty, "MIGRATION_DECISIONS C14: the suite sets every player setting (the user's manual config must not change a result)");
     }
 
-    [Test] public void EveryTest_StartsInTheArena()
+    [Test]
+    public void EveryTest_StartsInTheArena()
     {
         foreach (var f in TestFiles())
         {
             var test = Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(f));
             var steps = test.ContainsKey("steps") ? ((System.Collections.ArrayList)test["steps"]).Cast<object>().ToList() : new List<object>();
             var first = steps.Count > 0 ? steps[0] as Dictionary<string, object> : null;
-            // D-181 (suite on DrakesTestLab blocks): a test may start with the `start` block - then the block itself must start with the stt.arena hook
-            if (first != null && Equals(first["do"], "use") && first.ContainsKey("block") && Equals(first["block"], "start"))
-                first = StartBlockFirstStep();
+            // D-181 (suite on DrakesTestLab blocks): a test may start with a block - then the block itself must start with the stt.arena hook.
+            // 2026-11-09: a block may start with another block (tripScene starts with `start`): the first REAL step after resolving the chain must be stt.arena.
+            first = FirstRealStep(first);
             Assert.That(first != null && Equals(first["do"], "hook") && Equals(first["name"], "stt.arena"), Is.True,
                 Path.GetFileName(f) + ": the first step must be the stt.arena hook (MIGRATION_DECISIONS C26: every test starts on the arena spot, away from the lab start)");
         }
     }
 
-    static Dictionary<string, object> StartBlockFirstStep()
+    const int MaxBlockDepth = 5;
+
+    /// The first step that is not a `use block` call: follows the chain test -> block -> block (at most MaxBlockDepth levels, so a block that calls itself ends the walk with null).
+    /// Expected outcome: the step that really runs first, or null when a block file is missing / empty / the chain is too deep.
+    static Dictionary<string, object> FirstRealStep(Dictionary<string, object> first)
     {
-        string path = Path.Combine(SuiteDir, "_functions", "start.json");
-        if (!File.Exists(path)) return null;
-        var block = Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(path));
-        var steps = block.ContainsKey("steps") ? ((System.Collections.ArrayList)block["steps"]).Cast<object>().ToList() : new List<object>();
-        return steps.Count > 0 ? steps[0] as Dictionary<string, object> : null;
+        for (int depth = 0; depth < MaxBlockDepth; depth++)
+        {
+            if (first == null || !Equals(first["do"], "use") || !first.ContainsKey("block"))
+                return first;
+            string path = Path.Combine(SuiteDir, "_functions", first["block"] + ".json");
+            if (!File.Exists(path)) return null;
+            var block = Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(path));
+            var steps = block.ContainsKey("steps") ? ((System.Collections.ArrayList)block["steps"]).Cast<object>().ToList() : new List<object>();
+            first = steps.Count > 0 ? steps[0] as Dictionary<string, object> : null;
+        }
+
+        return null;
     }
 
-    [Test] public void NoTestLabScreenshots()
+    [Test]
+    public void NoTestLabScreenshots()
     {
         foreach (var f in TestFiles())
             Assert.That(Regex.IsMatch(File.ReadAllText(f), @"""do""\s*:\s*""screenshot"""), Is.False, Path.GetFileName(f) + ": no TestLab screen capture (user 2026-11-03) - use Kydl.GameProbe.ProbeApi.Screenshot");
     }
 
-    [Test] public void EveryHookUsed_Exists()
+    [Test]
+    public void EveryHookUsed_Exists()
     {
         var declared = new HashSet<string>(Directory.GetFiles(TestPaths.Src, "*.cs", SearchOption.AllDirectories)
             .SelectMany(f => Regex.Matches(File.ReadAllText(f), @"\[TestHook\(""(?<n>[^""]+)""\)\]").Cast<Match>().Select(m => m.Groups["n"].Value)));

@@ -1,5 +1,6 @@
 using KydlCore.Common;
 using SteveTheTroll.Configuration;
+using SteveTheTroll.Features.Riding.Domain;
 using SteveTheTroll.Integrations.Unity;
 using UnityEngine;
 
@@ -22,7 +23,16 @@ internal sealed class HalterVisual : MonoBehaviour
     /// Lab: how far (cm) the hands ended from where the reins want them, last frame.
     internal float HandErrorCm => _handErrorCm;
     private LineRenderer[] _lines = new LineRenderer[2];
-    private Vector3 _bodyBase, _headBase, _seatSmooth;
+    private Vector3 _bodyBase, _headBase, _seatSmooth, _lastPos;
+    private bool _hasLastPos;
+    private float _exactUntil;   // D-214: the seat follows the bone exactly until this time (an attack or a stagger is playing)
+    private float _anchorGap;    // D-214: metres between the seat point and the bone anchor it hangs on, after this frame's follow step
+
+    /// Lab / log: how far (m) the rider's seat point was from the bone anchor after the last frame (0 = the seat is exactly on the bone).
+    internal float AnchorGap => _anchorGap;
+
+    /// Lab / log: an attack or stagger is playing (or ended less than SeatFollow.DeliberateHoldSeconds ago), so the seat follows the bone exactly.
+    internal bool FollowsExactly => Time.time < _exactUntil;
 
     /// Where the rider's pelvis goes (offset by the SeatX/Y/Z tunables).
     internal Transform SeatPoint => _seatPoint;
@@ -223,9 +233,24 @@ internal sealed class HalterVisual : MonoBehaviour
     {
         _body.localPosition = _bodyBase + _body.parent.InverseTransformVector(World(ModSettings.RideBodyX.Value, ModSettings.RideBodyY.Value, ModSettings.RideBodyZ.Value));
         _head.localPosition = _headBase + _head.parent.InverseTransformVector(World(ModSettings.RideHeadX.Value, ModSettings.RideHeadY.Value, ModSettings.RideHeadZ.Value));
-        // the anchor's place in the troll's own space, followed exactly (the rider is pinned to it every frame in LateUpdate, so it moves with the saddle); the offsets are in the troll's axes
+        // the anchor's place in the troll's own space (the rider is pinned to the seat every frame in LateUpdate); the offsets are in the troll's axes. A walking troll is followed exactly,
+        // a standing one eased (D-202): its random idle clips move the spine fast and far, the rider jumped up to 22 cm in a frame
         Vector3 target = _troll.transform.InverseTransformPoint(_seatAnchor.position);
-        _seatSmooth = target;
+        Vector3 trollPos = _troll.transform.position;
+        float dt = Time.deltaTime;
+        float speed = _hasLastPos && dt > 0f ? new Vector2(trollPos.x - _lastPos.x, trollPos.z - _lastPos.z).magnitude / dt : 0f;
+        _lastPos = trollPos;
+        _hasLastPos = true;
+        // D-208: eased AND capped in speed, so a huge gap to the bone (the Candy idle) cannot throw the rider in one frame
+        // D-214: ... but never while the troll swings or staggers: the game pins the rider to the saddle exactly, and the basket on the bone moves with the animation
+        if (_troll.InAttack() || _troll.IsStaggering())
+        {
+            _exactUntil = Time.time + SeatFollow.DeliberateHoldSeconds;
+        }
+
+        bool deliberate = Time.time < _exactUntil;
+        _seatSmooth = Vector3.MoveTowards(_seatSmooth, Vector3.Lerp(_seatSmooth, target, SeatFollow.Share(speed, dt, deliberate)), SeatFollow.MaxStep(speed, dt, deliberate));
+        _anchorGap = Vector3.Distance(_troll.transform.TransformPoint(_seatSmooth), _seatAnchor.position);
         _seatPoint.localPosition = _seatSmooth + new Vector3(ModSettings.RideSeatX.Value, ModSettings.RideSeatY.Value, ModSettings.RideSeatZ.Value);
         _seatPoint.localRotation = Quaternion.Euler(ModSettings.RideRiderPitch.Value, ModSettings.RideRiderYaw.Value, -ModSettings.RideRiderRoll.Value);
         SeatWidth();

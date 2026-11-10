@@ -97,8 +97,11 @@ public class FitGeometrySkinTests
     public void NearestK_EqualsSortingAllDistances()
     {
         var vec = from x in Props.GameFloat(1f) from y in Props.GameFloat(1f) from z in Props.GameFloat(1f) select new Vector3(x, y, z);
-        var gen = from count in Gen.Choose(1, 40) from pts in Gen.ArrayOf(count, vec)
-                  from p in vec from k in Gen.Choose(1, 6) select Tuple.Create(pts, p, k);
+        var gen = from count in Gen.Choose(1, 40)
+                  from pts in Gen.ArrayOf(count, vec)
+                  from p in vec
+                  from k in Gen.Choose(1, 6)
+                  select Tuple.Create(pts, p, k);
         Props.Check(Prop.ForAll(gen.ToArbitrary(), q =>
         {
             int[] idx; float[] dist;
@@ -220,7 +223,12 @@ public class FitGeometrySkinTests
     [Test]
     public void BlendWeights_AlwaysSumTo1_StrongestFirst_AtMost4()
     {
-        var bw = from b0 in Gen.Choose(0, 6) from b1 in Gen.Choose(0, 6) from b2 in Gen.Choose(0, 6) from w0 in Gen.Choose(1, 100) from w1 in Gen.Choose(0, 100) from w2 in Gen.Choose(0, 100)
+        var bw = from b0 in Gen.Choose(0, 6)
+                 from b1 in Gen.Choose(0, 6)
+                 from b2 in Gen.Choose(0, 6)
+                 from w0 in Gen.Choose(1, 100)
+                 from w1 in Gen.Choose(0, 100)
+                 from w2 in Gen.Choose(0, 100)
                  select W(b0, w0, b1, w1, b2, w2);
         var gen = from src in Gen.ArrayOf(4, bw) from d in Gen.ArrayOf(4, Gen.Choose(0, 100).Select(i => i / 1000f)) from n in Gen.Choose(1, 4) select Tuple.Create(src, d, n);
         Props.Check(Prop.ForAll(gen.ToArbitrary(), q =>

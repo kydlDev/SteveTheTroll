@@ -11,14 +11,18 @@ public class HubSelectionTests
 
     static int Nearest(long owner, long[] owners, float[] dists, out float d) { return HubRules.NearestOwned(owner, owners, dists, out d); }
 
-    [Test] public void NoHubs_NoneAndNoDistance() { float d;
+    [Test]
+    public void NoHubs_NoneAndNoDistance()
+    {
+        float d;
         using (Assert.EnterMultipleScope())
         {
             Assert.That(Nearest(Me, new long[0], new float[0], out d), Is.EqualTo(-1)); Assert.That(d, Is.EqualTo(-1f));
         }
     }
 
-    [Test] public void TwoHubs_TheNearerOneWins()
+    [Test]
+    public void TwoHubs_TheNearerOneWins()
     {
         float d; int i = Nearest(Me, new[] { Me, Me }, new[] { 1100f, 800f }, out d);
         using (Assert.EnterMultipleScope())
@@ -27,7 +31,8 @@ public class HubSelectionTests
         }
     }
 
-    [Test] public void AnotherPlayersHub_IsIgnored()
+    [Test]
+    public void AnotherPlayersHub_IsIgnored()
     {
         float d; int i = Nearest(Me, new[] { Other, Me }, new[] { 100f, 900f }, out d);
         using (Assert.EnterMultipleScope())
@@ -52,7 +57,8 @@ public class HubSelectionTests
         if (toHub) Assert.That(pick, Is.EqualTo(1));
     }
 
-    [Test] public void TwoHubs_FarOneIsNotChosenOverTheNearOne()
+    [Test]
+    public void TwoHubs_FarOneIsNotChosenOverTheNearOne()
     {
         float d; int i = Nearest(Me, new[] { Me, Me }, new[] { 1100f, 800f }, out d);
         Assert.That(HubRules.Pick(0, -1f, i + 1, d, true), Is.EqualTo(2));       // hub number 2 is 800 m away

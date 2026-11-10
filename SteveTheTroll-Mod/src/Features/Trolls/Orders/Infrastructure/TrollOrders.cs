@@ -1,4 +1,3 @@
-using SteveTheTroll.Features.Trolls.Contracts;
 using System;
 using System.Collections.Generic;
 using KydlCore.Common;
@@ -6,6 +5,7 @@ using KydlCore.Core;
 using KydlCore.Features.Hub.Contracts;
 using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Trolls.Combat.Infrastructure;
+using SteveTheTroll.Features.Trolls.Contracts;
 using SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 using SteveTheTroll.Features.Trolls.Orders.Application;
 using SteveTheTroll.Features.Trolls.Orders.Commands;
@@ -155,8 +155,14 @@ internal static class TrollOrders
 
         OperationResponse<OrderKind> decision = Pipeline.Evaluate(new OrderInput
         {
-            KeyPressed = pressed, PlayerAlive = alive, UiBlocked = blocked, HasTroll = troll != null, CanSteer = steer,
-            HasCreature = creature != null, HasSource = source != null, SourceIsWall = source != null && TrollWalls.IsWall(source)
+            KeyPressed = pressed,
+            PlayerAlive = alive,
+            UiBlocked = blocked,
+            HasTroll = troll != null,
+            CanSteer = steer,
+            HasCreature = creature != null,
+            HasSource = source != null,
+            SourceIsWall = source != null && TrollWalls.IsWall(source)
         });
         rec.Decision = decision.IsSuccess ? decision.Value.ToString() : "refused: " + decision.Reason;
         if (!decision.IsSuccess)
@@ -410,7 +416,26 @@ internal static class TrollOrders
             return h.m_text;
         }
 
-        return Utils.GetPrefabName(g);
+        // D-214 (user 2026-11-10): the game's own names first (ore deposits, pieces), else the prefab turned into English words - never the raw prefab
+        MineRock5 r5 = g.GetComponentInParent<MineRock5>();
+        if (r5 != null && !string.IsNullOrEmpty(r5.m_name))
+        {
+            return r5.m_name;
+        }
+
+        MineRock r = g.GetComponentInParent<MineRock>();
+        if (r != null && !string.IsNullOrEmpty(r.m_name))
+        {
+            return r.m_name;
+        }
+
+        Piece piece = g.GetComponentInParent<Piece>();
+        if (piece != null && !string.IsNullOrEmpty(piece.m_name))
+        {
+            return piece.m_name;
+        }
+
+        return ReadableName.FromPrefab(Utils.GetPrefabName(g));
     }
 
     internal static string Shown(Character troll)

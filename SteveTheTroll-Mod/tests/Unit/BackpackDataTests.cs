@@ -67,7 +67,9 @@ public class BackpackDataTests
         foreach (var o in Pieces())
         {
             float y = (float)F(o, "Y"), z = (float)F(o, "Z");
-            if ((string)F(o, "Prefab") == "woodiron_beam_45") { struts++;
+            if ((string)F(o, "Prefab") == "woodiron_beam_45")
+            {
+                struts++;
                 using (Assert.EnterMultipleScope())
                 {
                     Assert.That(z, Is.EqualTo(0f).Within(1e-4), "struts at the pivot plane"); Assert.That(Math.Abs(y), Is.LessThan(0.02f));

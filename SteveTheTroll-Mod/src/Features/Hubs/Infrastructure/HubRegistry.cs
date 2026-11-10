@@ -80,8 +80,12 @@ internal static class HubRegistry
 
             Hubs.Add(new HubInfo
             {
-                Zdo = z, Owner = z.GetLong(OwnerKey), OwnerName = z.GetString(OwnerNameKey), Number = no,
-                Name = NameOf(z, no), Pos = z.GetPosition()
+                Zdo = z,
+                Owner = z.GetLong(OwnerKey),
+                OwnerName = z.GetString(OwnerNameKey),
+                Number = no,
+                Name = NameOf(z, no),
+                Pos = z.GetPosition()
             });
         }
 

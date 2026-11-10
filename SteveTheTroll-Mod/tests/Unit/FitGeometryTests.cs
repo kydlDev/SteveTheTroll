@@ -239,7 +239,12 @@ public class FitGeometryTests
     [Test]
     public void FootFramePosition_HeightOnlyFromFootUpAndLift_FeetMirrorEachOther()
     {
-        var gen = from foot in AnyVec from fwd in FlatVec from f in Coord from s in Coord from u in Coord from l in Coord
+        var gen = from foot in AnyVec
+                  from fwd in FlatVec
+                  from f in Coord
+                  from s in Coord
+                  from u in Coord
+                  from l in Coord
                   select Tuple.Create(foot, fwd, new[] { f, s, u, l });
         Props.Check(Prop.ForAll(gen.ToArbitrary(), p =>
         {
@@ -326,9 +331,14 @@ public class FitGeometryTests
     [Test]
     public void LogScaleFactor_ScaledLogIsAlwaysTheWantedLength()
     {
-        var size = from x in Props.GameFloat(2f) from y in Props.GameFloat(2f) from z in Props.GameFloat(2f)
+        var size = from x in Props.GameFloat(2f)
+                   from y in Props.GameFloat(2f)
+                   from z in Props.GameFloat(2f)
                    select new Vector3(Math.Abs(x) + 0.01f, Math.Abs(y) + 0.01f, Math.Abs(z) + 0.01f);
-        var gen = from s in size from lossy in Gen.Choose(1, 2000) from r in Gen.Choose(1, 100) from h in Gen.Choose(10, 1000)
+        var gen = from s in size
+                  from lossy in Gen.Choose(1, 2000)
+                  from r in Gen.Choose(1, 100)
+                  from h in Gen.Choose(10, 1000)
                   select Tuple.Create(s, lossy / 10f, r / 100f, h / 1000f);
         Props.Check(Prop.ForAll(gen.ToArbitrary(), p =>
         {

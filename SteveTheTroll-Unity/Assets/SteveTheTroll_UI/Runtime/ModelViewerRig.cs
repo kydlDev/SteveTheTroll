@@ -207,7 +207,7 @@ internal sealed class ModelViewerRig : IModelScene
         }
 
         _texture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32)
-            { name = _rigName + "_Texture", antiAliasing = 4 };
+        { name = _rigName + "_Texture", antiAliasing = 4 };
         _texture.Create();
         _camera.targetTexture = _texture;
         Log("ModelViewerRig: texture " + w + "x" + h + " px (asked " + widthPx + "x" + heightPx + ")");

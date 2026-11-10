@@ -10,7 +10,10 @@ namespace SteveTheTroll.Tests.Unit;
 public class BreakRulesTests
 {
     // D-172 (user: "Protect player pieces"): a tamed troll's hit never damages a player-built piece; fortress walls (not player-built) and other attackers are untouched
-    [TestCase(true, true, false)] [TestCase(true, false, true)] [TestCase(false, true, true)] [TestCase(false, false, true)]
+    [TestCase(true, true, false)]
+    [TestCase(true, false, true)]
+    [TestCase(false, true, true)]
+    [TestCase(false, false, true)]
     public void TrollHitDamagesPiece(bool tamedTroll, bool playerBuilt, bool expected) { Assert.That(SteveTheTroll.Features.Trolls.Combat.Domain.BreakRules.TrollHitDamagesPiece(tamedTroll, playerBuilt), Is.EqualTo(expected)); }
 
     const string T = "SteveTheTroll.Features.Trolls.Combat.Domain.BreakRules";
@@ -151,7 +154,8 @@ public class BreakRulesTests
     [TestCase(5f, -1f, 5f)]
     public void BehindRing(float distance, float keep, float expected) { Assert.That((float)Call("BehindRing", distance, keep), Is.EqualTo(expected)); }
 
-    [Test] public void Constants()
+    [Test]
+    public void Constants()
     {
         using (Assert.EnterMultipleScope())
         {

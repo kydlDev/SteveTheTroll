@@ -31,8 +31,15 @@ internal sealed class SignStyle
     {
         var copy = new SignStyle
         {
-            Font = Font, Bold = Bold, Italic = Italic, Underline = Underline, Strike = Strike, Upper = Upper,
-            Align = Align, Color = Color, Spacing = Spacing
+            Font = Font,
+            Bold = Bold,
+            Italic = Italic,
+            Underline = Underline,
+            Strike = Strike,
+            Upper = Upper,
+            Align = Align,
+            Color = Color,
+            Spacing = Spacing
         };
         foreach (KeyValuePair<int, string> kv in Letters)
         {

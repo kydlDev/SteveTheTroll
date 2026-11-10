@@ -9,7 +9,8 @@ public class CombatRulesTests
 {
     const float G2 = 30f * 30f, K2 = 70f * 70f, R2 = 20f * 20f;
 
-    [Test] public void Guard_NoDefence_NoOwnerNear_Never()
+    [Test]
+    public void Guard_NoDefence_NoOwnerNear_Never()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -18,12 +19,16 @@ public class CombatRulesTests
         }
     }
     // item 2: a target the troll cannot chase (bed no-hit zone) is released after the limit; one it can chase never is
-    [TestCase(true, 4.9f, false)] [TestCase(true, 5f, true)] [TestCase(true, 30f, true)] [TestCase(false, 30f, false)]
+    [TestCase(true, 4.9f, false)]
+    [TestCase(true, 5f, true)]
+    [TestCase(true, 30f, true)]
+    [TestCase(false, 30f, false)]
     public void Guard_ReleasesATargetItCannotChase(bool cannotChase, float seconds, bool expected)
     { Assert.That(GuardRules.ReleaseStuckTarget(cannotChase, seconds, 5f), Is.EqualTo(expected)); }
 
     [Test] public void Guard_TooFarFromTheTroll_D081() { Assert.That(GuardRules.Eligible(true, true, 31f * 31f, 1f, G2, K2, R2), Is.False); }
-    [Test] public void Guard_NearTroll_OrNearOwner()
+    [Test]
+    public void Guard_NearTroll_OrNearOwner()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -32,20 +37,25 @@ public class CombatRulesTests
             Assert.That(GuardRules.Eligible(true, true, 25f * 25f, 25f * 25f, G2, K2, R2), Is.False, "near neither");
         }
     }
-    [Test] public void Guard_Nearest() {
+    [Test]
+    public void Guard_Nearest()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(GuardRules.Nearest(new[] { 5f, 2f, 2f, 9f }), Is.EqualTo(1)); Assert.That(GuardRules.Nearest(new float[0]), Is.EqualTo(-1)); Assert.That(GuardRules.Nearest(null), Is.EqualTo(-1));
         }
     }
 
-    [Test] public void Rage_Range_AndOff() {
+    [Test]
+    public void Rage_Range_AndOff()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(RageRules.Enrages(9.9f, 10f), Is.True); Assert.That(RageRules.Enrages(10.1f, 10f), Is.False); Assert.That(RageRules.Enrages(0f, 0f), Is.False, "0 = off");
         }
     }
-    [Test] public void Rage_CalmsDown()
+    [Test]
+    public void Rage_CalmsDown()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -57,7 +67,8 @@ public class CombatRulesTests
     }
     [Test] public void Rage_Reach_D084() { Assert.That(RageRules.Reach(1.5f, 2f), Is.EqualTo(6f)); }
 
-    [Test] public void Slam_Done_AndReady()
+    [Test]
+    public void Slam_Done_AndReady()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -72,7 +83,8 @@ public class CombatRulesTests
         }
     }
 
-    [Test] public void Counter_Order()
+    [Test]
+    public void Counter_Order()
     {
         using (Assert.EnterMultipleScope())
         {
@@ -84,7 +96,8 @@ public class CombatRulesTests
         }
     }
 
-    [Test] public void NoHit_Circle()
+    [Test]
+    public void NoHit_Circle()
     {
         using (Assert.EnterMultipleScope())
         {

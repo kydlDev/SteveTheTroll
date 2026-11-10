@@ -17,7 +17,8 @@ public class StuckRulesTests
     [Test] public void Classify_WildCreature_IsDestructible() { Assert.That(StuckRules.Classify(true, false, false, false, true), Is.EqualTo(Obstruction.Destructible)); }
     [Test] public void Classify_BreakableTreeOrRock_IsDestructible() { Assert.That(StuckRules.Classify(false, false, false, false, true), Is.EqualTo(Obstruction.Destructible)); }
     [Test] public void Classify_NotBreakable_IsIndestructible() { Assert.That(StuckRules.Classify(false, false, false, false, false), Is.EqualTo(Obstruction.Indestructible)); }
-    [Test] public void Rageable_OnlyDestructible()
+    [Test]
+    public void Rageable_OnlyDestructible()
     {
         Assert.That(StuckRules.Rageable(Obstruction.Destructible), Is.True);
         foreach (var o in new[] { Obstruction.None, Obstruction.Indestructible, Obstruction.PlayerBuilt, Obstruction.Protected }) Assert.That(StuckRules.Rageable(o), Is.False, o.ToString());
@@ -25,19 +26,28 @@ public class StuckRulesTests
 
     // ---- turn directions ----
     static float[] Dir(float ix, float iz, Side s) { float x, z; StuckRules.Direction(ix, iz, s, out x, out z); return new[] { x, z }; }
-    [Test] public void Direction_IntendedNorth_RightIsEast() { var d = Dir(0f, 1f, Side.Right);
+    [Test]
+    public void Direction_IntendedNorth_RightIsEast()
+    {
+        var d = Dir(0f, 1f, Side.Right);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(d[0], Is.EqualTo(1f).Within(1e-5f)); Assert.That(d[1], Is.EqualTo(0f).Within(1e-5f));
         }
     }
-    [Test] public void Direction_IntendedNorth_LeftIsWest() { var d = Dir(0f, 1f, Side.Left);
+    [Test]
+    public void Direction_IntendedNorth_LeftIsWest()
+    {
+        var d = Dir(0f, 1f, Side.Left);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(d[0], Is.EqualTo(-1f).Within(1e-5f)); Assert.That(d[1], Is.EqualTo(0f).Within(1e-5f));
         }
     }
-    [Test] public void Direction_IntendedEast_RightIsSouth() { var d = Dir(1f, 0f, Side.Right);
+    [Test]
+    public void Direction_IntendedEast_RightIsSouth()
+    {
+        var d = Dir(1f, 0f, Side.Right);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(d[0], Is.EqualTo(0f).Within(1e-5f)); Assert.That(d[1], Is.EqualTo(-1f).Within(1e-5f));
@@ -45,13 +55,18 @@ public class StuckRulesTests
     }
     [Test] public void Direction_IsAUnitVector_ForALongInput() { var d = Dir(30f, 40f, Side.Right); Assert.That(d[0] * d[0] + d[1] * d[1], Is.EqualTo(1f).Within(1e-5f)); }
     [Test] public void Direction_IsPerpendicularToTheIntendedDirection() { var d = Dir(3f, 4f, Side.Left); Assert.That(d[0] * 3f + d[1] * 4f, Is.EqualTo(0f).Within(1e-4f)); }
-    [Test] public void Direction_ZeroInput_GivesZero() { var d = Dir(0f, 0f, Side.Right);
+    [Test]
+    public void Direction_ZeroInput_GivesZero()
+    {
+        var d = Dir(0f, 0f, Side.Right);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(d[0], Is.EqualTo(0f)); Assert.That(d[1], Is.EqualTo(0f));
         }
     }
-    [Test] public void Opposite_Flips() {
+    [Test]
+    public void Opposite_Flips()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.Opposite(Side.Right), Is.EqualTo(Side.Left)); Assert.That(StuckRules.Opposite(Side.Left), Is.EqualTo(Side.Right));
@@ -72,7 +87,9 @@ public class StuckRulesTests
     [Test] public void PlanMetres_FirstStepInvalid_IsZero() { Assert.That(StuckRules.PlanMetres(new List<bool> { false, true, true }, 10f), Is.EqualTo(0f)); }
     [Test] public void PlanMetres_NeverMoreThanTheMaximum() { Assert.That(StuckRules.PlanMetres(Steps(20, 20), 10f), Is.EqualTo(10f)); }
     [Test] public void PlanMetres_ShortList_IsItsLength() { Assert.That(StuckRules.PlanMetres(Steps(4, 4), 10f), Is.EqualTo(4f)); }
-    [Test] public void PlanMetres_NullOrEmpty_IsZero() {
+    [Test]
+    public void PlanMetres_NullOrEmpty_IsZero()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.PlanMetres(null, 10f), Is.EqualTo(0f)); Assert.That(StuckRules.PlanMetres(new List<bool>(), 10f), Is.EqualTo(0f));
@@ -81,38 +98,56 @@ public class StuckRulesTests
     static List<bool> Steps(int count, int valid) { var l = new List<bool>(); for (int i = 0; i < count; i++) l.Add(i < valid); return l; }
 
     // ---- which side a leg goes ----
-    [Test] public void ChooseSide_PreferredHasRoom_KeepsIt() { float m;
+    [Test]
+    public void ChooseSide_PreferredHasRoom_KeepsIt()
+    {
+        float m;
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.ChooseSide(Side.Right, 8f, 10f, out m), Is.EqualTo(Side.Right)); Assert.That(m, Is.EqualTo(8f));
         }
     }
-    [Test] public void ChooseSide_PreferredBlocked_TakesTheOtherSide() { float m;
+    [Test]
+    public void ChooseSide_PreferredBlocked_TakesTheOtherSide()
+    {
+        float m;
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.ChooseSide(Side.Right, 0f, 6f, out m), Is.EqualTo(Side.Left)); Assert.That(m, Is.EqualTo(6f));
         }
     }
-    [Test] public void ChooseSide_PreferredLeftBlocked_TakesRight() { float m;
+    [Test]
+    public void ChooseSide_PreferredLeftBlocked_TakesRight()
+    {
+        float m;
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.ChooseSide(Side.Left, 0.5f, 3f, out m), Is.EqualTo(Side.Right)); Assert.That(m, Is.EqualTo(3f));
         }
     }
-    [Test] public void ChooseSide_NoRoomAnywhere_NothingToWalk() { float m;
+    [Test]
+    public void ChooseSide_NoRoomAnywhere_NothingToWalk()
+    {
+        float m;
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.ChooseSide(Side.Right, 0f, 0.5f, out m), Is.EqualTo(Side.Right)); Assert.That(m, Is.EqualTo(0f));
         }
     }
     [Test] public void ChooseSide_ExactlyTheMinimum_CountsWhenTheOtherSideHasNoMore() { float m; StuckRules.ChooseSide(Side.Right, StuckRules.MinLegMetres, 0.5f, out m); Assert.That(m, Is.EqualTo(StuckRules.MinLegMetres)); }
-    [Test] public void ChooseSide_PreferredHasLittleRoomOtherHasMuch_TakesTheOtherSide() { float m;
+    [Test]
+    public void ChooseSide_PreferredHasLittleRoomOtherHasMuch_TakesTheOtherSide()
+    {
+        float m;
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.ChooseSide(Side.Right, 1f, 10f, out m), Is.EqualTo(Side.Left)); Assert.That(m, Is.EqualTo(10f));
         }
     }
-    [Test] public void ChooseSide_PreferredHasLittleRoomAndSoDoesTheOther_KeepsThePreferred() { float m;
+    [Test]
+    public void ChooseSide_PreferredHasLittleRoomAndSoDoesTheOther_KeepsThePreferred()
+    {
+        float m;
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.ChooseSide(Side.Left, 2f, 1.5f, out m), Is.EqualTo(Side.Left)); Assert.That(m, Is.EqualTo(2f));
@@ -136,7 +171,9 @@ public class StuckRulesTests
     [Test] public void HeadOn_OtherBeside_No() { Assert.That(StuckRules.HeadOn(new GroundPoint(0f, 0f), new GroundPoint(0f, 1f), new GroundPoint(4f, 2.5f), new GroundPoint(0f, -1f)), Is.False); }
     [Test] public void HeadOn_OtherBehind_No() { Assert.That(StuckRules.HeadOn(new GroundPoint(0f, 0f), new GroundPoint(0f, 1f), new GroundPoint(0f, -2.5f), new GroundPoint(0f, -1f)), Is.False); }
     [Test] public void HeadOn_OtherTooFar_No() { Assert.That(StuckRules.HeadOn(new GroundPoint(0f, 0f), new GroundPoint(0f, 1f), new GroundPoint(0f, 6f), new GroundPoint(0f, -1f)), Is.False); }
-    [Test] public void HeadOnClear_FarEnoughApart() {
+    [Test]
+    public void HeadOnClear_FarEnoughApart()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(StuckRules.HeadOnClear(StuckRules.HeadOnClearMetres), Is.True); Assert.That(StuckRules.HeadOnClear(StuckRules.HeadOnClearMetres - 0.1f), Is.False);
@@ -146,7 +183,8 @@ public class StuckRulesTests
     // ---- progress (spec 1a / 5) ----
     static ProgressMeter Walk(float start) { var m = new ProgressMeter(); m.Reset(start); return m; }
 
-    [Test] public void Meter_WalkingTowardsTheGoal_NeverStuck()
+    [Test]
+    public void Meter_WalkingTowardsTheGoal_NeverStuck()
     {
         var m = Walk(50f);
         float d = 50f;
@@ -158,32 +196,37 @@ public class StuckRulesTests
             Assert.That(m.SustainedSeconds, Is.GreaterThan(5f));
         }
     }
-    [Test] public void Meter_StandingStill_BecomesStuckAfterTheTrigger()
+    [Test]
+    public void Meter_StandingStill_BecomesStuckAfterTheTrigger()
     {
         var m = Walk(20f);
         for (int i = 0; i < 61; i++) m.Update(20f, 0.05f, true);
         Assert.That(m.StuckSeconds, Is.GreaterThanOrEqualTo(StuckRules.StuckTrigger));
     }
-    [Test] public void Meter_WalkingSidewaysAgainstARock_IsStuck_EvenThoughItMoves()
+    [Test]
+    public void Meter_WalkingSidewaysAgainstARock_IsStuck_EvenThoughItMoves()
     {
         var m = Walk(20f);
         for (int i = 0; i < 80; i++) m.Update(20f + (i % 2 == 0 ? 0.05f : -0.05f), 0.05f, true);      // legs move, the distance does not shrink by MinGain
         Assert.That(m.StuckSeconds, Is.GreaterThanOrEqualTo(StuckRules.StuckTrigger));
     }
-    [Test] public void Meter_WalkingBackwards_IsNoProgress()
+    [Test]
+    public void Meter_WalkingBackwards_IsNoProgress()
     {
         var m = Walk(20f);
         float d = 20f;
         for (int i = 0; i < 80; i++) { d += 0.1f; m.Update(d, 0.05f, true); }
         Assert.That(m.StuckSeconds, Is.GreaterThanOrEqualTo(StuckRules.StuckTrigger));
     }
-    [Test] public void Meter_ASmallGainBelowTheMinimum_IsNotProgress()
+    [Test]
+    public void Meter_ASmallGainBelowTheMinimum_IsNotProgress()
     {
         var m = Walk(20f);
         m.Update(20f - StuckRules.MinGain * 0.5f, 1f, true);
         Assert.That(m.StuckSeconds, Is.EqualTo(1f));
     }
-    [Test] public void Meter_ResumedProgress_ResetsTheTimer()
+    [Test]
+    public void Meter_ResumedProgress_ResetsTheTimer()
     {
         var m = Walk(20f);
         for (int i = 0; i < 40; i++) m.Update(20f, 0.05f, true);
@@ -191,7 +234,8 @@ public class StuckRulesTests
         m.Update(19f, 0.05f, true);
         Assert.That(m.StuckSeconds, Is.EqualTo(0f));
     }
-    [Test] public void Meter_IntentionalPause_DoesNotCountAndDoesNotReset()
+    [Test]
+    public void Meter_IntentionalPause_DoesNotCountAndDoesNotReset()
     {
         var m = Walk(20f);
         for (int i = 0; i < 40; i++) m.Update(20f, 0.05f, true);
@@ -199,13 +243,15 @@ public class StuckRulesTests
         for (int i = 0; i < 400; i++) m.Update(20f, 0.05f, false);      // attack animation, knockback, a deliberate wait: 20 s
         Assert.That(m.StuckSeconds, Is.EqualTo(before).Within(1e-4f));
     }
-    [Test] public void Meter_ZeroOrNegativeDt_IsIgnored()
+    [Test]
+    public void Meter_ZeroOrNegativeDt_IsIgnored()
     {
         var m = Walk(20f);
         m.Update(20f, 0f, true); m.Update(20f, -1f, true);
         Assert.That(m.StuckSeconds, Is.EqualTo(0f));
     }
-    [Test] public void Meter_Sustained_BuildsUpOnlyWithRegularGains_AndDropsAfterAGap()
+    [Test]
+    public void Meter_Sustained_BuildsUpOnlyWithRegularGains_AndDropsAfterAGap()
     {
         var m = Walk(100f);
         float d = 100f;
@@ -214,7 +260,47 @@ public class StuckRulesTests
         for (int i = 0; i < 20; i++) m.Update(d, 0.1f, true);                           // 2 s with no gain: longer than GainWindow
         Assert.That(m.SustainedSeconds, Is.EqualTo(0f));
     }
-    [Test] public void Meter_Reset_StartsFromTheNewDistance()
+    // ---- D-214: plain rocks are walked around, ore rocks may be mined ----
+
+    [TestCase("Rock_3", false, true)]
+    [TestCase("rock2_cell", false, true)]
+    [TestCase("Rock_4_frac", false, true)]
+    [TestCase("MineRock_Stone", true, true)]
+    [TestCase("MineRock_Copper", true, false)]
+    [TestCase("MineRock_Tin", true, false)]
+    [TestCase("rock4_copper", false, false)]
+    [TestCase("silvervein", false, false)]
+    [TestCase("FirTree_oldLog", false, false)]
+    [TestCase("stubbe", false, false)]
+    [TestCase("", false, false)]
+    public void IsPlainRock_ByName(string prefab, bool isMineRock, bool expected)
+    {
+        Assert.That(StuckRules.IsPlainRock(prefab, isMineRock, new string[0]), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void IsPlainRock_OnlyStoneAndFlintDrops_StaysPlain()
+    {
+        Assert.That(StuckRules.IsPlainRock("Rock_3", false, new[] { "Stone", "Flint" }), Is.True);
+    }
+
+    [TestCase("CopperOre")]
+    [TestCase("TinOre")]
+    [TestCase("Obsidian")]
+    [TestCase("SilverOre")]
+    public void IsPlainRock_AnyOreDrop_IsNotPlain(string drop)
+    {
+        Assert.That(StuckRules.IsPlainRock("MineRock_X", true, new[] { "Stone", drop }), Is.False);
+    }
+
+    [Test]
+    public void IsPlainRock_UnknownDrops_AreTreatedAsPlain()
+    {
+        Assert.That(StuckRules.IsPlainRock("Rock_3", false, null), Is.True);
+    }
+
+    [Test]
+    public void Meter_Reset_StartsFromTheNewDistance()
     {
         var m = Walk(20f);
         for (int i = 0; i < 40; i++) m.Update(20f, 0.05f, true);

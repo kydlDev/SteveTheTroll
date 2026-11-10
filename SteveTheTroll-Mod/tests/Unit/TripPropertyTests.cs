@@ -84,7 +84,8 @@ public class TripPropertyTests
     /// A random LEGAL trip history: at each step one of the events the grammar allows (chosen by index), built phase by phase from the written rules, not from TripGrammar.Next.
     private static Gen<string[]> LegalTrip()
     {
-        return from steps in Gen.ArrayOf(40, Gen.Choose(0, 99)) from len in Gen.Choose(0, 40)
+        return from steps in Gen.ArrayOf(40, Gen.Choose(0, 99))
+               from len in Gen.Choose(0, 40)
                select Build(steps.Take(len).ToArray());
     }
 

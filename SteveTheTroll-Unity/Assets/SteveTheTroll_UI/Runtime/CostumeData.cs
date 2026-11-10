@@ -41,10 +41,17 @@ internal sealed class CostumeData
             SetName = "Steve The Troll",
             SetDescription = "The troll rush runs through your whole body.",
             SetWorn = 3,
-            ClubName = "Troll Club", ClubDescription = "A whole tree trunk with a rope grip.",
-            ClubBlunt = 150, ClubChop = 50, ClubPickaxe = 50, ClubBluntPerLevel = 35, ClubChopPerLevel = 20,
-            ClubPickaxePerLevel = 20, ClubMaxQuality = 4,
-            Station = "Workbench", StationLevel = 1
+            ClubName = "Troll Club",
+            ClubDescription = "A whole tree trunk with a rope grip.",
+            ClubBlunt = 150,
+            ClubChop = 50,
+            ClubPickaxe = 50,
+            ClubBluntPerLevel = 35,
+            ClubChopPerLevel = 20,
+            ClubPickaxePerLevel = 20,
+            ClubMaxQuality = 4,
+            Station = "Workbench",
+            StationLevel = 1
         };
         foreach (string[] p in new[]
                  {
@@ -55,7 +62,11 @@ internal sealed class CostumeData
         {
             var piece = new Piece
             {
-                Name = p[0], SlotKey = p[1], Armor = 20, ArmorPerLevel = 5, MaxQuality = 4,
+                Name = p[0],
+                SlotKey = p[1],
+                Armor = 20,
+                ArmorPerLevel = 5,
+                MaxQuality = 4,
                 WornQuality = p[0].EndsWith("Head") ? 0 : 1
             };
             piece.Recipe.Add(new SlipperData.Ingredient("Troll hide", 5, 2));

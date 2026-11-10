@@ -116,14 +116,14 @@ internal static class DepotSpots
         float lo = float.MaxValue, hi = float.MinValue, sum = 0f;
         int n = 0;
         for (int ix = -1; ix <= 1; ix++)
-        for (int iz = -1; iz <= 1; iz++)
-        {
-            float h = zs.GetGroundHeight(p + q * new Vector3(ix * DepotData.HalfX, 0f, iz * DepotData.HalfZ));
-            lo = Mathf.Min(lo, h);
-            hi = Mathf.Max(hi, h);
-            sum += h;
-            n++;
-        }
+            for (int iz = -1; iz <= 1; iz++)
+            {
+                float h = zs.GetGroundHeight(p + q * new Vector3(ix * DepotData.HalfX, 0f, iz * DepotData.HalfZ));
+                lo = Mathf.Min(lo, h);
+                hi = Mathf.Max(hi, h);
+                sum += h;
+                n++;
+            }
 
         slope = hi - lo;
         flatten = canLevel && slope > TrollDepot.MaxSlope;
@@ -189,6 +189,15 @@ internal static class DepotSpots
         }
 
         return false;
+    }
+
+    /// #30: the game's path search finds a way from the troll to within TrollDepot.Reach of `ground`. Expected outcome: true when it does (or there is no path search); false
+    /// when the chest sits behind something the troll cannot get round.
+    internal static bool CanReach(Character troll, Vector3 ground)
+    {
+        BaseAI ai = troll.GetComponent<BaseAI>();
+        Pathfinding.AgentType agent = ai != null ? ai.m_pathAgentType : Pathfinding.AgentType.TrollSize;
+        return Reachable(troll, agent, ground);
     }
 
     private static bool Reachable(Character troll, Pathfinding.AgentType agent, Vector3 ground)

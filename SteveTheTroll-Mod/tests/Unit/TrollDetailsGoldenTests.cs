@@ -15,9 +15,28 @@ public class TrollDetailsGoldenTests
 
     static TrollInfo Live()
     {
-        return new TrollInfo { Id = "a1", Name = "Steve", Number = 1, Status = "stevethetroll_status_farming", Focus = "CopperOre", Farming = "Wood",
-            Health = 1234.4f, MaxHealth = 1800f, Stars = 2, DamageFactor = 3.25f, X = 412.4f, Y = 77f, Z = -268.6f, BedDistance = 35.5f, Loaded = true,
-            Attacks = "Punch~Blunt=180,Chop=300~4", Resists = "Fire=Resistant,Frost=Weak", BackpackUsed = 12, BackpackSlots = 96 };
+        return new TrollInfo
+        {
+            Id = "a1",
+            Name = "Steve",
+            Number = 1,
+            Status = "stevethetroll_status_farming",
+            Focus = "CopperOre",
+            Farming = "Wood",
+            Health = 1234.4f,
+            MaxHealth = 1800f,
+            Stars = 2,
+            DamageFactor = 3.25f,
+            X = 412.4f,
+            Y = 77f,
+            Z = -268.6f,
+            BedDistance = 35.5f,
+            Loaded = true,
+            Attacks = "Punch~Blunt=180,Chop=300~4",
+            Resists = "Fire=Resistant,Frost=Weak",
+            BackpackUsed = 12,
+            BackpackSlots = 96
+        };
     }
 
     static string[] Flat(List<DetailGroup> groups)
@@ -92,7 +111,9 @@ public class TrollDetailsGoldenTests
     }
 
     // D-096 backpack fill
-    [Test] public void Backpack_Unknown_Dash() {
+    [Test]
+    public void Backpack_Unknown_Dash()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(TrollDetailsBuilder.Backpack(new TrollInfo(), K), Is.EqualTo("-")); Assert.That(TrollDetailsBuilder.Backpack(null, K), Is.EqualTo("-"));
@@ -127,7 +148,9 @@ public class TrollDetailsGoldenTests
         Assert.That(back.BackpackSlots, Is.EqualTo(0));
     }
 
-    [Test] public void Backpack_BadNumbers_Rejected() {
+    [Test]
+    public void Backpack_BadNumbers_Rejected()
+    {
         using (Assert.EnterMultipleScope())
         {
             Assert.That(TrollInfo.Decode(Live().Encode().Replace("|12|96", "|x|96")), Is.Null); Assert.That(TrollInfo.Decode(Live().Encode().Replace("|12|96", "|-1|96")), Is.Null);

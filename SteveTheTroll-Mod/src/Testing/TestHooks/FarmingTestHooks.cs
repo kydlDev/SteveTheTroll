@@ -54,7 +54,45 @@ internal static class FarmingTestHooks
         Vector3 to = p.transform.position + new Vector3(toDx, 0f, toDz);
         from.y = ZoneSystem.instance.GetGroundHeight(from);
         to.y = ZoneSystem.instance.GetGroundHeight(to);
-        return Pathfinding.instance.HavePath(from, to, Pathfinding.AgentType.TrollSize);
+        bool have = Pathfinding.instance.HavePath(from, to, Pathfinding.AgentType.TrollSize);
+        if (!have)
+        {
+            LogPathMiss(p.transform.position, from, to);
+        }
+
+        return have;
+    }
+
+    private static float _nextPathMissLog;
+
+    /// 2026-11-09 (il-mob1..3: stt.pathReady stayed false for the whole 30 s in most repeats of instruction-latency): which END of the leg has no navmesh and what stands there. Once per 3 s while the hook says false,
+    /// so a lab log shows whether the troll's spawn point, the end point, or both are missing. It found the cause: the old end point (4 m from the hub's middle) was INSIDE the hub's own floor, which is 355 pieces
+    /// up to 13.5 m wide - once the hub object exists the navmesh there is gone for good, so the test passed only when the navmesh answered before the hub object appeared (a race). Test hook only.
+    private static void LogPathMiss(Vector3 player, Vector3 from, Vector3 to)
+    {
+        if (Time.time < _nextPathMissLog)
+        {
+            return;
+        }
+
+        _nextPathMissLog = Time.time + 3f;
+        Pathfinding pf = Pathfinding.instance;
+        const Pathfinding.AgentType agent = Pathfinding.AgentType.TrollSize;
+        bool fromAlone = pf.HavePath(from, from + new Vector3(1f, 0f, 0f), agent);
+        bool toAlone = pf.HavePath(to, to + new Vector3(1f, 0f, 0f), agent);
+        bool playerFrom = pf.HavePath(player, from, agent);
+        bool playerTo = pf.HavePath(player, to, agent);
+        Collider[] hits = Physics.OverlapSphere(to + Vector3.up * 0.5f, 3f);
+        var around = new List<string>();
+        foreach (Collider c in hits)
+        {
+            if (around.Count < 3)
+            {
+                around.Add($"{c.name} (root {c.transform.root.name}, layer {LayerMask.LayerToName(c.gameObject.layer)})");
+            }
+        }
+
+        ModLog.Info($"FarmingTestHooks: pathReady false - player {player:F0}, from {from:F0}, to {to:F0}; navmesh at 'from' (1 m step) {fromAlone}, at 'to' (1 m step) {toAlone}, player -> from {playerFrom}, player -> to {playerTo}; {hits.Length} collider(s) within 3 m of 'to', first: {(around.Count == 0 ? "none" : string.Join("; ", around))}");
     }
 
     /// Planted trees still standing untouched (a felled tree is destroyed, so the lab cannot name it any more - this hook needs no tree argument). Expected outcome: 0 once hit.

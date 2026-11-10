@@ -128,12 +128,21 @@ internal static partial class TrollDepot
         target = bed;
         PlanChests.Clear();
         PlanFacts.Clear();
+        int unreachable = 0;
         foreach (Container c in Chests(bed, owner))
         {
             PlanChests.Add(c);
             bool room = c.GetInventory().HaveEmptySlot();
-            PlanFacts.Add(new DepotCandidate(room, room && Busy(c.transform.position, troll),
-                room && ReservedByOther(c, troll), Vector3.Distance(c.transform.position, troll.transform.position)));
+            bool crowded = room && Busy(c.transform.position, troll);
+            bool reserved = room && ReservedByOther(c, troll);
+            // #30: only a chest the troll could actually walk to is asked about (the path search is the expensive part)
+            bool reachable = !room || crowded || reserved || DepotSpots.CanReach(troll, c.transform.position);
+            if (!reachable)
+            {
+                unreachable++;
+            }
+
+            PlanFacts.Add(new DepotCandidate(room, crowded, reserved, Vector3.Distance(c.transform.position, troll.transform.position), reachable));
         }
 
         DepotPlan plan = DepotPlanner.Choose(PlanFacts);
@@ -142,11 +151,13 @@ internal static partial class TrollDepot
         {
             Container chosen = PlanChests[plan.Chosen];
             float best = PlanFacts[plan.Chosen].Distance;
+            bool chosenReachable = PlanFacts[plan.Chosen].Reachable;
             target = chosen.transform.position;
             Reserve(chosen, troll);
             PlanChests.Clear();
-            ModLog.Info("TrollDepot: " + TrollTaming.Tag(troll) + " unloads at the depot chest " + best.ToString("F1") +
-                        " m away" + (busy > 0 ? " (" + busy + " chest(s) skipped: another troll there)" : ""));
+            ModLog.Info($"TrollDepot: {TrollTaming.Tag(troll)} unloads at the depot chest {best:F1} m away" +
+                        (busy > 0 ? $" ({busy} chest(s) skipped: another troll there)" : "") +
+                        (unreachable > 0 ? $" ({unreachable} chest(s) with room have no path for the troll{(chosenReachable ? "" : " - this one has none either, walking there anyway")})" : ""));
             return true;
         }
 

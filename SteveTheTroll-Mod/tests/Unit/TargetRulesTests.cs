@@ -44,7 +44,8 @@ public class TargetRulesTests
     [Test] public void NotBlocked_FriendBeyondTheLookAhead() { Assert.That(BlockedAt(0f, 0f, 0f, 20f, 0f, 6f), Is.False); }
     [Test] public void NotBlocked_FriendPastTheGoal() { Assert.That(BlockedAt(0f, 0f, 0f, 2f, 0f, 3f), Is.False, "a friend past the goal is not in the way (the walker stops at the goal)"); }
 
-    [Test] public void Blocked_IsRotationInvariant_LikeTheFixtureAtEveryAngle()
+    [Test]
+    public void Blocked_IsRotationInvariant_LikeTheFixtureAtEveryAngle()
     {
         for (int deg = 0; deg < 360; deg += 15)
         {
@@ -78,7 +79,10 @@ public class TargetRulesTests
         return new[] { Coord(way, "X"), Coord(way, "Z") };
     }
 
-    [Test] public void Waypoint_OtherSlightlyRight_GoesLeftOfIt() { var w = Way(0.5f, 2f);
+    [Test]
+    public void Waypoint_OtherSlightlyRight_GoesLeftOfIt()
+    {
+        var w = Way(0.5f, 2f);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(w[0], Is.LessThan(0.5f - 2f)); Assert.That(w[1], Is.EqualTo(3f).Within(1e-3f));

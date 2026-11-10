@@ -27,6 +27,12 @@ internal static class ArenaTestHooks
     private static bool _further;
     private static Vector3 _furtherSpot;
 
+    /// True once the arena spot is known (after the first stt.reset / stt.arena).
+    internal static bool Known => _known;
+
+    /// The shared arena spot (lane 0) - where the test hub stands. Only meaningful when Known.
+    internal static Vector3 Spot => _spot;
+
     /// Every test starts here (MIGRATION_DECISIONS C26). Expected outcome: "arena at (x, y, z), 70 m from the lab start, god mode True".
     [TestHook("stt.arena")]
     private static string Arena()
@@ -138,8 +144,25 @@ internal static class ArenaTestHooks
         return to;
     }
 
+    /// #29: arms RouteClearWatch - once a second every farm source (tree, stump, log, rock, bush) within `halfWidth` m of the line from the player to the arena spot (the hub)
+    /// is removed in the part of the line that is loaded at that moment (the zones near the hub load only when the troll gets there). stt.reset takes the watch off.
+    /// Call it after stt.clearRoute. Expected outcome: how many sources the first sweep removed.
+    [TestHook("stt.keepRouteClear")]
+    private static int KeepRouteClear(float halfWidth)
+    {
+        Player p = Player.m_localPlayer;
+        if (!_known)
+        {
+            MovePlayer(p);
+        }
+
+        int n = RouteClearWatch.Arm(p, halfWidth);
+        ModLog.Info($"ArenaTestHooks: route kept clear within {halfWidth:F0} m of the way to the hub, first sweep removed {n}");
+        return n;
+    }
+
     /// TERRAIN ONLY (D-176: the name promises more than it checks): it samples world-generator heights and water, nothing else - trees, rocks, logs and stumps are NOT checked
-    /// (stt.clearAround removes them near the player, but not along the route). A test that needs a walkable route must say what it removes itself.
+    /// (stt.clearAround removes them near the player, but not along the route; stt.keepRouteClear does, #29). A test that needs a walkable route must say what it removes itself.
     /// D-174 (review: "a 400-metre return test should not depend on randomly generated terrain being passable"): of 16 directions from the arena spot, the one whose straight
     /// line of `metres` has the gentlest terrain and no water (WorldGenerator heights - valid where nothing is loaded; sampled every 10 m), and teleports the player to its end
     /// (the game's distant teleport finds the floor). Expected outcome: a description; throws when no direction is dry.
@@ -205,7 +228,17 @@ internal static class ArenaTestHooks
     [TestHook("stt.clearMobs")]
     internal static int ClearMobs(float radius)
     {
-        Player p = Player.m_localPlayer;
+        var names = new List<string>();
+        int n = RemoveWildMobs(Player.m_localPlayer, radius, names);
+        ModLog.Info("ArenaTestHooks: " + n + " wild creature(s) removed within " + radius.ToString("F0") +
+                    " m of the player" + (n > 0 ? " (" + string.Join(", ", names) + ")" : ""));
+        return n;
+    }
+
+    /// The removal itself, shared by stt.clearMobs and MobClearWatch: wild creatures (not tamed, not players, alive) within `radius` m of `player`; `names` (when given)
+    /// receives what was removed. Expected outcome: how many were removed.
+    internal static int RemoveWildMobs(Player player, float radius, List<string> names)
+    {
         int n = 0;
         foreach (Character c in new List<Character>(Character.GetAllCharacters()))
         {
@@ -214,7 +247,7 @@ internal static class ArenaTestHooks
                 continue;
             }
 
-            if (Flat(c.transform.position - p.transform.position) > radius)
+            if (Flat(c.transform.position - player.transform.position) > radius)
             {
                 continue;
             }
@@ -225,14 +258,38 @@ internal static class ArenaTestHooks
                 continue;
             }
 
+            names?.Add(c.name);
             v.ClaimOwnership();
             ZNetScene.instance.Destroy(c.gameObject);
             n++;
         }
 
-        ModLog.Info("ArenaTestHooks: " + n + " wild creature(s) removed within " + radius.ToString("F0") +
-                    " m of the player");
         return n;
+    }
+
+    /// 2026-11-09 (g16a-3, instruction-latency: the troll walked 11 m AWAY from its hub after the home order): the game's own SpawnSystem put two wild Boars next to the troll
+    /// 3 s AFTER stt.clearMobs / stt.wildMobsNear had found the arena clean. A troll with a target creature fights first, by design (D-042 / D-149, FarmGate: YieldToFight before
+    /// GoHome), so the order was correctly not followed. The one-time clearing cannot keep the arena clean while the world spawns; this arms MobSpawnBlock (the game's own spawns
+    /// within `radius` m of the player are skipped, so the creatures are never created) and MobClearWatch (removes what is there already or gets past, twice a second) until
+    /// stt.reset. Only for tests that do not spawn their own creatures (stt.spawnMob). Expected outcome: how many the first sweep removed.
+    [TestHook("stt.keepMobsClear")]
+    private static int KeepMobsClear(float radius)
+    {
+        MobSpawnBlock.Arm(radius); // the creatures are not created at all (MobSpawnBlock) ...
+        int n = MobClearWatch.Arm(Player.m_localPlayer, radius); // ... and what is there already, or gets past, is removed twice a second
+        ModLog.Info($"ArenaTestHooks: arena kept free of wild creatures within {radius:F0} m of the player (game spawns skipped, sweep every 0.5 s), first sweep removed {n}");
+        return n;
+    }
+
+    /// D-206 (g16c-3, ledge-forced-medium-up: the game's SpawnSystem put a Deer next to the player in the same second stt.clearMobs found the arena clean, so the start's own precondition
+    /// stt.wildMobsNear failed with 1): only the game's own creature spawns within `radius` m of the player are skipped (MobSpawnBlock; until stt.reset or 180 s). Nothing is removed and nothing
+    /// is swept, so creatures a test spawns itself (stt.spawnMob, stt.spawnWildTroll, ...) are not touched - this is what the shared `start` block arms BEFORE stt.clearMobs. Expected outcome: the radius.
+    [TestHook("stt.blockSpawns")]
+    private static float BlockSpawns(float radius)
+    {
+        MobSpawnBlock.Arm(radius);
+        ModLog.Info($"ArenaTestHooks: the game's own creature spawns within {radius:F0} m of the player are skipped (until stt.reset or {MobSpawnBlock.MaxSeconds:F0} s)");
+        return radius;
     }
 
     /// D-175: how many living wild creatures (not tamed, not players) are within `radius` m of the player - the precondition a test that needs an enemy-free arena states
@@ -248,6 +305,19 @@ internal static class ArenaTestHooks
                 Flat(c.transform.position - p.transform.position) <= radius)
             {
                 n++;
+                // D-206 (g16d-1 ledger-readback: a creature was found 110 ms after stt.clearMobs removed 0, while MobSpawnBlock was armed and logged no skipped spawn): WHICH creature, where, how old, who owns it -
+                // the log line is the only way to tell a creature that came out of a saved ZDO, a spawner or a walk-in from a SpawnSystem spawn
+                ZNetView v = c.GetComponent<ZNetView>();
+                string age = "?";
+                BaseAI ai = c.GetComponent<BaseAI>();
+                if (ai != null)
+                {
+                    age = ai.GetTimeSinceSpawned().TotalSeconds.ToString("F1") + " s";
+                }
+
+                ModLog.Info($"ArenaTestHooks: wild creature left within {radius:F0} m: {c.name} at {c.transform.position:F1}, {Flat(c.transform.position - p.transform.position):F1} m from the player, " +
+                            $"view valid {v != null && v.IsValid()}, owner {(v != null && v.IsValid() && v.IsOwner())}, since spawn {age}, " +
+                            $"ZDO {(v != null && v.IsValid() ? v.GetZDO().m_uid.ToString() : "-")}, block active {MobSpawnBlock.Active} ({MobSpawnBlock.Blocked} skipped), frame {Time.frameCount}");
             }
         }
 

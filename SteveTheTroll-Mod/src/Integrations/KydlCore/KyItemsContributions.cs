@@ -90,7 +90,11 @@ internal static class KyItemsContributions
 
         KyResult r = KyItems.Contribute(new KyContribution
         {
-            Id = w.Id, ModGuid = Plugin.ModGuid, Prefab = prefab, Kind = w.Kind, RegisterInGame = false,
+            Id = w.Id,
+            ModGuid = Plugin.ModGuid,
+            Prefab = prefab,
+            Kind = w.Kind,
+            RegisterInGame = false,
             Tags = new[] { "SteveTheTroll" }
         });
         if (!r.Accepted)

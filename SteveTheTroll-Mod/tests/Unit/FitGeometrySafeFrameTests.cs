@@ -87,7 +87,10 @@ public class FitGeometrySafeFrameTests
     [Test] public void UprightForward_FlatSocket_IsKept() { Near(Upright(new Vector3(0, 0, 1), Vector3.up, Vector3.right), new Vector3(0, 0, 1)); }
     [Test] public void UprightForward_TiltedFootSocket_IsFlattened() { Near(Upright(new Vector3(0, 0.7f, 0.7f), Vector3.up, Vector3.right), new Vector3(0, 0, 1)); }
     [Test] public void UprightForward_PointingStraightUp_UsesFallback() { Near(Upright(Vector3.up, Vector3.up, new Vector3(1, 0.5f, 0)), new Vector3(1, 0, 0)); }
-    [Test] public void UprightForward_IsUnitAndPerpendicularToUp() { var f = Upright(new Vector3(3, 5, 4), new Vector3(0.1f, 1, 0), Vector3.right);
+    [Test]
+    public void UprightForward_IsUnitAndPerpendicularToUp()
+    {
+        var f = Upright(new Vector3(3, 5, 4), new Vector3(0.1f, 1, 0), Vector3.right);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(f.magnitude, Is.EqualTo(1f).Within(1e-4f)); Assert.That(Vector3.Dot(f, new Vector3(0.1f, 1, 0).normalized), Is.EqualTo(0f).Within(1e-4f));

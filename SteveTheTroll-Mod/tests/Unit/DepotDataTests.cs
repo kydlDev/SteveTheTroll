@@ -56,13 +56,15 @@ public class DepotDataTests
         foreach (var p in Get("Frame"))
         {
             string at = (float)F(p, "X") + "/" + (float)F(p, "Z");
-            if ((string)F(p, "Prefab") == "wood_pole") {
+            if ((string)F(p, "Prefab") == "wood_pole")
+            {
                 using (Assert.EnterMultipleScope())
                 {
                     Assert.That(poles.Add(at), Is.True, "two poles at " + at); Assert.That((float)F(p, "Y"), Is.EqualTo(0.5f));
                 }
             }
-            else {
+            else
+            {
                 using (Assert.EnterMultipleScope())
                 {
                     Assert.That(floors.Add(at), Is.True, "two floors at " + at); Assert.That((float)F(p, "Y"), Is.EqualTo(1f));

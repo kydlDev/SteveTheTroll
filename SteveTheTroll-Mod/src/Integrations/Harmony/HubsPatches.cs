@@ -1,6 +1,6 @@
 using HarmonyLib;
-using SteveTheTroll.Presentation.Map;
 using SteveTheTroll.Features.Hubs.Infrastructure;
+using SteveTheTroll.Presentation.Map;
 using UnityEngine;
 
 namespace SteveTheTroll.Integrations.Harmony;

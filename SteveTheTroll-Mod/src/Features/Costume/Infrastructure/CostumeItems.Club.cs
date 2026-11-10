@@ -27,8 +27,10 @@ internal static partial class CostumeItems
 
         var cfg = new ItemConfig
         {
-            Name = "$stevethetroll_club", Description = "$stevethetroll_club_desc",
-            CraftingStation = CraftingStations.Workbench, MinStationLevel = 1
+            Name = "$stevethetroll_club",
+            Description = "$stevethetroll_club_desc",
+            CraftingStation = CraftingStations.Workbench,
+            MinStationLevel = 1
         };
         cfg.AddRequirement(new RequirementConfig("RoundLog", 15, 5)); // D-071: core wood
         cfg.AddRequirement(new RequirementConfig("FineWood", 15, 5));
@@ -70,7 +72,7 @@ internal static partial class CostumeItems
         HitData.DamageTypes v = s.m_damages;
         s.m_damages = new HitData.DamageTypes { m_blunt = ClubBlunt, m_chop = ClubChop, m_pickaxe = ClubPickaxe };
         s.m_damagesPerLevel = new HitData.DamageTypes
-            { m_blunt = ClubBluntPerLevel, m_chop = ClubChopPerLevel, m_pickaxe = ClubPickaxePerLevel };
+        { m_blunt = ClubBluntPerLevel, m_chop = ClubChopPerLevel, m_pickaxe = ClubPickaxePerLevel };
         float knock = s.m_attackForce;
         s.m_attackForce = knock * ClubKnockbackFactor;
         s.m_maxQuality = MaxQuality;

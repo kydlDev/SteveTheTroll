@@ -65,7 +65,9 @@ public class ExploreRulesTests
         }
     }
 
-    [TestCase(10f, 0f, 0f, 0f, 90f, 0f)] [TestCase(0f, -50f, 0f, 0f, 0f, -90f)] [TestCase(2f, 2f, 0f, 0f, 33f, 33f)]
+    [TestCase(10f, 0f, 0f, 0f, 90f, 0f)]
+    [TestCase(0f, -50f, 0f, 0f, 0f, -90f)]
+    [TestCase(2f, 2f, 0f, 0f, 33f, 33f)]
     public void StartHeading_AwayFromTheHub(float px, float pz, float hx, float hz, float forward, float expected)
     {
         Assert.That(ExploreRules.StartHeading(px, pz, hx, hz, forward), Is.EqualTo(expected).Within(0.01f));

@@ -1,7 +1,7 @@
 {
     "name":  "hub-no-spawn-area",
     "timeout":  60,
-    "description":  "Item 3 (user 2026-11-06: same as the workbench, just set this range): the Troll Hub carries a copy of the workbench's PlayerBase effect area with NoSpawnRadius (50 m), so no wild creature spawns near it. The hub stands 25 m ahead of the player; a point 45 m behind it (inside 50 m) is inside the base area, a point 70 m behind it is outside.",
+    "description":  "Item 3 (user 2026-11-06: same as the workbench, just set this range): the Troll Hub carries a copy of the workbench's PlayerBase effect area with NoSpawnRadius (50 m) measured from the hub\u0027s OUTER edge (D-214, user 2026-11-10: 15.5 m from its middle), so the sphere is 65.5 m around the middle and no wild creature spawns near it. The hub stands 25 m ahead of the player; a point 45 m and one 60 m behind it (inside 65.5 m, the 60 m one only because of the extra edge) are inside the base area, a point 70 m behind it is outside.",
     "steps":  [
                   { "do":  "use", "block":  "start", "args":  { "slippers":  false, "hub":  true } },
                   { "do":  "wait", "seconds":  3, "label":  "the game builds the hub object from its ZDO" },
@@ -12,7 +12,8 @@
                       "label":  "the hub's own spot is inside a base area"
                   },
                   { "do":  "hook", "name":  "stt.baseAreaAt", "args":  { "dx":  0, "dz":  70 }, "expect":  true, "label":  "45 m beyond the hub: inside the 50 m area" },
-                  { "do":  "hook", "name":  "stt.baseAreaAt", "args":  { "dx":  0, "dz":  95 }, "expect":  false, "label":  "70 m beyond the hub: outside" }
+                  { "do":  "hook", "name":  "stt.baseAreaAt", "args":  { "dx":  0, "dz":  85 }, "expect":  true, "label":  "60 m beyond the hub middle (44.5 m beyond its edge): inside" },
+                  { "do":  "hook", "name":  "stt.baseAreaAt", "args":  { "dx":  0, "dz":  95 }, "expect":  false, "label":  "70 m beyond the hub middle (more than the 65.5 m sphere): outside" }
               ],
     "asserts":  [
                     { "check":  "noErrors", "source":  "SteveTheTroll" }
