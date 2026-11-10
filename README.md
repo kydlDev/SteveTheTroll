@@ -92,7 +92,7 @@ to kill one
 
 A troll with a full backpack stops what it is doing and walks home to unload. It empties the backpack into troll depots
 that it builds
-15 - 50 m from your bed (stacks of chests, up to 5 high; uneven ground is levelled first). If it cannot find a spot it
+15 - 50 m from your bed, or from the outer edge of their hub (stacks of chests, up to 5 high; uneven ground is levelled first). If it cannot find a spot it
 tries again
 soon, and the depot is cleaned up once you have emptied it.
 

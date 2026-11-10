@@ -81,6 +81,16 @@ public class HubEdgeDistanceTests
         Assert.That(HubRules.Pick(0, -1f, 1, HubRules.EdgeDistance(HubRules.AutoReach + Outer + 1f), true), Is.EqualTo(0));
     }
 
+    [TestCase(15f, 15.5f, 30.5f)]
+    [TestCase(50f, 15.5f, 65.5f)]
+    [TestCase(15f, 0f, 15f)]
+    [TestCase(50f, -3f, 50f)]
+    public void DepotRing_CountsFromTheOuterEdgeOfWhatItSurrounds(float ring, float outer, float fromMiddle)
+    {
+        // D-225 (user 2026-11-10: "Yes depot ring should also count from outer edge"): 15 .. 50 m around a hub = 30.5 .. 65.5 m from its middle; the bed has no edge
+        Assert.That(SteveTheTroll.Features.Trolls.Backpack.Domain.DepotRules.FromEdge(ring, outer), Is.EqualTo(fromMiddle).Within(0.001f));
+    }
+
     [Test]
     public void NewHub_NeedsA1000mGapBetweenTheEdges()
     {

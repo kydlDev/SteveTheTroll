@@ -33,11 +33,15 @@ internal static class DepotSpots
         // User 2026-10-31 (a full troll stood at the bed and did nothing - test run 141207: "none of 288 spot(s) fits ... unreachable 229"): pass 1 is the strict search; when it finds
         // nothing, pass 2 takes ground up to TrollDepot.MaxSlopeRelaxed uneven (the level op cuts and fills it) and does not ask the game's pathfinding whether the troll can come within
         // 10 m of the spot - the walk to the depot gives up after UnloadWalkSeconds and the unload does not need the troll to stand next to the chest.
+        // D-225 (user 2026-11-10): around a Troll Hub the ring counts from the hub's outer edge (30.5 .. 65.5 m from its middle for 15 .. 50 m), around the bed from the bed
+        float ringMin = TrollDepot.MinFrom(bed), ringMax = TrollDepot.MaxFrom(bed);
+        ModLog.Verbose("DepotSpots: depot ring around " + bed.ToString("F0") + " = " + ringMin.ToString("F1") + " .. " + ringMax.ToString("F1") + " m from its middle (" +
+                       TrollDepot.MinFromBed.ToString("F0") + " .. " + TrollDepot.MaxFromBed.ToString("F0") + " m from its outer edge, which is " + TrollDepot.AnchorOuter(bed).ToString("F1") + " m out)");
         for (int pass = 0; pass < 2; pass++)
         {
             bool relaxed = pass == 1;
             float slopeLimit = relaxed && canLevel ? TrollDepot.MaxSlopeRelaxed : maxSlope;
-            for (float r = TrollDepot.MinFromBed; r <= TrollDepot.MaxFromBed; r += TrollDepot.RingStep)
+            for (float r = ringMin; r <= ringMax; r += TrollDepot.RingStep)
             {
                 for (int k = 0; k < TrollDepot.Angles; k++)
                 {

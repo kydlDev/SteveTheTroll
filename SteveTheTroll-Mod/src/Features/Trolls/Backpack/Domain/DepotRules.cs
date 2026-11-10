@@ -13,6 +13,14 @@ internal static class DepotRules
     /// unloading 8 - 10 m from one stack rarely makes the next one busy too).
     internal const float StackSpacing = 12f;
 
+    /// D-225 (user 2026-11-10: "Yes depot ring should also count from outer edge"): a ring distance (the 15 m and the 50 m of the depot ring) counted from the outer edge of
+    /// what the ring surrounds. `anchorOuterRadius` = how far that thing reaches from its own middle: 15.5 m for a Troll Hub, 0 for the bed. Expected outcomes:
+    /// ringMetres + anchorOuterRadius; a negative radius counts as 0.
+    internal static float FromEdge(float ringMetres, float anchorOuterRadius)
+    {
+        return ringMetres + (anchorOuterRadius > 0f ? anchorOuterRadius : 0f);
+    }
+
     /// The stack stands in the depot ring around the bed (both edges count). Expected outcome: false for a negative distance.
     internal static bool InRing(float toBed, float min, float max)
     {

@@ -7,6 +7,8 @@ using SteveTheTroll.Configuration;
 using SteveTheTroll.Features.Trolls.Backpack.Application;
 using SteveTheTroll.Features.Trolls.Backpack.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
+using SteveTheTroll.Features.Hubs.Domain;
+using SteveTheTroll.Features.Hubs.Infrastructure;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -67,7 +69,30 @@ internal static partial class TrollDepot
 
     internal static float MaxFromBed => Mathf.Max(ModSettings.DepotMaxFromBed.Value, MinFromBed + RingStep);
 
-    private static float SearchRadius => MaxFromBed + 15f; // depot chests are found up to here
+    private static float SearchRadius => MaxFromBed + 15f + HubData.OuterRadius; // depot chests are found up to here (D-225: the ring of a hub lies OuterRadius further out)
+
+    private const float HubAnchorMetres = 1f;
+
+    /// D-225 (user 2026-11-10: the depot ring counts from the hub's outer edge too): how far the thing the depots stand around reaches from its own middle - a Troll Hub's
+    /// outer radius when a hub stands at `anchor`, 0 for the bed. Expected outcome: HubData.OuterRadius or 0.
+    internal static float AnchorOuter(Vector3 anchor)
+    {
+        foreach (HubInfo h in HubRegistry.All())
+        {
+            if (Flat(h.Pos - anchor) < HubAnchorMetres)
+            {
+                return HubData.OuterRadius;
+            }
+        }
+
+        return 0f;
+    }
+
+    /// The inner edge of the depot ring around `anchor`, metres from its MIDDLE (bed: MinFromBed; hub: MinFromBed + its outer radius).
+    internal static float MinFrom(Vector3 anchor) => DepotRules.FromEdge(MinFromBed, AnchorOuter(anchor));
+
+    /// The outer edge of the depot ring around `anchor`, metres from its MIDDLE.
+    internal static float MaxFrom(Vector3 anchor) => DepotRules.FromEdge(MaxFromBed, AnchorOuter(anchor));
 
     internal static IEnumerable<ZNetView> Near(Vector3 at, string prefab)
     {
@@ -102,6 +127,9 @@ internal static partial class TrollDepot
     private static List<Container> Chests(Vector3 bed, long owner)
     {
         var list = new List<Container>();
+        // D-225: new depots of a hub stand 15 .. 50 m from its OUTER edge. Chests that already stand nearer (built while the ring counted from the hub's middle, down to
+        // MinFromBed from the middle) are still unloaded into - a player's filled depots must not go out of use with an update; only the far edge moves out
+        float ringMax = MaxFrom(bed);
         foreach (ZNetView v in Near(bed, DepotData.ChestPrefab))
         {
             ZDO z = v.GetZDO();
@@ -112,7 +140,7 @@ internal static partial class TrollDepot
 
             // D-104 (user: "sure"): depots outside the 15 .. 50 m ring (older ones next to the house) are not used any more
             // (a chest sits up to ~1.2 m from its frame's centre: a little slack on both edges)
-            if (!DepotRules.InRing(Flat(v.transform.position - bed), MinFromBed - ChestSlack, MaxFromBed + ChestSlack))
+            if (!DepotRules.InRing(Flat(v.transform.position - bed), MinFromBed - ChestSlack, ringMax + ChestSlack))
             {
                 continue;
             }

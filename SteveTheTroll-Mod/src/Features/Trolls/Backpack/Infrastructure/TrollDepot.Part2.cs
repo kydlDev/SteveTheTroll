@@ -61,11 +61,12 @@ internal static partial class TrollDepot
         }
 
         frames.Sort((a, b) => Flat(a.transform.position - bed).CompareTo(Flat(b.transform.position - bed)));
+        float ringMin = MinFrom(bed), ringMax = MaxFrom(bed);
         foreach (ZNetView bottom in frames)
         {
             // TEST-043: stacks from before the 15 .. 50 m ring (5 - 7 m from the bed) kept growing next to the house - only stacks inside
             // the ring get more levels (the old ones stay as they are and are still used for unloading)
-            if (!DepotRules.InRing(Flat(bottom.transform.position - bed), MinFromBed, MaxFromBed))
+            if (!DepotRules.InRing(Flat(bottom.transform.position - bed), ringMin, ringMax)) // D-225: a hub's ring counts from its outer edge
             {
                 continue;
             }
