@@ -20,6 +20,16 @@ internal static class TripRules
     /// User 2026-10-31: a remembered spot closer than this to the troll (after unloading) is not worth the walk.
     internal const float SpotMinMetres = 40f;
 
+    /// D-106: a full troll empties its backpack once it is this close (flat metres) to its depot - it never has to reach the depot itself.
+    internal const float UnloadMetres = 10f;
+
+    /// 2026-11-10 (a26rep2 ledge-forced-medium-down, 3 of 5 repeats: the depot was built exactly at the ledge walk's goal, the walk stopped 1.9 m short at the depot's wall and ran into its 40 s timeout
+    /// while the troll stood inside the unload range): the troll is close enough to unload. Recovery must not hold the troll back from here. Expected outcome: true at `flatMetres` <= UnloadMetres.
+    internal static bool InUnloadRange(float flatMetres)
+    {
+        return flatMetres <= UnloadMetres;
+    }
+
     /// What to do with the remembered spot after an unload. `awayMetres` = flat distance troll -> spot, `farmAllowed` = the hub's farm leash lets the troll farm at the spot (HubRules.FarmAllowed).
     /// Order matters and is part of the contract: no spot, then too close, then the leash. Expected outcome: exactly one decision.
     internal static ResumeDecision Resume(bool spotKnown, float awayMetres, bool farmAllowed)

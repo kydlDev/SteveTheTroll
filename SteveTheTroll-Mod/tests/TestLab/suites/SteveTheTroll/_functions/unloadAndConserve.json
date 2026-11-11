@@ -23,14 +23,11 @@
       "do": "wait",
       "until": {
         "check": "hook",
-        "name": "stt.followedBackpackAtMost",
-        "args": {
-          "stacks": 0
-        },
+        "name": "stt.followedUnloadedAll",
         "expect": true
       },
       "timeout": "{{timeout}}",
-      "label": "it unloaded everything"
+      "label": "it unloaded everything (by the unload ledger: the troll goes back to work and picks up new wood right after, so the backpack count is a race - run a26h-3)"
     },
     {
       "do": "wait",

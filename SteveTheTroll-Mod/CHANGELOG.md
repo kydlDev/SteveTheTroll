@@ -19,8 +19,9 @@
 - The developer console commands (`stt_...`, test helpers) now stay locked until you type `stt_unlock <word>`; the word is the new setting `[General] UnlockWord` in your config (empty = they stay locked). The `stt_freeze` / `stt_unfreeze` commands are gone.
 - Changed: every Troll Hub distance (the 500 m circle a hub serves, the 950 m farm limit, the 1000 m reach, the 1250 m half-speed limit and the 1000 m between two hubs) now counts from the hub's outer edge instead of its middle. Each one reaches about 15 m further out; two hubs need about 1031 m between their middles. The depot ring of a hub (new depots 15 - 50 m away) counts from the hub's outer edge as well; depots that already stand nearer to a hub are still used.
 - The "trolls from your last visit are missing" message is shown once for each missing troll, not again at every login.
+- Fixed: a full troll that gets within 10 m of its depot now unloads at once, also while it is still walking down a cliff towards it (before, a depot built at the foot of a cliff could keep the troll standing next to it for up to 40 s).
 - Performance: unloading a full backpack into the depot no longer stops the game for a moment (96 stacks took about 0.05 s instead of about 1.5 s in the test world), and the search for trees and rocks drops far-away objects earlier.
-- Fixed: the game log is no longer flooded with "Physics.ClosestPoint can only be used with ..." warnings while a troll works its way past rocks (0 in the lab runs of 2026-11-10; not yet checked in a long session by hand).
+- Fixed: the game log is no longer flooded with "Physics.ClosestPoint can only be used with ..." warnings while a troll works its way past rocks (none in five full lab runs in a row of this version).
 - Every error the mod catches is now written to the log with the exact exception type and what the mod did instead, so the next bug report names the exception.
 
 ## 2.0.0

@@ -23,7 +23,7 @@ namespace SteveTheTroll.Features.Trolls.Farming.Infrastructure;
 /// </summary>
 internal sealed class FarmHomeTrip
 {
-    private const float UnloadMetres = 10f,
+    private const float UnloadMetres = TripRules.UnloadMetres,
         UnloadStopMetres = 8f,
         UnloadWalkSeconds = 60f,
         StuckHomeSeconds = 8f;
@@ -95,6 +95,22 @@ internal sealed class FarmHomeTrip
     /// IT drive and never calls GoHome, so the 60 s walk limit below was never looked at for 80 s; TrollFrozenWatch rebuilt the troll, the new trip announced DepotWalk a second time
     /// and the journal was illegal): the walk to the depot has used up its UnloadWalkSeconds. The farmer does not let a busy recovery drive past this point - the unload happens where
     /// the troll stands, as the limit has always promised (full11: 96 stacks delivered 12.9 m from the depot). Expected outcome: true only while unloading and past the limit.
+    /// The troll walks to the depot and stands within the unload range: a running recovery walk (ledge, detour) no longer holds it back, the unload ends that walk as "arrived". Expected outcome: false when not on a depot walk.
+    internal bool InUnloadRange
+    {
+        get
+        {
+            if (!_unloading)
+            {
+                return false;
+            }
+
+            Vector3 d = _unloadAt - _f.transform.position;
+            d.y = 0f;
+            return TripRules.InUnloadRange(d.magnitude);
+        }
+    }
+
     internal bool UnloadWalkExpired => _unloading && Time.time - _unloadStart > UnloadWalkSeconds;
 
     /// A new home trip (after ResumeAtSpot). Expected outcome: not unloading, no best distance.
