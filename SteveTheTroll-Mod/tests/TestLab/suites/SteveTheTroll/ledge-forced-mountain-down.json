@@ -1,6 +1,6 @@
 {
   "name": "ledge-forced-mountain-down",
-  "description": "2026-11-06 (user: prove the cliff walk from the logs, other kinds of cliffs, a mountain too): the troll is FORCED over the ledge walk (stt.forceLedge) on a mountain cliff, down - the walk itself arrives within 1.5 m of the hub and the log says RESULT arrived. Needs such a cliff within 160 m of the arena (stt.findCliffKind); fails with its text when the loaded world has none.",
+  "description": "2026-11-06 (user: prove the cliff walk from the logs, other kinds of cliffs, a mountain too): the troll is FORCED over the ledge walk (stt.forceLedge) on a mountain cliff, down - the walk itself arrives within 1.5 m of the hub and the log says RESULT arrived. Needs the baked cliff of the KydlFlat template (stt.bakedCliff; the world holds small / medium / high / mountain cliffs 119 m south of the lab start).",
   "timeout": 150,
   "steps": [
     {

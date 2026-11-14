@@ -1,6 +1,6 @@
 {
   "name": "cliff-walk-mountain-up",
-  "description": "2026-11-06 (user: other kinds of cliffs, a mountain too): a full troll walks home to a hub over a mountain cliff, up, by the whole recovery ladder (the game's path or the ledge walk) and unloads; the ledge counters are logged. Needs such a cliff within 160 m of the arena.",
+  "description": "2026-11-06 (user: other kinds of cliffs, a mountain too): a full troll walks home to a hub over a mountain cliff, up, by the whole recovery ladder (the game's path or the ledge walk) and unloads; the ledge counters are logged. Needs the baked cliff of the KydlFlat template (stt.bakedCliff; the world holds small / medium / high / mountain cliffs 119 m south of the lab start).",
   "timeout": 150,
   "steps": [
     {
