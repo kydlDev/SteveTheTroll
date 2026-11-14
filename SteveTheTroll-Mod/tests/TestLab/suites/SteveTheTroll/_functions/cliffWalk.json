@@ -15,13 +15,12 @@
     },
     {
       "do": "hook",
-      "name": "stt.findCliffKind",
+      "name": "stt.buildCliff",
       "args": {
-        "radius": "{{radius}}",
         "kind": "{{kind}}"
       },
       "contains": " | ",
-      "label": "a {{kind}} cliff exists in the loaded terrain near the arena"
+      "label": "a {{kind}} cliff is built into the terrain 20 m from the arena spot (D-229; the KydlFlat world has none of its own)"
     },
     {
       "if": "{{up}}",
