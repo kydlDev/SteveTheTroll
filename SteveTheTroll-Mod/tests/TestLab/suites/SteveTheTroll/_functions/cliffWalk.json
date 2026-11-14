@@ -1,5 +1,5 @@
 {
-  "description": "2026-11-06: a full troll walks home to a hub on the far side of a cliff of the given `kind` (small / medium / high / mountain), `up` or down. Finds the cliff in the loaded terrain, takes the player and the troll there, builds the hub on the far side, fills the backpack and waits for the unload. With `forced` the troll is sent over the LEDGE WALK at once (stt.forceLedge) and the walk must arrive. Leaves the troll as tag `troll`; the ledge counters are logged as the last step.",
+  "description": "2026-11-06: a full troll walks home to a hub on the far side of a cliff of the given `kind` (small / medium / high / mountain), `up` or down. Takes the baked cliff of the KydlFlat template (stt.bakedCliff; `radius` is ignored since 2026-11-14), takes the player and the troll there, builds the hub on the far side, fills the backpack and waits for the unload. With `forced` the troll is sent over the LEDGE WALK at once (stt.forceLedge) and the walk must arrive. Leaves the troll as tag `troll`; the ledge counters are logged as the last step.",
   "params": {
     "kind": "medium",
     "radius": 120,
@@ -15,12 +15,12 @@
     },
     {
       "do": "hook",
-      "name": "stt.buildCliff",
+      "name": "stt.bakedCliff",
       "args": {
         "kind": "{{kind}}"
       },
       "contains": " | ",
-      "label": "a {{kind}} cliff is built into the terrain 20 m from the arena spot (D-229; the KydlFlat world has none of its own)"
+      "label": "the {{kind}} cliff of the KydlFlat template (119 m south of the lab start, baked into the world)"
     },
     {
       "if": "{{up}}",
@@ -44,6 +44,12 @@
       "do": "wait",
       "seconds": 12,
       "label": "the zones around the cliff load"
+    },
+    {
+      "do": "hook",
+      "name": "stt.bakedCliffOk",
+      "expect": true,
+      "label": "the world holds the {{kind}} cliff: the measured rise at the baked bottom and top is the baked one (else this is not the KydlFlat template with cliffs)"
     },
     {
       "do": "hook",
