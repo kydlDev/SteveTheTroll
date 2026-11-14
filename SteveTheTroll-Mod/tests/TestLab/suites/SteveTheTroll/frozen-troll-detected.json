@@ -4,6 +4,7 @@
     "description":  "NEXT_STEPS item 4: an own troll that should be travelling and has not moved for 10 s is detected as frozen by the always-on watch (checked outside the AI step): the flight recorder is dumped, the player is told and the troll counts as frozen (map pin highlight). It moves again and the freeze ends. The troll is held still with stt.freezeMob; stt.forceTravelling says it should be on its way.",
     "steps":  [
                   { "do":  "use", "block":  "start", "args":  { "slippers":  true, "hub":  true } },
+                  { "do":  "hook", "name":  "stt.plantTree", "args":  { "dx":  -20, "dz":  14 }, "label":  "KydlFlat world (2026-11-14): a source near the troll, so it farms here and does not set off to a far source (run kydlflat-stt-full: with nothing within 150 m it walked to a FineWood 188 m away and stayed travelling after forceTravelling went off)" },
                   { "do":  "hook", "name":  "stt.spawnTroll", "args":  { "dx":  -14, "dz":  8 }, "as":  "troll" },
                   { "do":  "wait", "seconds":  2 },
                   { "do":  "hook", "name":  "stt.freezeMob", "args":  { "mob":  "troll" }, "expect":  true, "label":  "the troll stands still (held by the lab)" },

@@ -49,6 +49,24 @@
                   },
                   {
                       "do":  "hook",
+                      "name":  "stt.plantTree",
+                      "args":  {
+                                   "dx":  -22,
+                                   "dz":  12
+                               },
+                      "label":  "KydlFlat world (2026-11-14): nothing grows in the test area any more, so the troll\u0027s first source is planted here (the random world used to have trees there by chance)"
+                  },
+                  {
+                      "do":  "hook",
+                      "name":  "stt.plantTree",
+                      "args":  {
+                                   "dx":  60,
+                                   "dz":  4
+                               },
+                      "label":  "a source at the spot the test injects (60 m east), so the troll has work there after it walks back"
+                  },
+                  {
+                      "do":  "hook",
                       "name":  "stt.spawnTroll",
                       "args":  {
                                    "dx":  -14,
