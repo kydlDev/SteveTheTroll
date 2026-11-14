@@ -1,6 +1,6 @@
 {
   "name": "cliff-walk-up",
-  "description": "Item 5 (user 2026-11-06: also in every walk, and down / up cliffs in meadows): a full troll walks home to a hub on the other side of a 4 - 15 m terrain step, up (the shared recovery, a hub goal; the game's path or the ledge walk). Needs a cliff within 120 m of the arena (stt.findCliffKind medium); fails with its text when the world has none.",
+  "description": "Item 5 (user 2026-11-06: also in every walk, and down / up cliffs in meadows): a full troll walks home to a hub on the other side of a 4 - 15 m terrain step, up (the shared recovery, a hub goal; the game's path or the ledge walk). Needs the baked medium cliff of the KydlFlat template (stt.bakedCliff).",
   "timeout": 150,
   "steps": [
     {
