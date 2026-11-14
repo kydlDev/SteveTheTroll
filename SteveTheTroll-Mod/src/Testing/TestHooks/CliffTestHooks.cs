@@ -6,7 +6,7 @@ using UnityEngine;
 namespace SteveTheTroll.Testing.TestHooks;
 
 /// <summary>Item 5: hooks for the ledge walk over a cliff. Every hook calls the mod's real code (TrollFarmer.StartTravel -> TrollRecovery) on a real troll and the real terrain.</summary>
-internal static class CliffTestHooks
+internal static partial class CliffTestHooks
 {
     private static Vector3 _bottom, _top, _goal, _dir;
 
