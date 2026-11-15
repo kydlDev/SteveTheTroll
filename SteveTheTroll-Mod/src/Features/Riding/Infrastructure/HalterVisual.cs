@@ -31,14 +31,9 @@ internal sealed class HalterVisual : MonoBehaviour
     private bool _hasRest;
     private float _mountedAt = -1f;   // D-222: when the first frame of this ride ran (the chair's rest pose is learned for SeatTilt.GlueSettleSeconds from here)
     private float _tiltWeight, _leanDeg;   // T-217 R3: fade weight of the lean (0..1) and the lean applied to the rider this frame (degrees)
-    // 2026-11-15 (user: "force the player's position always to be centered on the chair at the moment of mounting", "the back of the player goes through the chair"):
-    // after the sitting pose has blended in, the rider's hips are measured against the chair (Seat / Cantle / Pommel) and the seat point is moved once so the hips sit on the chair's
-    // middle line and in front of the chair back; the correction is then frozen for the ride
-    private Transform _hips;
-    private float _fixX, _fixZ, _topOffset;
-    private bool _centred;
-    private int _settled;
-    private const float CentreFrom = 0.3f, CentreUntil = 2.5f, HipsDepth = 0.17f;
+    // 2026-11-15 (user: "force the player's position always to be centered on the chair at the moment of mounting", "the back of the player goes through the chair"): see HalterCentring
+    private HalterCentring _centring;
+    private float _topOffset;
     private readonly Vector3[] _way = new Vector3[5];   // T-217 R8: the rein waypoints, reused (two new arrays per frame before)
 
     /// Lab: the animated seat anchor on the bone (the rider's lean is compared with it).
@@ -57,10 +52,10 @@ internal sealed class HalterVisual : MonoBehaviour
     internal float TopOffset => _topOffset;
 
     /// Lab / log: the correction (troll axes, m) that centres the rider on the chair; zero until measured.
-    internal Vector2 CentreFix => new Vector2(_fixX, _fixZ);
+    internal Vector2 CentreFix => new Vector2(_centring.FixX, _centring.FixZ);
 
     /// Lab / log: the centring is finished.
-    internal bool Centred => _centred;
+    internal bool Centred => _centring.Done;
 
     /// Where the rider's pelvis goes (offset by the SeatX/Y/Z tunables).
     internal Transform SeatPoint => _seatPoint;
@@ -112,6 +107,7 @@ internal sealed class HalterVisual : MonoBehaviour
             ModLog.Warn("HalterVisual: STT_RideSeat missing in BodyParts - the seat is at the bone");
         }
 
+        v._centring = new HalterCentring(troll.transform, v._rider, body, v._seatAnchor);
         // the seat hangs on the troll's ROOT, not on the animated bone: the game moves the attached rider in FixedUpdate, a bone that bobs with the walk animation made the rider shake
         v._seatPoint = new GameObject("STT_RideSeatPoint").transform;
         v._seatPoint.SetParent(troll.transform, false);
@@ -171,10 +167,7 @@ internal sealed class HalterVisual : MonoBehaviour
         if (p != null && p.IsAttached() && RideSession.IsRidden(_troll))
         {
             p.transform.SetPositionAndRotation(_seatPoint.position, _seatPoint.rotation);
-            if (!_centred)
-            {
-                Centre();
-            }
+            _centring.Step(_mountedAt < 0f ? -1f : Time.time - _mountedAt);
 
             if (ModSettings.RideHandsOn.Value)
             {
@@ -189,126 +182,11 @@ internal sealed class HalterVisual : MonoBehaviour
         }
     }
 
-    // The extent (m) of a renderer along the troll's forward axis, and its centre, in the troll's frame.
-    private bool PartZ(string part, out float centreZ, out float halfDepth, out float centreX)
-    {
-        Transform part_ = _body.Find(part);
-        Renderer r = part_ != null ? part_.GetComponent<Renderer>() : null;
-        centreZ = halfDepth = centreX = 0f;
-        if (r == null)
-        {
-            return false;
-        }
-
-        Transform tr = _troll.transform;
-        Vector3 c = tr.InverseTransformPoint(r.bounds.center);
-        Vector3 e = r.bounds.extents, f = tr.forward;
-        centreZ = c.z;
-        centreX = c.x;
-        halfDepth = Mathf.Abs(f.x) * e.x + Mathf.Abs(f.y) * e.y + Mathf.Abs(f.z) * e.z;
-        return true;
-    }
-
-    // How far (m, in the troll's axes) the rider's hips are from the chair's middle line (ex) and how far they must move to clear the chair back (ez, 0 = clear).
-    private void Measure(out float ex, out float ez)
-    {
-        Transform tr = _troll.transform;
-        Vector3 h = tr.InverseTransformPoint(_hips.position);
-        float seatX = _seatAnchor != null ? tr.InverseTransformPoint(_seatAnchor.position).x : h.x;
-        float sz, sHalf, sx;
-        if (PartZ("Seat", out sz, out sHalf, out sx))
-        {
-            seatX = sx;
-        }
-
-        ex = h.x - seatX;
-        ez = 0f;
-        float cz, cHalf, cx, pz, pHalf, px;
-        if (PartZ("Cantle", out cz, out cHalf, out cx) && PartZ("Pommel", out pz, out pHalf, out px))
-        {
-            float f = pz >= cz ? 1f : -1f; // + = towards the troll's head (the cantle is the back of the chair, the pommel the front)
-            float gap = f * (h.z - (cz + f * cHalf));
-            if (gap < HipsDepth)
-            {
-                ez = -f * (HipsDepth - gap);
-            }
-        }
-
-    }
-
     /// Lab: the rider's hips off the chair's middle line, in cm (+ = to the troll's right); 0 when there is no hips bone yet.
-    internal float HipsSideCm()
-    {
-        if (_hips == null && _rider != null)
-        {
-            _hips = FindDeep(_rider, "Hips");
-        }
-
-        if (_hips == null)
-        {
-            return 0f;
-        }
-
-        float ex, ez;
-        Measure(out ex, out ez);
-        return ex * 100f;
-    }
+    internal float HipsSideCm() => _centring.SideCm();
 
     /// Lab: how far (cm) the rider's hips still have to move forward to clear the chair back; 0 when clear.
-    internal float HipsIntoBackCm()
-    {
-        if (_hips == null && _rider != null)
-        {
-            _hips = FindDeep(_rider, "Hips");
-        }
-
-        if (_hips == null)
-        {
-            return 0f;
-        }
-
-        float ex, ez;
-        Measure(out ex, out ez);
-        return Mathf.Abs(ez) * 100f;
-    }
-
-    // Moves the seat point (once, smoothly) until the rider's hips are on the chair's middle line and the rider's back is in front of the chair back.
-    private void Centre()
-    {
-        if (_mountedAt < 0f || _rider == null)
-        {
-            return;
-        }
-
-        float since = Time.time - _mountedAt;
-        if (since < CentreFrom)
-        {
-            return;
-        }
-
-        if (_hips == null)
-        {
-            _hips = FindDeep(_rider, "Hips");
-            if (_hips == null)
-            {
-                _centred = true;
-                ModLog.Warn("HalterVisual: no Hips bone on the rider - not centred on the chair");
-                return;
-            }
-        }
-
-        float ex, ez;
-        Measure(out ex, out ez);
-        bool ok = Mathf.Abs(ex) < 0.01f && Mathf.Abs(ez) < 0.01f;
-        _settled = ok ? _settled + 1 : 0;
-        _fixX -= ex * 0.4f;
-        _fixZ -= ez * 0.4f;
-        if (_settled >= 5 || since > CentreUntil)
-        {
-            _centred = true;
-            ModLog.Info($"HalterVisual: rider centred on the chair after {since:F1} s - correction side {_fixX * 100f:F1} cm, back/forward {_fixZ * 100f:F1} cm (left over {ex * 100f:F1} / {ez * 100f:F1} cm)");
-        }
-    }
+    internal float HipsIntoBackCm() => _centring.IntoBackCm();
 
     // the seat parts are made narrower / wider along the troll's left-right axis (their own X); the base scale is remembered once
     private readonly System.Collections.Generic.Dictionary<Transform, Vector3> _seatScale = new System.Collections.Generic.Dictionary<Transform, Vector3>();
@@ -420,7 +298,7 @@ internal sealed class HalterVisual : MonoBehaviour
 
         _seatSmooth = Vector3.MoveTowards(_seatSmooth, Vector3.Lerp(_seatSmooth, target, SeatFollow.Share(speed, dt, deliberate)), SeatFollow.MaxStep(speed, dt, deliberate));
         _anchorGap = Vector3.Distance(_troll.transform.TransformPoint(_seatSmooth), _seatAnchor.position);
-        _seatPoint.localPosition = _seatSmooth + new Vector3(ModSettings.RideSeatX.Value + _fixX, ModSettings.RideSeatY.Value, ModSettings.RideSeatZ.Value + _fixZ);
+        _seatPoint.localPosition = _seatSmooth + new Vector3(ModSettings.RideSeatX.Value + _centring.FixX, ModSettings.RideSeatY.Value, ModSettings.RideSeatZ.Value + _centring.FixZ);
         // T-217 R3: the basket is on the bone and leans with it in a swing; the rider leans the same way (against the bone's rest pose) while the animation is deliberate,
         // and keeps the fixed rotation otherwise. Pose authority (R4): this component owns the rider's pose - the game's Player.UpdateAttach copies the same seat point in its
         // own step, and the Vector3 given to Player.AttachStart is the DISMOUNT offset (m_detachOffset), not a seat offset
