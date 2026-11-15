@@ -7,6 +7,7 @@
 - Changed: the developer console commands (`stt_...`) exist only when the developer's own KydlTools mod is loaded. The `[General] UnlockWord` setting and the `stt_unlock` command are gone; players do not see any of these commands.
 - Fixed: the name tag of the troll you ride stays on top of the troll instead of drifting around it.
 - Fixed: when you get on a troll, you are moved to the middle of the chair and in front of its back, so you no longer sit sideways or with your back inside the chair.
+- Fixed: a farming troll that steps around a friendly troll standing in its way is no longer sent on a 20 m detour of its own a second later (the sideways step counted as being stuck), so it passes the friend and goes on to the tree.
 
 ## 2.0.1
 
