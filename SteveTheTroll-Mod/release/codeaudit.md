@@ -41,7 +41,7 @@
   Forget                       CostumeUnlock.cs:50, TrollGuard.Query.cs:9
   Format                       LedgerRules.cs:43, CliffTestHooks.Baked.cs:54
   FromEdge                     HubGeometry.cs:36, DepotRules.cs:19
-  HeldByOther                  TargetRules.cs:107, FarmReservations.cs:21
+  HeldByOther                  TargetRules.cs:110, FarmReservations.cs:21
   Holds                        HomeRules.cs:37, TrollHold.cs:57
   IconOf                       CostumeItems.cs:162, HubPrefab.cs:204
   InRange                      BackpackRules.cs:41, TrollBedHeal.cs:26
@@ -73,7 +73,7 @@
   TargetMethods                ClubBreaks.cs:30, SetTooltipPatch.cs:94, TrollFarmHits.cs:29, CostumePatches.cs:14, CostumePatches.cs:59, TrollsCombatPatches.cs:34
   Track                        SlipperUpgradeCostPatch.cs:30, TrollFlight.cs:21, TrollZones.Part2.cs:148
   Watch                        TrollIdle.cs:206, TrollOrders.cs:94
-  Waypoint                     TargetRules.cs:69, FarmHomeTrip.cs:77
+  Waypoint                     TargetRules.cs:70, FarmHomeTrip.cs:77
   Within                       TrollZones.Part2.cs:50, ClearCommand.cs:136
   Write                        MountFile.cs:14, BackpackStore.cs:105, LedgerTestHooks.cs:13
 
