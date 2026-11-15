@@ -24,6 +24,10 @@ internal sealed class FarmFriendDetour
     private bool _onFirstLeg;
     private float _detourUntil, _nextCheck, _nextLog, _nextNearLog;
 
+    /// 2026-11-15 (full runs 4-7 red, farm-friend-detour): true while a detour runs (sideways leg or second leg). The sideways step is no progress towards the goal, so TrollRecovery
+    /// must not count it as 'stuck' (its stuck rule started its own 20 m leg 1-2 s into the detour and the detour never finished). Expected outcome: true during a detour.
+    internal bool Active { get { return _onFirstLeg || Time.time < _detourUntil; } }
+
     /// Expected outcome: true = walk to `around` this frame (a friendly troll stands in the way, or the detour still runs).
     internal bool Check(GameObject self, Vector3 goal, string targetName, out Vector3 around)
     {

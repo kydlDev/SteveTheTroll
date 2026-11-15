@@ -94,7 +94,7 @@ internal sealed partial class TrollFarmer
             long ka, kb;
             TrollRecovery.KeyOf(_target, out ka, out kb);
             rec = TrollRecovery.Of(this);
-            if (rec.Tick(dt, point, ka, kb, true, true, _target))
+            if (rec.Tick(dt, point, ka, kb, true, !_friend.Active, _target)) // D-232: a detour around a friend is an intentional sidestep, not 'stuck'
             {
                 return how == ApproachAction.Walk;
             }
