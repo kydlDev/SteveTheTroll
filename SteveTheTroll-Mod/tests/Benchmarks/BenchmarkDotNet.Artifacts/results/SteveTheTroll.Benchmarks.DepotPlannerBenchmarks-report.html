@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>SteveTheTroll.Benchmarks.DepotPlannerBenchmarks-20261107-010628</title>
+<title>SteveTheTroll.Benchmarks.DepotPlannerBenchmarks-20261115-153358</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -15,17 +15,19 @@
 <pre><code>
 BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6466/22H2/2022Update)
 AMD Ryzen 7 7800X3D 4.20GHz, 1 CPU, 16 logical and 8 physical cores
-  [Host]     : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
-  DefaultJob : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+  [Host]   : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+  ShortRun : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
 </code></pre>
-<pre><code></code></pre>
+<pre><code>Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+</code></pre>
 
 <table>
-<thead><tr><th>Method</th><th>Chests</th><th>Mean </th><th>Error</th><th>StdDev</th><th>Median</th><th>Allocated</th>
+<thead><tr><th>Method</th><th>Chests</th><th>Mean </th><th>Error</th><th>StdDev</th><th>Allocated</th>
 </tr>
-</thead><tbody><tr><td>Choose</td><td>8</td><td>26.68 ns</td><td>0.516 ns</td><td>0.483 ns</td><td>26.54 ns</td><td>-</td>
-</tr><tr><td>Choose</td><td>64</td><td>202.10 ns</td><td>5.092 ns</td><td>15.013 ns</td><td>195.85 ns</td><td>-</td>
-</tr><tr><td>Choose</td><td>512</td><td>1,618.61 ns</td><td>17.716 ns</td><td>18.193 ns</td><td>1,612.48 ns</td><td>-</td>
+</thead><tbody><tr><td>Choose</td><td>8</td><td>28.03 ns</td><td>6.139 ns</td><td>0.337 ns</td><td>-</td>
+</tr><tr><td>Choose</td><td>64</td><td>202.93 ns</td><td>7.416 ns</td><td>0.406 ns</td><td>-</td>
+</tr><tr><td>Choose</td><td>512</td><td>1,726.91 ns</td><td>35.192 ns</td><td>1.929 ns</td><td>-</td>
 </tr></tbody></table>
 </body>
 </html>

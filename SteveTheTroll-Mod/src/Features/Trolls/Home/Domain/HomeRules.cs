@@ -39,7 +39,7 @@ internal static class HomeRules
     {
         if (range <= 0f || follows || fights || distance > range)
         {
-            return range > 0f && !follows && !fights && distance <= range && lookedAtEver && sinceLook <= grace;
+            return false;
         }
 
         return lookedAtEver && sinceLook <= grace;

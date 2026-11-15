@@ -21,7 +21,7 @@ internal static class GuardRules
 
         if (toTroll2 > guard2 || toTroll2 > keep2)
         {
-            return toTroll2 <= guard2 && toTroll2 <= keep2;
+            return false;
         }
 
         return toTroll2 <= range2 || toOwner2 <= range2;

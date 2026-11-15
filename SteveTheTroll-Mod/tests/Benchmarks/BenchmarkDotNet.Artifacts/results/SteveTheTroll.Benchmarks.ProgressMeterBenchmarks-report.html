@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>SteveTheTroll.Benchmarks.ProgressMeterBenchmarks-20261107-011009</title>
+<title>SteveTheTroll.Benchmarks.ProgressMeterBenchmarks-20261115-153451</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -15,15 +15,17 @@
 <pre><code>
 BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6466/22H2/2022Update)
 AMD Ryzen 7 7800X3D 4.20GHz, 1 CPU, 16 logical and 8 physical cores
-  [Host]     : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
-  DefaultJob : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+  [Host]   : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+  ShortRun : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
 </code></pre>
-<pre><code></code></pre>
+<pre><code>Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+</code></pre>
 
 <table>
 <thead><tr><th>Method</th><th>Mean</th><th>Error</th><th>StdDev</th>
 </tr>
-</thead><tbody><tr><td>Update</td><td>2.493 ns</td><td>0.0697 ns</td><td>0.0829 ns</td>
+</thead><tbody><tr><td>Update</td><td>2.415 ns</td><td>0.1984 ns</td><td>0.0109 ns</td>
 </tr></tbody></table>
 </body>
 </html>

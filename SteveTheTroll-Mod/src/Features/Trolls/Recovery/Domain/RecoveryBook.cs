@@ -13,14 +13,14 @@ internal sealed class RecoveryBook
 {
     private const int MaxEntries = 2000;
 
-    private readonly Dictionary<Key, Entry> _entries = new();
+    private readonly Dictionary<(string Troll, long A, long B), Entry> _entries = new();
 
     /// How many entries are kept (diagnostics).
     internal int Count => _entries.Count;
 
-    private static Key K(string troll, long a, long b)
+    private static (string Troll, long A, long B) K(string troll, long a, long b)
     {
-        return new Key { Troll = troll ?? "", A = a, B = b };
+        return (troll ?? "", a, b);
     }
 
     private Entry Get(string troll, long a, long b, bool create)
@@ -87,8 +87,8 @@ internal sealed class RecoveryBook
     /// Drops entries that are neither counting nor blacklisted any more.
     internal int Prune(float now)
     {
-        var dead = new List<Key>();
-        foreach (KeyValuePair<Key, Entry> kv in _entries)
+        var dead = new List<(string Troll, long A, long B)>();
+        foreach (KeyValuePair<(string Troll, long A, long B), Entry> kv in _entries)
         {
             if (kv.Value.Failed == 0 && now >= kv.Value.BlacklistedUntil)
             {
@@ -96,7 +96,7 @@ internal sealed class RecoveryBook
             }
         }
 
-        foreach (Key k in dead)
+        foreach ((string Troll, long A, long B) k in dead)
         {
             _entries.Remove(k);
         }
@@ -108,29 +108,5 @@ internal sealed class RecoveryBook
     {
         internal float BlacklistedUntil;
         internal int Failed;
-    }
-
-    private struct Key : IEquatable<Key>
-    {
-        internal string Troll;
-        internal long A, B;
-
-        public bool Equals(Key o)
-        {
-            return Troll == o.Troll && A == o.A && B == o.B;
-        }
-
-        public override bool Equals(object o)
-        {
-            return o is Key && Equals((Key)o);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((((Troll != null ? Troll.GetHashCode() : 0) * 397) ^ A.GetHashCode()) * 397) ^ B.GetHashCode();
-            }
-        }
     }
 }

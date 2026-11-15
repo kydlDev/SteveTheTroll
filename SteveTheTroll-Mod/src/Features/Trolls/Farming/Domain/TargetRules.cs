@@ -46,6 +46,7 @@ internal static class TargetRules
         float mx = me.X, mz = me.Z, gx = goal.X, gz = goal.Z, ox = other.X, oz = other.Z;
         float dx = gx - mx, dz = gz - mz;
         float len = (float)Math.Sqrt(dx * dx + dz * dz);
+        // Stryker disable once Equality : a length of exactly 0.5 m ends in `along >= len - 0.5` = false below anyway (same result)
         if (len < 0.5f)
         {
             return false;
@@ -71,6 +72,7 @@ internal static class TargetRules
         float mx = me.X, mz = me.Z, gx = goal.X, gz = goal.Z, ox = other.X, oz = other.Z;
         float dx = gx - mx, dz = gz - mz;
         float len = (float)Math.Sqrt(dx * dx + dz * dz);
+        // Stryker disable once Equality : a length of exactly 0.0001 gives the same point to within float noise (no observable difference)
         if (len < 0.0001f)
         {
             return other;
@@ -91,6 +93,7 @@ internal static class TargetRules
         float mx = me.X, mz = me.Z, gx = goal.X, gz = goal.Z, ox = other.X, oz = other.Z;
         float dx = gx - mx, dz = gz - mz;
         float len = (float)Math.Sqrt(dx * dx + dz * dz);
+        // Stryker disable once Equality : a length of exactly 0.0001 gives the same point to within float noise (no observable difference)
         if (len < 0.0001f)
         {
             return me;

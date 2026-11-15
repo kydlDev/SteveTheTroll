@@ -8,9 +8,9 @@
   SteveTheTroll/SteveTheTroll-Mod/src/Features/Riding/Domain/RideRules.cs:72 member FollowsOrderKey
   SteveTheTroll/SteveTheTroll-Mod/src/Features/Riding/Domain/RideRules.cs:75 member GuardsTheRider
   SteveTheTroll/SteveTheTroll-Mod/src/Features/Riding/Domain/RideRules.cs:82 member DamageHitsPlayer
-  SteveTheTroll/SteveTheTroll-Mod/src/Features/Riding/Infrastructure/RideSession.cs:160 member Recover
+  SteveTheTroll/SteveTheTroll-Mod/src/Features/Riding/Infrastructure/RideSession.cs:178 member Recover
   SteveTheTroll/SteveTheTroll-Mod/src/Features/Trolls/Backpack/Domain/BackpackRules.cs:29 member Collects
-  SteveTheTroll/SteveTheTroll-Mod/src/Features/Trolls/Combat/Domain/BreakRules.cs:132 member StaggerTaken
+  SteveTheTroll/SteveTheTroll-Mod/src/Features/Trolls/Combat/Domain/BreakRules.cs:138 member StaggerTaken
   SteveTheTroll/SteveTheTroll-Mod/src/Features/Trolls/Combat/Domain/CombatDecision.cs:45 member WhyNot
   SteveTheTroll/SteveTheTroll-Mod/src/Features/Trolls/Farming/Infrastructure/TripRules.cs:51 member EventOf
   SteveTheTroll/SteveTheTroll-Mod/src/Features/Trolls/Taming/Domain/TamingRules.cs:126 member Defends
@@ -34,11 +34,12 @@
   Disarm                       CombatTestHooks.Part2.cs:45, MobClearWatch.cs:39, MobSpawnBlock.cs:41, RouteClearWatch.cs:44
   DistanceToSegment            TrollPath.cs:208, RouteClearWatch.cs:54
   Execute                      BuildDumpCommand.cs:43, ClearCommand.cs:35, ClearDepotsCommand.cs:31, ComingPreviewCommand.cs:19, FillBackpackCommand.cs:24, LevelGroundCommand.cs:23
-  FilePath                     RideSession.cs:40, TrollLedger.cs:105
+  FilePath                     RideSession.cs:58, TrollLedger.cs:105
   FloorLift                    DepotData.cs:46, DepotPrefab.cs:36
   Follow                       TrollCommands.cs:43, TestHooks.Part3.cs:366
   FollowedFarming              TestHooks.FollowedSpot.cs:134, ZoneTestHooks.cs:95
   Forget                       CostumeUnlock.cs:50, TrollGuard.Query.cs:9
+  Format                       LedgerRules.cs:43, CliffTestHooks.Baked.cs:54
   FromEdge                     HubGeometry.cs:36, DepotRules.cs:19
   HeldByOther                  TargetRules.cs:107, FarmReservations.cs:21
   Holds                        HomeRules.cs:37, TrollHold.cs:57
@@ -69,7 +70,7 @@
   Shown                        TrollIdle.cs:196, TrollOrders.cs:442, TrollCommands.cs:36
   Slippers                     ModelKyPages.cs:58, CombatTestHooks.Part2.cs:213
   Target                       TrollReturn.cs:49, CombatTestHooks.cs:151
-  TargetMethods                ClubBreaks.cs:30, SetTooltipPatch.cs:94, TrollFarmHits.cs:27, CostumePatches.cs:14, CostumePatches.cs:59, TrollsCombatPatches.cs:34
+  TargetMethods                ClubBreaks.cs:30, SetTooltipPatch.cs:94, TrollFarmHits.cs:29, CostumePatches.cs:14, CostumePatches.cs:59, TrollsCombatPatches.cs:34
   Track                        SlipperUpgradeCostPatch.cs:30, TrollFlight.cs:21, TrollZones.Part2.cs:148
   Watch                        TrollIdle.cs:206, TrollOrders.cs:94
   Waypoint                     TargetRules.cs:69, FarmHomeTrip.cs:77
