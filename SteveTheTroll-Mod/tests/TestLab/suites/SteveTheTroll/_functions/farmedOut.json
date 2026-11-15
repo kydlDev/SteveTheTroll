@@ -109,12 +109,7 @@
                       "do":  "wait",
                       "seconds":  45
                   },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.followedPurposeful",
-                      "expect":  true,
-                      "label":  "45 s later it is still on its way (a source found, or the next exploration step)"
-                  },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.followedPurposeful", "expect": true }, "timeout": 12, "label": "45 s later it is still on its way (a source found, or the next exploration step) - 2026-11-15: waits up to 12 s because for a moment between two exploration steps (arrival, next walk) the troll is neither travelling nor working (full runs 4 and 6 read exactly that moment)" },
                   {
                       "do":  "hook",
                       "name":  "stt.exploreStats",

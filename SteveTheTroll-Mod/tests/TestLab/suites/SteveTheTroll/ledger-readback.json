@@ -1,6 +1,6 @@
 {
     "name": "ledger-readback",
-    "description": "NEXT_STEPS item 4 step 4 (read-back, user 2026-11-06: the file is tied to the world name AND uid): the troll ledger is written for a troll, a troll that is gone is reported missing by the read-back and kept in the file as missing, and a file of another world with the same name is ignored and then overwritten.",
+    "description": "2026-11-15 (full run 6 red): the 30 s ledger writer marks a gone troll missing silently - a longer wait after the clearing let it run before the read-back, which then only said already reported (no first time noticed line); the wait is 0.4 s. NEXT_STEPS item 4 step 4 (read-back, user 2026-11-06: the file is tied to the world name AND uid): the troll ledger is written for a troll, a troll that is gone is reported missing by the read-back and kept in the file as missing, and a file of another world with the same name is ignored and then overwritten.",
     "timeout": 60,
     "steps": [
         {
@@ -58,7 +58,7 @@
         },
         {
             "do": "wait",
-            "seconds": 1
+            "seconds": 0.4
         },
         {
             "do": "hook",
