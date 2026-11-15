@@ -47,6 +47,7 @@
                                },
                       "label":  "HUB 1 70 m ahead: a full troll within 50 m of its hub counts as home at once (full12) - 70 m makes it walk"
                   },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
                   {
                       "do":  "hook",
                       "name":  "stt.plantTree",

@@ -3,6 +3,7 @@
   "params": { "metres": 100, "radius": 40 },
   "steps": [
     { "do": "hook", "name": "stt.arenaFurther", "args": { "metres": "{{metres}}" } },
+    { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
     { "do": "hook", "name": "stt.clearAround", "args": { "radius": "{{radius}}" }, "label": "open ground: no world tree / rock within {{radius}} m" }
   ]
 }

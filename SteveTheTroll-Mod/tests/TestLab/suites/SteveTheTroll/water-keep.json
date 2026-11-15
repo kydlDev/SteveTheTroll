@@ -1,4 +1,4 @@
-﻿{
+{
     "name":  "water-keep",
     "description":  "D-131 / D-177 (user: \"when they enter water, they are to keep 15 m away from the player at all times so that the player can have space to steer the boat, and they don\u0027t break the boat\"): a following tamed troll in deep water backs off from 5 m to the 15 m ring and holds it; a tamed troll\u0027s hit does not damage a ship (a plain hit does).",
     "timeout":  150,
@@ -12,16 +12,9 @@
                                    "hub":  false
                                }
                   },
-                  {
-                      "do":  "hook",
-                      "name":  "stt.toWater",
-                      "args":  {
-                                   "around":  25,
-                                   "maxMetres":  2000,
-                                   "depth":  4
-                               },
-                      "label":  "the player swims in open water at least 4 m deep, 25 m around"
-                  },
+                  { "do": "hook", "name": "stt.toBakedLake", "contains": "lake at", "label": "the player swims in the middle of the template's baked lake (50 x 50 m floor, 12 m deep; user 2026-11-15)" },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
+                  { "do": "hook", "name": "stt.inDeepWater", "args": { "depth": 4 }, "expect": true, "label": "D-231: the REAL ground here is at least 4 m under water (the world is the KydlFlat template with its lake)", "stop": true },
                   {
                       "do":  "wait",
                       "seconds":  10

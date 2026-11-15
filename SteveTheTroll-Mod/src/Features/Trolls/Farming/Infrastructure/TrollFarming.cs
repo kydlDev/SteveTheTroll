@@ -326,7 +326,8 @@ internal static partial class TrollFarming
                 continue;
             }
 
-            if (src.Tier == TamingRules.TierNone || (src.Young && ModSettings.FarmSkipYoung.Value))
+            if (src.Tier == TamingRules.TierNone || (src.Young && ModSettings.FarmSkipYoung.Value) ||
+                (!ModSettings.GammeltrollOn && BreakRules.PetrifiedGammeltroll(src.PrefabName)))
             {
                 skipped++;
                 continue;

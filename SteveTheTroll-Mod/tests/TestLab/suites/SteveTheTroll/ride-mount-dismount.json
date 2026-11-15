@@ -9,7 +9,8 @@
             "args": {
                 "clearTrolls": true,
                 "slippers": true,
-                "hub": true
+                "hub": true,
+                "hubDz":  -45
             }
         },
         {
@@ -75,6 +76,42 @@
             },
             "max": 150,
             "label": "the player sits on the seat (cm)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideCentred",
+            "args": {
+                "troll": "troll"
+            },
+            "expect": true,
+            "label": "2.0.2: the rider was centred on the chair"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideSideCm",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 6,
+            "label": "2.0.2: the rider sits on the chair middle line, not sideways (cm)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideIntoBackCm",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 1,
+            "label": "2.0.2: the rider back is not inside the chair back (cm)"
+        },
+        {
+            "check": "hook",
+            "name": "stt.rideTagSideCm",
+            "args": {
+                "troll": "troll"
+            },
+            "max": 3,
+            "label": "2.0.2: the name tag anchor is straight above the walking troll (cm)"
         },
         {
             "check": "hook",

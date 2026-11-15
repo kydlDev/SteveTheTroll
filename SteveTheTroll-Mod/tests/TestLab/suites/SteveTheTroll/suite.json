@@ -1,10 +1,10 @@
 {
     "name":  "SteveTheTroll",
-    "description":  "SteveTheTroll 2.0.1 (KydlDev spec port T-210; Architecture V2, D-169 - architecture-v2 runs first): the spec features / hub tabs / KY-Items, costume after slippers (T-201), depot lifecycle, backpack storage, hub choice, full-backpack unload, slipper figures, ownership (D-160) - attack-key-tree runs after every test that needs the arena ground (it teleports the player); costume-after-slippers runs LAST because of its relog (run 20261103-124440: after a relog in the middle, spot-return and far-troll-goes-home-clear-route lost the far troll\u0027s ZDO ownership - T-211)",
+    "description":  "SteveTheTroll 2.0.2 (KydlDev spec port T-210; Architecture V2, D-169 - architecture-v2 runs first): the spec features / hub tabs / KY-Items, costume after slippers (T-201), depot lifecycle, backpack storage, hub choice, full-backpack unload, slipper figures, ownership (D-160) - attack-key-tree runs after every test that needs the arena ground (it teleports the player); costume-after-slippers runs LAST because of its relog (run 20261103-124440: after a relog in the middle, spot-return and far-troll-goes-home-clear-route lost the far troll\u0027s ZDO ownership - T-211)",
     "requireMods":  [
                         {
                             "guid":  "com.kydldev.SteveTheTroll",
-                            "minVersion":  "2.0.1"
+                            "minVersion":  "2.0.2"
                         },
                         {
                             "guid":  "com.kydldev.KydlCore",
@@ -19,19 +19,19 @@
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
                                 "section":  "General",
-                                "key":  "EnableAll",
+                                "key":  "Enable mod",
                                 "value":  true
                             },
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
-                                "section":  "Slippers",
-                                "key":  "Enable",
+                                "section":  "General",
+                                "key":  "Enable slippers",
                                 "value":  true
                             },
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
-                                "section":  "Costume",
-                                "key":  "Enable",
+                                "section":  "General",
+                                "key":  "Enable costume",
                                 "value":  true
                             },
                             {
@@ -42,14 +42,26 @@
                             },
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
-                                "section":  "Trolls",
-                                "key":  "Enable",
+                                "section":  "General",
+                                "key":  "Enable trolls",
                                 "value":  true
                             },
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
-                                "section":  "TrollHub",
-                                "key":  "Enable",
+                                "section":  "Trolls",
+                                "key":  "Two star trolls break fortress walls",
+                                "value":  true
+                            },
+                            {
+                                "guid":  "com.kydldev.SteveTheTroll",
+                                "section":  "Trolls",
+                                "key":  "Trolls mine Petrified Gammeltroll",
+                                "value":  true
+                            },
+                            {
+                                "guid":  "com.kydldev.SteveTheTroll",
+                                "section":  "General",
+                                "key":  "Enable trollHub",
                                 "value":  true
                             },
                             {
@@ -60,8 +72,8 @@
                             },
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
-                                "section":  "Riding",
-                                "key":  "Enable",
+                                "section":  "General",
+                                "key":  "Enable riding",
                                 "value":  true
                             },
                             {

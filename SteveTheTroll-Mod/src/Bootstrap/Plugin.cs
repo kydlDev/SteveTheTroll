@@ -43,14 +43,16 @@ namespace SteveTheTroll.Bootstrap;
 [BepInPlugin(ModGuid, ModName, ModVersion)]
 [BepInDependency(Main.ModGuid)]
 [BepInDependency(KydlCore.Bootstrap.Plugin.ModGuid, "1.1.0")]
+[BepInDependency(KydlToolsGuid, BepInDependency.DependencyFlags.SoftDependency)] // the stt_ console commands exist only with the developer's KydlTools
 // shared world state (tamed trolls, ZDOs, items, pieces, RPCs): everyone needs the mod, the exact same version (MIGRATION_DECISIONS network rule)
 [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Patch)]
 public class Plugin : BaseUnityPlugin
 {
     // ModGuid never changes after the first release. ModVersion = manifest.json version_number = newest CHANGELOG heading (tests check it).
     public const string ModGuid = "com.kydldev.SteveTheTroll";
+    private const string KydlToolsGuid = "com.kydldev.KydlTools";
     public const string ModName = "SteveTheTroll";
-    public const string ModVersion = "2.0.1";
+    public const string ModVersion = "2.0.2";
 
     public const string BundleName = "stevethetroll";
 
@@ -134,15 +136,22 @@ public class Plugin : BaseUnityPlugin
         };
         ModLog.Verbose("Plugin: features " + (installed ? "started" : "had failures") + " (layout " +
                        Architecture.Tag + ", architecture marker " + Architecture.Marker + ")");
-        CommandManager.Instance.AddConsoleCommand(new BuildDumpCommand()); // T-008b: stt_dumpbuild (backpack model)
-        CommandManager.Instance.AddConsoleCommand(new ClearCommand()); // D-093: stt_clear (clean test area)
-        CommandManager.Instance.AddConsoleCommand(new ClearDepotsCommand()); // D-104: stt_cleardepots (start clean)
-        CommandManager.Instance.AddConsoleCommand(new LevelGroundCommand()); // D-105: stt_levelground (repair)
-        CommandManager.Instance.AddConsoleCommand(new ComingPreviewCommand()); // D-058 preview: stt_coming [name]
-        CommandManager.Instance.AddConsoleCommand(new UnlockCommand()); // stt_unlock <word> (the other stt_ commands need the Steam account or this)
-        CommandManager.Instance.AddConsoleCommand(new FillBackpackCommand()); // D-064 test: stt_fillbackpack [item]
-        ModLog.Verbose(
-            "Plugin: console commands stt_unlock, stt_dumpbuild, stt_clear, stt_cleardepots, stt_levelground, stt_coming, stt_fillbackpack registered");
+        // 2026-11-15 (user): the stt_ console commands (test / debug helpers) exist only while the developer's KydlTools is loaded - no unlock word.
+        if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(KydlToolsGuid))
+        {
+            CommandManager.Instance.AddConsoleCommand(new BuildDumpCommand()); // T-008b: stt_dumpbuild (backpack model)
+            CommandManager.Instance.AddConsoleCommand(new ClearCommand()); // D-093: stt_clear (clean test area)
+            CommandManager.Instance.AddConsoleCommand(new ClearDepotsCommand()); // D-104: stt_cleardepots (start clean)
+            CommandManager.Instance.AddConsoleCommand(new LevelGroundCommand()); // D-105: stt_levelground (repair)
+            CommandManager.Instance.AddConsoleCommand(new ComingPreviewCommand()); // D-058 preview: stt_coming [name]
+            CommandManager.Instance.AddConsoleCommand(new FillBackpackCommand()); // D-064 test: stt_fillbackpack [item]
+            ModLog.Verbose("Plugin: KydlTools is loaded - console commands stt_dumpbuild, stt_clear, stt_cleardepots, stt_levelground, stt_coming, stt_fillbackpack registered");
+        }
+        else
+        {
+            ModLog.Verbose("Plugin: KydlTools is not loaded - no stt_ console commands");
+        }
+
         ModLog.Verbose("Plugin: Awake finished (Harmony patches applied)");
     }
 

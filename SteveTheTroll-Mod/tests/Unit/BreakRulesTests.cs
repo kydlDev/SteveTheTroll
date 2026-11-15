@@ -59,6 +59,13 @@ public class BreakRulesTests
     [TestCase(4, true)]
     public void BreaksWalls_TwoStarsUp(int level, bool expected) { Assert.That((bool)Call("BreaksWalls", level), Is.EqualTo(expected)); }
 
+    [TestCase("DN_gammeltroll(Clone)", true)]
+    [TestCase("DN_gammeltroll_pile", true)]
+    [TestCase("giant_ribs", false)]
+    [TestCase("Troll", false)]
+    [TestCase("", false)]
+    public void PetrifiedGammeltroll(string name, bool expected) { Assert.That((bool)Call("PetrifiedGammeltroll", name), Is.EqualTo(expected)); }
+
     [Test] public void PrefabName_StripsClone() { Assert.That(Call("PrefabName", " giant_ribs (Clone)"), Is.EqualTo("giant_ribs")); }
     [Test] public void PrefabName_Null_Empty() { Assert.That(Call("PrefabName", new object[] { null }), Is.EqualTo("")); }
 

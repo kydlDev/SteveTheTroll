@@ -1,11 +1,11 @@
 {
-    "description":  "Every SteveTheTroll test starts here: the arena spot (MIGRATION_DECISIONS C26), stt.reset (bed on the player\u0027s spot, hub closed, ghost trolls dropped, costume off, proximity watch on), no test trolls, and - unless switched off - the slippers on and HUB 1 25 m in front. clearMobs (default TRUE since 2026-11-09, agent24: every test starts in an arena without wild creatures and VERIFIES it; a test that needs a wild creature spawns it itself after this block): no wild creature within 80 m. blockSpawns (default TRUE since 2026-11-09, agent25): the game's own SpawnSystem spawns within 80 m are skipped from before the clearing (stt.blockSpawns, until stt.reset or 180 s), so a creature cannot appear between the clearing, the verification and the test itself; a test that needs the game's real spawns passes blockSpawns=false.",
+    "description":  "Every SteveTheTroll test starts here: the arena spot (MIGRATION_DECISIONS C26), stt.reset (bed on the player\u0027s spot, hub closed, ghost trolls dropped, costume off, proximity watch on), no test trolls, and - unless switched off - the slippers on and HUB 1 25 m in front (hubDz, D-231: the riding tests put it 45 m BEHIND the player - the hub building reaches 15.5 m from its middle, so a troll spawned 16 m in front stood INSIDE a hub 25 m in front and was sometimes walled in). clearMobs (default TRUE since 2026-11-09, agent24: every test starts in an arena without wild creatures and VERIFIES it; a test that needs a wild creature spawns it itself after this block): no wild creature within 80 m. blockSpawns (default TRUE since 2026-11-09, agent25): the game's own SpawnSystem spawns within 80 m are skipped from before the clearing (stt.blockSpawns, until stt.reset or 180 s), so a creature cannot appear between the clearing, the verification and the test itself; a test that needs the game's real spawns passes blockSpawns=false.",
     "params":  {
                    "clearTrolls":  true,
                    "slippers":  true,
                    "hub":  false,
                    "clearMobs":  true,
-                   "blockSpawns":  true
+                   "blockSpawns":  true, "hubDz": 25
                },
     "steps":  [
                   {
@@ -14,6 +14,7 @@
                       "contains":  "arena at",
                       "label":  "start on the arena spot (MIGRATION_DECISIONS C26)"
                   },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
                   {
                       "do":  "hook",
                       "name":  "stt.reset"
@@ -66,8 +67,9 @@
                       "args":  {
                                    "number":  1,
                                    "dx":  0,
-                                   "dz":  25
+                                   "dz":  "{{hubDz}}"
                                }
-                  }
+                  },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true }
               ]
 }

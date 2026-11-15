@@ -204,18 +204,19 @@ Removing a hub with the hammer gives back what it cost.
 
 `BepInEx/config/com.kydldev.SteveTheTroll.cfg` (or the in-game config manager):
 
-| Section  | Setting    | Default | What it does                                                                                                                                                                                         |
+| Section  | Setting          | Default | What it does                                                                                                                                                                                         |
 |----------|------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| General  | EnableAll  | true    | Switches the whole mod on / off while playing                                                                                                                                                        |
-| General  | UnlockWord | (empty) | For developers: the word that unlocks the stt_ console commands (test helpers), typed as stt_unlock <word>. Empty = the commands stay locked                                                         |
-| Slippers | Enable     | true    | The Fluffy Slippers and the mini trolls on the feet. Off: the Slippers tab goes away at once; the item is added at game start, so turning it on needs a restart                                      |
-| Costume  | Enable     | true    | The Troll Mascot costume, club and set power. Off: the Costume tab goes away at once; turning it on needs a restart                                                                                  |
-| Trolls   | Enable     | true    | Taming and farming of real trolls, backpack, depots, map pins, extra trolls. Off: the troll tabs and the background troll work stop at once, the rest after a restart; turning it on needs a restart |
-| Trolls   | AttackKey  | Mouse 4 | Orders your nearest troll                                                                                                                                                                            |
-| TrollHub | Enable     | true    | Troll hubs. Off: trolls use the bed and the Troll Hub tab goes away at once; turning it on needs a restart                                                                                           |
-| TrollHub | AutoAssign | true    | A troll without a chosen hub uses the nearest one within 1000 m                                                                                                                                      |
-| Riding   | Enable     | true    | The Troll Halter and Seat (riding a tamed troll). Off: riding stops at once; turning it on needs a restart                                                                                         |
-| DebugLog | Enable     | false   | Detailed lines in the BepInEx log for bug reports                                                                                                                                                    |
+| General  | Enable mod       | true    | Switches the whole mod on / off while playing                                                                                                                                                        |
+| General  | Enable slippers  | true    | The Fluffy Slippers and the mini trolls on the feet. Off: the Slippers tab goes away at once; the item is added at game start, so turning it on needs a restart                                      |
+| General  | Enable costume   | true    | The Troll Mascot costume, club and set power. Off: the Costume tab goes away at once; turning it on needs a restart                                                                                  |
+| General  | Enable trolls    | true    | Taming and farming of real trolls, backpack, depots, map pins, extra trolls. Off: the troll tabs and the background troll work stop at once, the rest after a restart; turning it on needs a restart |
+| General  | Enable trollHub  | true    | Troll hubs. Off: trolls use the bed and the Troll Hub tab goes away at once; turning it on needs a restart                                                                                           |
+| General  | Enable riding    | true    | The Troll Halter and Seat (riding a tamed troll). Off: riding stops at once; turning it on needs a restart                                                                                         |
+| Trolls   | AttackKey        | Mouse 4 | Orders your nearest troll                                                                                                                                                                            |
+| Trolls   | Two star trolls break fortress walls | true | Your tamed trolls with two stars break Ashlands fortress walls. Off: they leave them alone                                                                                                  |
+| Trolls   | Trolls mine Petrified Gammeltroll | true | Your tamed trolls break and mine the Petrified Gammeltroll. Off: they leave it alone                                                                                                          |
+| TrollHub | AutoAssign       | true    | A troll without a chosen hub uses the nearest one within 1000 m                                                                                                                                      |
+| DebugLog | Enable           | false   | Detailed lines in the BepInEx log for bug reports                                                                                                                                                    |
 
 Edits to the file are picked up while the game runs.
 

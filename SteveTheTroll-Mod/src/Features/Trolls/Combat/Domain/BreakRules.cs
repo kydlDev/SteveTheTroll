@@ -96,6 +96,12 @@ public static class BreakRules
         return StartsWithAny(name, FortressWallPrefixes);
     }
 
+    /// User 2026-11-15 ("Trolls mine Petrified Gammeltroll" switch): the object is a Petrified Gammeltroll. Expected outcome: true for "DN_gammeltroll(Clone)".
+    public static bool PetrifiedGammeltroll(string name)
+    {
+        return StartsWithAny(name, new[] { "DN_gammeltroll" });
+    }
+
     /// D-124: tamed trolls with 2 stars (level 3) break fortress walls. Expected outcome: level 3 or more.
     public static bool BreaksWalls(int level)
     {

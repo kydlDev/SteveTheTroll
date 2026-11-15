@@ -31,6 +31,7 @@
                                    "owner":  "other"
                                }
                   },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
                   {
                       "do":  "hook",
                       "name":  "stt.hubFor",
@@ -49,6 +50,7 @@
                                    "dz":  0
                                }
                   },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
                   {
                       "do":  "hook",
                       "name":  "stt.hubFor",

@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Reflection;
 using BepInEx.Configuration;
 using KydlCore.Common;
 using SteveTheTroll.Features.Trolls.Combat.Domain;
@@ -18,25 +20,18 @@ namespace SteveTheTroll.Configuration;
 /// </summary>
 internal static class ModSettings
 {
-    // [General]
-    public static ConfigEntry<bool> EnableAll;
+    // [General]: the mod switch and one Enable per functionality (PROJECT_RULES 11), all in one place (user 2026-11-15)
+    public static ConfigEntry<bool> EnableAll, SlippersEnable, CostumeEnable, TrollsEnable, HubEnable, RidingEnable;
 
-    // [Slippers] / [Costume] / [Trolls]: one Enable per functionality (PROJECT_RULES 11); [Trolls] also holds the attack key
-    public static ConfigEntry<bool> SlippersEnable, CostumeEnable, TrollsEnable;
+    // [TrollHub]: the Troll Hub building (D-135); its switch (General / Enable trollHub) needs Enable trolls too
+    public static ConfigEntry<bool> HubAutoAssign;
 
-    // [TrollHub]: the Troll Hub building (D-135) - its own functionality switch, needs [Trolls] Enable too
-    public static ConfigEntry<bool> HubEnable, HubAutoAssign;
-
-    // [Riding]: the Troll Halter and Seat (T-213), needs [Trolls] Enable too
-    public static ConfigEntry<bool> RidingEnable;
-
+    // [Trolls]: the attack key and two switches for what tamed trolls may break / mine (user 2026-11-15)
     public static ConfigEntry<KeyCode> AttackKey;
+    public static ConfigEntry<bool> BreakWalls, MineGammeltroll;
 
     // [DebugLog]
     public static ConfigEntry<bool> DebugLog;
-
-    // [Commands] 2026-11-06: who may use the stt_ console commands
-    public static ConfigEntry<string> CommandsUnlockWord;
 
     // --- dev-only fixed values (Tunables): not in the config file, KydlTools changes them for testing -----------------------------------
     // --- T-008a troll taming (D-037 / D-038): the user's numbers. ---
@@ -314,24 +309,49 @@ internal static class ModSettings
     public static readonly Tunable<float> RideLeashWidth = new("TrollRiding", "LeashWidth", 0.1f, 0.02f, 0.4f,
         "Width of the leather leash (m).");
 
-    /// Is the mod switched on ([General] EnableAll)? Off = inert: no effects, no menus; nothing built is removed.
+    /// Is the mod switched on ([General] Enable mod)? Off = inert: no effects, no menus; nothing built is removed.
     public static bool On => EnableAll == null || EnableAll.Value;
 
-    /// A functionality is on only when EnableAll AND its own Enable are on (the rule itself is Functions.IsOn). Read live: the features (Bootstrap.ModInstaller)
+    /// A functionality is on only when Enable mod AND its own Enable are on (the rule itself is Functions.IsOn). Read live: the features (Bootstrap.ModInstaller)
     /// start / stop their tabs, KY-Items entries and ticks at once. The prefabs of a part that was off at game start are not added, so switching it ON needs a restart.
     public static bool SlippersOn => Functions.IsOn(On, SlippersEnable == null || SlippersEnable.Value);
 
     public static bool CostumeOn => Functions.IsOn(On, CostumeEnable == null || CostumeEnable.Value);
     public static bool TrollsOn => Functions.IsOn(On, TrollsEnable == null || TrollsEnable.Value);
 
-    /// The rideable troll (T-213): [General] EnableAll AND [Trolls] Enable AND [Riding] Enable. Read live; the item needs a restart to appear.
+    /// The rideable troll (T-213): [General] Enable mod AND Enable trolls AND Enable riding. Read live; the item needs a restart to appear.
     public static bool RidingOn => Functions.IsOn(TrollsOn, RidingEnable == null || RidingEnable.Value);
 
-    /// The Troll Hubs (D-135): [General] EnableAll AND [Trolls] Enable AND [TrollHub] Enable. Read live like the others.
+    /// The Troll Hubs (D-135): [General] Enable mod AND Enable trolls AND Enable trollHub. Read live like the others.
     public static bool HubsOn => Functions.IsOn(TrollsOn, HubEnable == null || HubEnable.Value);
+
+    /// 2-star tamed trolls break Ashlands fortress walls ([Trolls] Two star trolls break fortress walls).
+    public static bool WallsOn => BreakWalls == null || BreakWalls.Value;
+
+    /// Tamed trolls mine / break the Petrified Gammeltroll ([Trolls] Trolls mine Petrified Gammeltroll).
+    public static bool GammeltrollOn => MineGammeltroll == null || MineGammeltroll.Value;
 
     /// Trolls with no hub chosen go to the nearest one ([TrollHub] AutoAssign).
     public static bool HubAuto => HubAutoAssign == null || HubAutoAssign.Value;
+
+    /// The value the player had in an entry that moved (still in the file as an orphan before DropRemoved); true when there was none.
+    private static bool Old(ConfigFile c, string section, string key)
+    {
+        // OrphanedEntries is not a public member of every BepInEx 5 build (ConfigTools.DropRemoved reaches it the same way)
+        PropertyInfo orphans = typeof(ConfigFile).GetProperty("OrphanedEntries", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        var dict = orphans != null ? orphans.GetValue(c, null) as IDictionary : null;
+        var def = new ConfigDefinition(section, key);
+        if (dict != null && dict.Contains(def))
+        {
+            bool b;
+            if (bool.TryParse((dict[def] as string ?? "").Trim(), out b))
+            {
+                return b;
+            }
+        }
+
+        return true;
+    }
 
     /// Expected outcome: every player entry is bound (returns that check).
     public static bool Bind(ConfigFile c)
@@ -340,39 +360,42 @@ internal static class ModSettings
             savedLines =
                 ConfigTools.Capture(c); // before the first Bind: every Bind saves the file with what BepInEx parsed
 
-        EnableAll = c.Bind("General", "EnableAll", true,
+        // 2026-11-15 (user): the Enable switches moved to [General] under new names; the player's old values are carried over (read from the
+        // old entries before DropRemoved deletes them).
+        EnableAll = c.Bind("General", "Enable mod", Old(c, "General", "EnableAll"),
             "Switches the whole mod on / off while playing. Off: no effects and no menus from this mod; things already built stay in the world.");
-        SlippersEnable = c.Bind("Slippers", "Enable", true,
+        SlippersEnable = c.Bind("General", "Enable slippers", Old(c, "Slippers", "Enable"),
             "The Fluffy Slippers with the little plush trolls on your feet. Off: their menu tab goes away at once; the item itself is added when the game starts, so switching this on needs a game restart.");
-        CostumeEnable = c.Bind("Costume", "Enable", true,
+        CostumeEnable = c.Bind("General", "Enable costume", Old(c, "Costume", "Enable"),
             "The troll costume (head, suit, trousers), the Troll Club and the set effects. Off: their menu tab goes away at once; the items are added when the game starts, so switching this on needs a game restart.");
-        TrollsEnable = c.Bind("Trolls", "Enable", true,
+        TrollsEnable = c.Bind("General", "Enable trolls", Old(c, "Trolls", "Enable"),
             "Taming and farming of real trolls with the slippers, their backpack and depots, map pins and extra trolls near your bed. Off: the troll menu tabs and the background troll work (pick-up, depots, orders, map pins) stop at once; everything else follows after a game restart, and switching this on also needs a restart.");
+        HubEnable = c.Bind("General", "Enable trollHub", Old(c, "TrollHub", "Enable"),
+            "The Troll Hub building: where your trolls go when you log out and unload, with a sign you can name. Off: trolls use the bed and the Troll Hub tab goes away at once; the building is added when the game starts, so switching this on needs a game restart.");
+        RidingEnable = c.Bind("General", "Enable riding", Old(c, "Riding", "Enable"),
+            "The Troll Halter and Seat: craft it (workbench level 3), keep it in your inventory and use the alternative interact key on a tamed troll to ride it. Off: riding stops at once; the item is added when the game starts, so switching this on needs a game restart.");
         AttackKey = c.Bind("Trolls", "AttackKey", KeyCode.Mouse3,
             "Look at a creature, tree, log or rock and press this: your nearest tamed troll attacks / breaks it (Mouse3 = the mouse's back button, Mouse 4). Looking at nothing: it goes farming. None = off.");
-        HubEnable = c.Bind("TrollHub", "Enable", true,
-            "The Troll Hub building: where your trolls go when you log out and unload, with a sign you can name. Off: trolls use the bed and the Troll Hub tab goes away at once; the building is added when the game starts, so switching this on needs a game restart.");
+        BreakWalls = c.Bind("Trolls", "Two star trolls break fortress walls", true,
+            "On: your tamed trolls with two stars break Ashlands fortress walls (on your order, or when a wall is in the way to an enemy). Off: no troll damages them.");
+        MineGammeltroll = c.Bind("Trolls", "Trolls mine Petrified Gammeltroll", true,
+            "On: your tamed trolls break and mine the Petrified Gammeltroll like other rocks. Off: they leave it alone.");
         HubAutoAssign = c.Bind("TrollHub", "AutoAssign", true,
             "On: a troll you did not send to a hub yourself uses the hub nearest to it. Off: only trolls you assigned in the Troll Hub tab use a hub, the others use the bed.");
-        RidingEnable = c.Bind("Riding", "Enable", true,
-            "The Troll Halter and Seat: craft it (workbench level 3), keep it in your inventory and use the alternative interact key on a tamed troll to ride it. Off: riding stops at once; the item is added when the game starts, so switching this on needs a game restart.");
         DebugLog = c.Bind("DebugLog", "Enable", false,
             "Writes detailed lines about everything the mod does to the BepInEx log (for bug reports). Leave off while playing normally.");
-
-        CommandsUnlockWord = c.Bind("General", "UnlockWord", "",
-            "The stt_ console commands (test / debug helpers) stay locked until you type in the console: stt_unlock <this word>. Empty = no word set, the commands stay locked. Unlocked until the game closes.");
 
         ConfigTools.ApplyCommaFix(c, savedLines); // after every Bind: "3,5" typed by hand means 3.5, not 35
         ConfigTools.DropRemoved(c);
 
-        EnableAll.SettingChanged += (s, e) => ModLog.Info("Config: EnableAll = " + EnableAll.Value +
+        EnableAll.SettingChanged += (s, e) => ModLog.Info("Config: Enable mod = " + EnableAll.Value +
                                                           (EnableAll.Value
                                                               ? ", the mod is on"
                                                               : ", the mod is inert (no effects or menus)"));
-        ModLog.Verbose("Config: bound (EnableAll " + EnableAll.Value + ", slippers " + SlippersOn + ", costume " +
+        ModLog.Verbose("Config: bound (Enable mod " + EnableAll.Value + ", slippers " + SlippersOn + ", costume " +
                        CostumeOn + ", trolls " + TrollsOn + ", attack key " + AttackKey.Value + ", debug log " +
                        DebugLog.Value + ")");
         return EnableAll != null && SlippersEnable != null && CostumeEnable != null && TrollsEnable != null &&
-               HubEnable != null && HubAutoAssign != null && RidingEnable != null && AttackKey != null && DebugLog != null && CommandsUnlockWord != null;
+               HubEnable != null && HubAutoAssign != null && RidingEnable != null && AttackKey != null && BreakWalls != null && MineGammeltroll != null && DebugLog != null;
     }
 }

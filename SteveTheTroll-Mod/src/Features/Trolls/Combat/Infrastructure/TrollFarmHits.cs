@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using KydlCore.Common;
+using SteveTheTroll.Configuration;
+using SteveTheTroll.Features.Trolls.Combat.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Domain;
 using SteveTheTroll.Features.Trolls.Taming.Infrastructure;
 using UnityEngine;
@@ -53,6 +55,12 @@ internal static class TrollFarmHits
         if (attacker == null || !TrollTaming.IsTroll(attacker) || !attacker.IsTamed())
         {
             return;
+        }
+
+        var target = __instance as Component;
+        if (!ModSettings.GammeltrollOn && target != null && BreakRules.PetrifiedGammeltroll(target.name))
+        {
+            return; // user 2026-11-15: "Trolls mine Petrified Gammeltroll" is off - the hit stays an ordinary hit
         }
 
         short before = hit.m_toolTier;

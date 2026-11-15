@@ -1,12 +1,12 @@
 {
-  "description": "D-176: the attack-key scene - a frozen Greydwarf (tag `mob`) 15 m ahead that nothing but the key can make a target (TrollGuard cannot see a hunter), a troll (tag `troll`) 16 m ahead-left (farming when `farming` is true), the player facing the creature, and proof that the troll has no forced target before the key.",
-  "params": { "farming": false },
+  "description": "D-176: the attack-key scene - a frozen Greydwarf (tag `mob`) 15 m ahead that nothing but the key can make a target (TrollGuard cannot see a hunter), a troll (tag `troll`) 16 m ahead, `trollDx` m to the side (default 14 m left; farming when `farming` is true - a farming troll walks off towards its far source and must not cross the key ray, so the farming test puts it on the side it walks away from), the player facing the creature, and proof that the troll has no forced target before the key.",
+  "params": { "farming": false, "trollDx": -14 },
   "steps": [
     { "do": "wait", "seconds": 1 },
     { "do": "hook", "name": "stt.clearMobs", "args": { "radius": 150 }, "label": "2026-11-08 (agent24-full10: a wild Boar 3 m from the troll attacked the player 0.1 s after the key, the guard took the troll to the Boar, killed it, and the attack order on the Greydwarf was gone - a guard chase, not the key under test): no wild creature around when the scene is built (the player was teleported just before, so it is cleared after the teleport)" },
     { "do": "hook", "name": "stt.spawnMob", "args": { "prefab": "Greydwarf", "dx": 0, "dz": 15 }, "as": "mob" },
     { "do": "hook", "name": "stt.freezeMob", "args": { "mob": "mob" }, "expect": true, "label": "D-176: nothing but the key can give the troll this target (TrollGuard cannot see a hunter)" },
-    { "do": "hook", "name": "stt.spawnTroll", "args": { "dx": -14, "dz": 8 }, "as": "troll" },
+    { "do": "hook", "name": "stt.spawnTroll", "args": { "dx": "{{trollDx}}", "dz": 8 }, "as": "troll" },
     { "if": "{{farming}}", "do": "hook", "name": "stt.startFarm", "args": { "troll": "troll" }, "label": "the troll is farming when the key is pressed" },
     { "do": "wait", "seconds": 1.5 },
     { "do": "face", "target": "mob" },

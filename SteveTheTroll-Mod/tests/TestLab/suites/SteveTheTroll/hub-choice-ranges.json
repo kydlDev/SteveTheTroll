@@ -1,6 +1,6 @@
 ﻿{
     "name": "hub-choice-ranges",
-    "description": "Which hub a troll uses: the nearest own hub within 1000 m of the hub's OUTER EDGE (D-217: every hub distance counts from the edge, 15.5 m from the hub's middle), else the bed (D-159); the real HubRegistry.For",
+    "description": "D-231: no waits between the steps (the troll is a live tamed troll: waiting lets it walk towards the hub and moves the 1008.5 m edge distance). Which hub a troll uses: the nearest own hub within 1000 m of the hub's OUTER EDGE (D-217: every hub distance counts from the edge, 15.5 m from the hub's middle), else the bed (D-159); the real HubRegistry.For",
     "timeout": 60,
     "steps": [
         {

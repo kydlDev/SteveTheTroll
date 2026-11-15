@@ -24,7 +24,8 @@
                       "do":  "use",
                       "block":  "frozenMobScene",
                       "args":  {
-                                   "farming":  true
+                                   "farming":  true,
+                                   "trollDx":  14
                                }
                   },
                   {

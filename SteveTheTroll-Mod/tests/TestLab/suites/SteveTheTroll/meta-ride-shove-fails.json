@@ -10,7 +10,8 @@
             "args": {
                 "clearTrolls": true,
                 "slippers": true,
-                "hub": true
+                "hub": true,
+                "hubDz":  -45
             }
         },
         {

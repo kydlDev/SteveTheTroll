@@ -27,6 +27,24 @@ internal static class RideSession
 
     internal static bool IsRidden(Character c) => c != null && _troll == c;
 
+    /// 2026-11-15 (user: the name tag flies around instead of sitting on the troll's head): while ridden, the tag's anchor (Character.GetTopPoint, read by the game's EnemyHud)
+    /// is the troll's root plus the height measured at mount time - it follows nothing but the troll. Expected outcome: `top` is changed only for the ridden troll.
+    internal static void NameTag(Character c, ref Vector3 top)
+    {
+        if (_troll == null || c != _troll || _visual == null)
+        {
+            return;
+        }
+
+        Vector3 glued = c.transform.position + Vector3.up * _visual.TopOffset;
+        if (ModLog.IsDue("RideNameTag", 3d))
+        {
+            ModLog.Every("RideNameTag", 3d, $"RideNameTag: the game's anchor is {top.y - c.transform.position.y:F2} m above the troll's root (sideways {Vector2.Distance(new Vector2(top.x, top.z), new Vector2(c.transform.position.x, c.transform.position.z)):F2} m), the tag is glued {_visual.TopOffset:F2} m above it");
+        }
+
+        top = glued;
+    }
+
     /// 0 = none, else the troll's instance id (what RideRules.Decide compares).
     internal static int RidingId() => Troll != null ? Troll.GetInstanceID() : 0;
 

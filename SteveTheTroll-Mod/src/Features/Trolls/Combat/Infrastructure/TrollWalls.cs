@@ -32,7 +32,7 @@ internal static class TrollWalls
     /// The troll may break fortress walls (tamed, level 3+). Expected outcome: true for a tamed 2-star troll.
     internal static bool Breaks(Character troll)
     {
-        return troll != null && TrollTaming.IsTroll(troll) && troll.IsTamed() &&
+        return ModSettings.WallsOn && troll != null && TrollTaming.IsTroll(troll) && troll.IsTamed() &&
                BreakRules.BreaksWalls(troll.GetLevel());
     }
 

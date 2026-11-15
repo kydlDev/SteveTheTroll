@@ -15,7 +15,7 @@ public class LabSuiteGeometryTests
 {
     const float MinFromPlayer = 16f;
     static readonly string[] NearAllowed = { "defend-rage", "hold-look", "hold-keeps-zdo", "nohit-zone" };
-    static readonly Regex Spawn = new Regex(@"""name""\s*:\s*""(stt\.spawnTroll(?:Near)?)""\s*,\s*""args""\s*:\s*\{(?<args>[^}]*)\}");
+    static readonly Regex Spawn = new Regex(@"""name""\s*:\s*""(stt\.spawnTroll(?:Near)?)""\s*,\s*""args""\s*:\s*\{(?<args>(?:[^{}]|\{\{[^}]*\}\})*)\}");
     static readonly Regex Dx = new Regex(@"""dx""\s*:\s*(-?[0-9.]+)"), Dz = new Regex(@"""dz""\s*:\s*(-?[0-9.]+)");
 
     static string SuiteDir { get { return Path.Combine(TestPaths.SuiteDir); } }
@@ -34,7 +34,9 @@ public class LabSuiteGeometryTests
             {
                 seen++;
                 string args = m.Groups["args"].Value;
-                float dx = float.Parse(Dx.Match(args).Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+                // a "{{param}}" dx (frozenMobScene) has no number here: the scene's default is 14 m to a side
+                var dxm = Dx.Match(args);
+                float dx = dxm.Success ? float.Parse(dxm.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture) : 14f;
                 float dz = float.Parse(Dz.Match(args).Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
                 Assert.That(dz, Is.GreaterThan(0f), test + ": troll (" + dx + ", " + dz + ") is not in front of the player");
                 if (m.Groups[1].Value == "stt.spawnTroll")

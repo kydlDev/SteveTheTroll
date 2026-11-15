@@ -4,6 +4,7 @@
   "timeout": 60,
   "steps": [
     { "do": "hook", "name": "stt.arena", "contains": "arena at", "label": "start on the arena spot (MIGRATION_DECISIONS C26)" },
+    { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
     { "do": "wait", "seconds": 6 },
     { "do": "hook", "name": "stt.selftest", "contains": "PASS", "notContains": "FAIL", "label": "InGameTests" }
   ],

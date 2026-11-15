@@ -6,6 +6,7 @@ using System.Reflection;
 using HarmonyLib;
 using KydlCore.Common;
 using SteveTheTroll.Configuration;
+using SteveTheTroll.Features.Trolls.Combat.Domain;
 using SteveTheTroll.Features.Trolls.Combat.Infrastructure;
 using SteveTheTroll.Features.Trolls.Home.Infrastructure;
 using SteveTheTroll.Features.Trolls.Movement.Infrastructure;
@@ -105,7 +106,8 @@ internal static partial class TrollFarming
 
             int hash = z.GetPrefab();
             FarInfo info = FarOf(hash);
-            if (!info.Source || info.MinTier > tier || (info.Young && skipYoung))
+            if (!info.Source || info.MinTier > tier || (info.Young && skipYoung) ||
+                (!ModSettings.GammeltrollOn && BreakRules.PetrifiedGammeltroll(info.Name)))
             {
                 continue;
             }

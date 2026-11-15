@@ -21,6 +21,7 @@
                                    "dz":  1300
                                }
                   },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
                   {
                       "do":  "hook",
                       "name":  "stt.spawnTroll",
@@ -85,6 +86,7 @@
                                    "dz":  940
                                }
                   },
+                  { "do": "wait", "until": { "check": "hook", "name": "stt.worldReady", "expect": true }, "timeout": 30, "label": "D-231: the world around the player is loaded and its ground has settled (no fixed wait)", "stop": true },
                   {
                       "do":  "hook",
                       "name":  "stt.follow",

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.2
+
+- Changed: all the **Enable** switches are now together in `[General]` and have new names: `Enable mod` (was `[General] EnableAll`), `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`. The values you had set are taken over; the old entries are removed from your config file. `[TrollHub] AutoAssign` stays in `[TrollHub]`.
+- New: `[Trolls] Two star trolls break fortress walls` (on by default) and `[Trolls] Trolls mine Petrified Gammeltroll` (on by default). Off: your trolls leave the Ashlands fortress walls / the Petrified Gammeltroll alone.
+- Changed: the developer console commands (`stt_...`) exist only when the developer's own KydlTools mod is loaded. The `[General] UnlockWord` setting and the `stt_unlock` command are gone; players do not see any of these commands.
+- Fixed: the name tag of the troll you ride stays on top of the troll instead of drifting around it.
+- Fixed: when you get on a troll, you are moved to the middle of the chair and in front of its back, so you no longer sit sideways or with your back inside the chair.
+
 ## 2.0.1
 
 - New: **ride your troll.** Craft the **Troll Halter and Seat** (workbench level 3: 15 Wolf pelt, 15 Linen thread, 10 Iron, 10 Round log), keep it in your inventory and press the alternative interact key on one of your tamed trolls. The halter and a seat basket go on the troll and you sit in the basket. You steer with the movement keys and the camera, Shift (or autorun) makes it run, the left mouse button swings its weapon and the right one does the overhead chop; the same key (or the Use key) gets you off. A ridden troll takes no farm, guard or hub orders, your other trolls still guard you. The item is never used up; after a death it is in your tombstone. Other players do not see the halter and seat yet. Config `[Riding] Enable`.

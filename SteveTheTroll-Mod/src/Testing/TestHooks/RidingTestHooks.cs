@@ -131,6 +131,53 @@ internal static class RidingTestHooks
         return $"sampling {on != 0}";
     }
 
+    /// 2026-11-15: the rider has been centred on the chair (the correction is frozen). Expected outcome: true a moment after mounting.
+    [TestHook("stt.rideCentred")]
+    private static bool RideCentred(GameObject troll)
+    {
+        var v = troll.GetComponent<HalterVisual>();
+        return v != null && v.Centred;
+    }
+
+    /// 2026-11-15 (user: the rider sat sideways in the chair): how far the rider's hips are off the chair's middle line, in cm (absolute). Expected outcome: a few cm at most.
+    [TestHook("stt.rideSideCm")]
+    private static int RideSideCm(GameObject troll)
+    {
+        var v = troll.GetComponent<HalterVisual>();
+        return v == null ? -1 : Mathf.RoundToInt(Mathf.Abs(v.HipsSideCm()));
+    }
+
+    /// 2026-11-15 (user: the rider's back goes through the chair): how far (cm) the rider's hips still sit too far back, inside the chair back. Expected outcome: 0.
+    [TestHook("stt.rideIntoBackCm")]
+    private static int RideIntoBackCm(GameObject troll)
+    {
+        var v = troll.GetComponent<HalterVisual>();
+        return v == null ? -1 : Mathf.RoundToInt(v.HipsIntoBackCm());
+    }
+
+    /// 2026-11-15 (user: the name tag flies around): how far (cm) the name tag's anchor (what the game's EnemyHud reads) is from straight above the ridden troll's root. Expected outcome: 0.
+    [TestHook("stt.rideTagSideCm")]
+    private static int RideTagSideCm(GameObject troll)
+    {
+        var c = troll.GetComponent<Character>();
+        if (c == null)
+        {
+            return -1;
+        }
+
+        Vector3 top = c.GetTopPoint();
+        Vector3 root = c.transform.position;
+        return Mathf.RoundToInt(new Vector2(top.x - root.x, top.z - root.z).magnitude * 100f);
+    }
+
+    /// 2026-11-15: the height (cm) of the name tag's anchor above the troll's root. Expected outcome: the same all ride long.
+    [TestHook("stt.rideTagHeightCm")]
+    private static int RideTagHeightCm(GameObject troll)
+    {
+        var c = troll.GetComponent<Character>();
+        return c == null ? -1 : Mathf.RoundToInt((c.GetTopPoint().y - c.transform.position.y) * 100f);
+    }
+
     /// The biggest gap between the rider and the seat point since the sampling started, in cm (about 0 when the rider is pinned to the seat).
     [TestHook("stt.rideGap")]
     private static int Gap(GameObject troll)

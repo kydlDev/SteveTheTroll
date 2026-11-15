@@ -194,3 +194,13 @@ internal static class RidingPatch_BlockAttack
         return false;
     }
 }
+
+// 2026-11-15 (user): the ridden troll's name tag stays glued to the top of the troll (RideSession.NameTag).
+[HarmonyPatch(typeof(Character), nameof(Character.GetTopPoint))]
+internal static class RidingPatch_NameTag
+{
+    private static void Postfix(Character __instance, ref UnityEngine.Vector3 __result)
+    {
+        RideSession.NameTag(__instance, ref __result);
+    }
+}

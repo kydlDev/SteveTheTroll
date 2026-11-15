@@ -50,38 +50,51 @@ public class SettingsTests
     }
 
     [Test]
-    public void PlayerConfig_HasEnableAll()
+    public void PlayerConfig_HasEnableMod()
     {
         var src = File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs"));
 
-        Assert.That(Regex.IsMatch(src, @"Bind\(\s*""General""\s*,\s*""EnableAll""\s*,\s*true"), Is.True, "[General] EnableAll (on by default) is the global switch of every mod");
+        Assert.That(Regex.IsMatch(src, @"Bind\(\s*""General""\s*,\s*""Enable mod"""), Is.True, "[General] Enable mod (on by default) is the global switch of every mod");
     }
 
     [Test]
-    public void PlayerConfig_EverySectionHasEnable()
+    public void PlayerConfig_EnableSwitchesLiveInGeneral()
     {
-        // PROJECT_RULES 11 (user, 2026-10-30): every functionality has its own [Section] Enable; General holds EnableAll, DebugLog holds its Enable
+        // user 2026-11-15: every functionality switch is an "Enable <name>" entry in [General]; only [DebugLog] keeps its own Enable
         var src = File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs"));
-        var sections = new HashSet<string>();
-        var withEnable = new HashSet<string>();
+
         foreach (Match m in Regex.Matches(src, @"\.Bind\(\s*""(?<s>[^""]+)""\s*,\s*""(?<k>[^""]+)"""))
         {
-            sections.Add(m.Groups["s"].Value);
-            if (m.Groups["k"].Value == "Enable") withEnable.Add(m.Groups["s"].Value);
+            string s = m.Groups["s"].Value, k = m.Groups["k"].Value;
+            if (k.StartsWith("Enable", System.StringComparison.Ordinal) && s != "DebugLog")
+                Assert.That(s, Is.EqualTo("General"), "[" + s + "] " + k + ": the Enable switches are all in [General]");
         }
-        sections.Remove("General");
-
-        foreach (var s in sections)
-            Assert.That(withEnable.Contains(s), Is.True, "config section [" + s + "] has no 'Enable' entry: every functionality gets its own switch (PROJECT_RULES 11); a setting that is not a functionality belongs in [General]");
     }
 
     [Test]
-    public void PlayerConfig_HasTheThreeFunctionalitySwitches()
+    public void PlayerConfig_HasTheFunctionalitySwitches()
     {
         var src = File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs"));
 
-        foreach (var section in new[] { "Slippers", "Costume", "Trolls" })
-            Assert.That(Regex.IsMatch(src, @"Bind\(\s*""" + section + @"""\s*,\s*""Enable""\s*,\s*true"), Is.True, "[" + section + "] Enable (on by default) is the switch of that functionality");
+        foreach (var name in new[] { "Enable slippers", "Enable costume", "Enable trolls", "Enable trollHub", "Enable riding" })
+            Assert.That(Regex.IsMatch(src, @"Bind\(\s*""General""\s*,\s*""" + name + @""""), Is.True, "[General] " + name + " is the switch of that functionality");
+    }
+
+    [Test]
+    public void PlayerConfig_HasTheTrollBreakSwitches()
+    {
+        var src = File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs"));
+
+        foreach (var name in new[] { "Two star trolls break fortress walls", "Trolls mine Petrified Gammeltroll" })
+            Assert.That(Regex.IsMatch(src, @"Bind\(\s*""Trolls""\s*,\s*""" + name + @"""\s*,\s*true"), Is.True, "[Trolls] " + name + " (on by default)");
+    }
+
+    [Test]
+    public void PlayerConfig_HasNoUnlockWord()
+    {
+        var src = File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs"));
+
+        Assert.That(src.Contains("UnlockWord"), Is.False, "the stt_ commands exist only with KydlTools loaded; there is no unlock word option");
     }
 
     [Test]
