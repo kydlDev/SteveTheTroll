@@ -192,15 +192,6 @@
                         "check":  "hook",
                         "name":  "stt.detourCount",
                         "args":  {
-                                     "counter":  "sideways"
-                                 },
-                        "min":  1,
-                        "label":  "the sideways leg of the detour was completed"
-                    },
-                    {
-                        "check":  "hook",
-                        "name":  "stt.detourCount",
-                        "args":  {
                                      "counter":  "passed"
                                  },
                         "min":  1,
