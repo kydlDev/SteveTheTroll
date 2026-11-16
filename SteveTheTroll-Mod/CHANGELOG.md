@@ -7,6 +7,14 @@ _Not released yet (user, 2026-11-16): only the names of the switches changed, th
 
 - Changed: the category switches in `[General]` are written with capital letters, like all KydlDev mods: `Enable Slippers`, `Enable Costume`, `Enable Trolls`, `Enable Troll Hub` and `Enable Riding` (were `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`). The values you had set are taken over.
 
+### Testing
+- Unit tests: 1450 passed. Integration tests: 73 passed.
+- Property-based tests (FsCheck, included in the unit tests above): 27 property checks with generated inputs.
+- Coverage of the testable code: 99.4%. Mutation testing (Stryker): 92% of the mutants are caught by the tests.
+- Performance benchmarks (BenchmarkDotNet): 10.
+- Static analysis (SonarQube): no Medium or High issues.
+- In game with DrakesTestLab: the full suite of 104 tests per run, run 3 times in a row on the release build, all green (the release requirement).
+
 ## 2.0.2
 
 - Changed: all the **Enable** switches are now together in `[General]` and have new names: `Enable mod` (was `[General] EnableAll`), `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`. The values you had set are taken over; the old entries are removed from your config file. `[TrollHub] AutoAssign` stays in `[TrollHub]`.
