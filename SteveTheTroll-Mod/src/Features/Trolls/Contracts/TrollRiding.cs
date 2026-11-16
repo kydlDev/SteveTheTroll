@@ -13,4 +13,3 @@ internal static class TrollRiding
         return c != null && Ridden != null && Ridden(c);
     }
 }
-

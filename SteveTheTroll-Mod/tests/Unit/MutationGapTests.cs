@@ -404,5 +404,3 @@ public class MutationGapTests
         Assert.That(book.Count, Is.EqualTo(0));
     }
 }
-
-
