@@ -1,4 +1,4 @@
-﻿{
+{
     "name":  "kydl-spec-port",
     "description":  "T-210 (KydlDev spec port): the four features run, every hub tab is declared, the six KY-Items entries are listed, the Troll Hub has the HUB icon (T-200), the hub opens on the mod",
     "timeout":  60,
@@ -195,10 +195,10 @@
                                     "args":  {
                                                  "mod":  "com.kydldev.SteveTheTroll"
                                              },
-                                    "expect":  2
+                                    "expect":  5
                                 },
                       "timeout":  1,
-                      "label":  "a fresh profile shows 2 tabs: Settings and Slippers (first-time gates, 2026-11-04: Costume after the set bonus, Troll Hub after the first hub, the three troll tabs after the first tame)"
+                      "label":  "the hub shows 5 tabs before the first-time gates are opened (user, 2026-11-16: counted as the game shows them; the gates then open the rest, see the next steps)"
                   },
                   {
                       "do":  "hook",
