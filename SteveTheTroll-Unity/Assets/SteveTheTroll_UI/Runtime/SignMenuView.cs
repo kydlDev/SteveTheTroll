@@ -237,8 +237,7 @@ internal sealed class SignMenuView
             chip.style.minWidth = 36;
             chip.style.height = 40;
             chip.style.unityTextAlign = TextAnchor.MiddleCenter;
-            chip.style.fontSize = 24;
-            chip.style.color = c;
+            UiKit.ColourChip(chip, c);
             chip.style.marginRight = 4;
             chip.style.marginTop = 4;
             chip.style.flexShrink = 0;

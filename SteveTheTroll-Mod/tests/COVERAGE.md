@@ -9,7 +9,7 @@ Status "Automated" here is only true after the TestLab run named in `_agent\TEST
 | Features run, tabs declared, KY-Items listed, HUB icon (T-210, T-200) | KydlCore.Core FeatureRegistry | ArchitectureRulesTests | kydl-spec-port | hub-look (looks, icon) | Automated + Manual |
 | Feature switches live, no stale tab / KY-Items entry | - | - | feature-toggle | - | Automated |
 | Costume recipes only after the first slipper equip, survives relog (T-201) | CostumeUnlockRulesTests | - | costume-after-slippers | hub-look (message) | Automated + Manual |
-| Player config layout (EnableAll, Enables, DebugLog, ranges) | - | SettingsTests, SuiteRulesTests | (configOverrides) | - | Automated |
+| Player config layout (EnableMod, Enables, DebugLog, ranges) | - | SettingsTests, SuiteRulesTests | (configOverrides) | - | Automated |
 | Harmony patch targets still exist | - | PatchTargetsTests | - | - | Automated |
 | Taming, health / elemental immunity | TamingRules*, HealthRules | - | troll-elemental-immune, health-clean | - | Automated |
 | Farming, far search, spot return, recovery | IdleRules, FarmGate, StuckRules, Recovery* | - | farm-chops-tree, far-search, spot-return, recovery-walled-tree, unarmed-farm, noweapon-farm | - | Automated |

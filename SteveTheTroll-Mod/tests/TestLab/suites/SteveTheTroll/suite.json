@@ -4,11 +4,11 @@
     "requireMods":  [
                         {
                             "guid":  "com.kydldev.SteveTheTroll",
-                            "minVersion":  "2.0.2"
+                            "minVersion":  "2.0.3"
                         },
                         {
                             "guid":  "com.kydldev.KydlCore",
-                            "minVersion":  "1.1.0"
+                            "minVersion":  "1.1.1"
                         },
                         {
                             "guid":  "com.drakemods.testlab",
@@ -25,13 +25,13 @@
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
                                 "section":  "General",
-                                "key":  "Enable slippers",
+                                "key":  "Enable Slippers",
                                 "value":  true
                             },
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
                                 "section":  "General",
-                                "key":  "Enable costume",
+                                "key":  "Enable Costume",
                                 "value":  true
                             },
                             {
@@ -43,7 +43,7 @@
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
                                 "section":  "General",
-                                "key":  "Enable trolls",
+                                "key":  "Enable Trolls",
                                 "value":  true
                             },
                             {
@@ -61,7 +61,7 @@
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
                                 "section":  "General",
-                                "key":  "Enable trollHub",
+                                "key":  "Enable Troll Hub",
                                 "value":  true
                             },
                             {
@@ -73,7 +73,7 @@
                             {
                                 "guid":  "com.kydldev.SteveTheTroll",
                                 "section":  "General",
-                                "key":  "Enable riding",
+                                "key":  "Enable Riding",
                                 "value":  true
                             },
                             {

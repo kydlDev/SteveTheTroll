@@ -7,7 +7,7 @@ using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 namespace SteveTheTroll.Features.Riding.Infrastructure;
 
 /// <summary>
-///     T-213: the rideable troll (MIGRATION_DECISIONS A4). Gate: [General] EnableAll AND [Trolls] Enable AND [Riding] Enable, read live. The halter item is added to the game
+///     T-213: the rideable troll (MIGRATION_DECISIONS A4). Gate: [General] EnableMod AND [Trolls] Enable AND [Riding] Enable, read live. The halter item is added to the game
 ///     at start (Jotunn clones the prefab once, Plugin.Awake), so it exists only when the feature was on then; the mount / dismount, hover prompt and ride patches
 ///     check the gate on every use.
 /// </summary>

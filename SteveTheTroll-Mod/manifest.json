@@ -1,11 +1,11 @@
 {
   "name": "SteveTheTroll",
-  "version_number": "2.0.2",
+  "version_number": "2.0.3",
   "website_url": "",
   "description": "Tame real trolls with the Fluffy Slippers. They follow, fight, farm wood and ore, unload into depots and work from Troll Hubs. Add the troll costume and club.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2202",
     "ValheimModding-Jotunn-2.30.2",
-    "KydlDev-KydlCore-1.1.0"
+    "KydlDev-KydlCore-1.1.1"
   ]
 }

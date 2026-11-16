@@ -278,7 +278,7 @@ internal static class MainMenuView
 
     private static Label Cell(string content, float width, bool header)
     {
-        Label l = UiKit.Label(content, header ? UiKit.SmallSize : UiKit.FontSize, header ? UiKit.TextDim : UiKit.Text);
+        Label l = UiKit.TextLabel(content, header ? TextRole.SmallNote : TextRole.Body);
         l.style.whiteSpace = WhiteSpace.Normal;
         if (width >= 0f)
         {

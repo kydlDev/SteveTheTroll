@@ -42,7 +42,7 @@ namespace SteveTheTroll.Bootstrap;
 /// </summary>
 [BepInPlugin(ModGuid, ModName, ModVersion)]
 [BepInDependency(Main.ModGuid)]
-[BepInDependency(KydlCore.Bootstrap.Plugin.ModGuid, "1.1.0")]
+[BepInDependency(KydlCore.Bootstrap.Plugin.ModGuid, "1.1.1")]
 [BepInDependency(KydlToolsGuid, BepInDependency.DependencyFlags.SoftDependency)] // the stt_ console commands exist only with the developer's KydlTools
 // shared world state (tamed trolls, ZDOs, items, pieces, RPCs): everyone needs the mod, the exact same version (MIGRATION_DECISIONS network rule)
 [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Patch)]
@@ -52,7 +52,7 @@ public class Plugin : BaseUnityPlugin
     public const string ModGuid = "com.kydldev.SteveTheTroll";
     private const string KydlToolsGuid = "com.kydldev.KydlTools";
     public const string ModName = "SteveTheTroll";
-    public const string ModVersion = "2.0.2";
+    public const string ModVersion = "2.0.3";
 
     public const string BundleName = "stevethetroll";
 

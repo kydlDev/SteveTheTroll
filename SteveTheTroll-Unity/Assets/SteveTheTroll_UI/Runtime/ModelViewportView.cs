@@ -45,8 +45,8 @@ internal static class ModelViewportView
         {
             frame.style.justifyContent = Justify.Center;
             frame.style.alignItems = Align.Center;
-            frame.Add(UiKit.Label(title ?? "", UiKit.SectionSize, UiKit.TextDim, true));
-            frame.Add(UiKit.Label(unavailable ?? "", UiKit.FontSize, UiKit.TextDim));
+            frame.Add(UiKit.TextLabel(title ?? "", TextRole.SectionMuted));
+            frame.Add(UiKit.TextLabel(unavailable ?? "", TextRole.Note));
             UiLog.Verbose("ModelViewportView: no 3D scene, showing the title '" + title + "' only");
             return frame;
         }
@@ -85,14 +85,14 @@ internal static class ModelViewportView
             _image.style.bottom = 0;
             frame.Add(_image);
 
-            Label name = UiKit.Label(title ?? "", UiKit.SectionSize, UiKit.Gold, true);
+            Label name = UiKit.TextLabel(title ?? "", TextRole.Section);
             name.style.position = Position.Absolute;
             name.style.left = 10;
             name.style.top = 6;
             name.pickingMode = PickingMode.Ignore;
             frame.Add(name);
 
-            Label hintLabel = UiKit.Label(hint ?? "", UiKit.SmallSize, UiKit.TextDim);
+            Label hintLabel = UiKit.TextLabel(hint ?? "", TextRole.SmallNote);
             hintLabel.style.position = Position.Absolute;
             hintLabel.style.left = 10;
             hintLabel.style.bottom = 8;

@@ -76,7 +76,7 @@ public class SettingsTests
     {
         var src = File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs"));
 
-        foreach (var name in new[] { "Enable slippers", "Enable costume", "Enable trolls", "Enable trollHub", "Enable riding" })
+        foreach (var name in new[] { "Enable Slippers", "Enable Costume", "Enable Trolls", "Enable Troll Hub", "Enable Riding" })
             Assert.That(Regex.IsMatch(src, @"Bind\(\s*""General""\s*,\s*""" + name + @""""), Is.True, "[General] " + name + " is the switch of that functionality");
     }
 

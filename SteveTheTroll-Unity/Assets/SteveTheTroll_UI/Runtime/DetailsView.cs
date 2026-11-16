@@ -57,9 +57,9 @@ internal static class DetailsView
     private static VisualElement ColumnHeader(string q, string max)
     {
         VisualElement r = RowBox();
-        r.Add(Cell("", LabelWidth, UiKit.TextDim, UiKit.SmallSize));
-        r.Add(Cell(q ?? "", ValueWidth, UiKit.TextDim, UiKit.SmallSize));
-        r.Add(Cell(max ?? "", ValueWidth, UiKit.TextDim, UiKit.SmallSize));
+        r.Add(Cell("", LabelWidth, TextRole.SmallNote));
+        r.Add(Cell(q ?? "", ValueWidth, TextRole.SmallNote));
+        r.Add(Cell(max ?? "", ValueWidth, TextRole.SmallNote));
         return r;
     }
 
@@ -67,11 +67,11 @@ internal static class DetailsView
     private static VisualElement StatRow(DetailRow row, bool blockHasMax)
     {
         VisualElement r = RowBox();
-        r.Add(Cell(row.Label, LabelWidth, UiKit.TextDim, UiKit.FontSize));
-        r.Add(Cell(row.Value, blockHasMax && row.HasMax ? ValueWidth : -1f, UiKit.Text, UiKit.FontSize));
+        r.Add(Cell(row.Label, LabelWidth, TextRole.Note));
+        r.Add(Cell(row.Value, blockHasMax && row.HasMax ? ValueWidth : -1f, TextRole.Body));
         if (blockHasMax && row.HasMax)
         {
-            r.Add(Cell(row.MaxValue, ValueWidth, UiKit.Gold, UiKit.FontSize));
+            r.Add(Cell(row.MaxValue, ValueWidth, TextRole.Value));
         }
 
         return r;
@@ -88,9 +88,9 @@ internal static class DetailsView
         return r;
     }
 
-    private static Label Cell(string content, float width, Color color, float size)
+    private static Label Cell(string content, float width, TextRole role)
     {
-        Label l = UiKit.Label(content, size, color);
+        Label l = UiKit.TextLabel(content, role);
         l.style.whiteSpace = WhiteSpace.Normal;
         if (width >= 0f)
         {

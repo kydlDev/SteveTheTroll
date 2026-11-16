@@ -40,15 +40,15 @@ internal static partial class InGameTests
     /// The player config is bound and the mod is switched on.
     private static string Startup_ConfigBound()
     {
-        if (ModSettings.EnableAll == null)
+        if (ModSettings.EnableMod == null)
         {
-            return "FAIL: ModSettings.Bind did not run (EnableAll is null)";
+            return "FAIL: ModSettings.Bind did not run (EnableMod is null)";
         }
 
         return ModSettings.On
-            ? "PASS: EnableAll on, slippers " + ModSettings.SlippersOn + ", costume " + ModSettings.CostumeOn +
+            ? "PASS: EnableMod on, slippers " + ModSettings.SlippersOn + ", costume " + ModSettings.CostumeOn +
               ", trolls " + ModSettings.TrollsOn
-            : "SKIP: EnableAll is off in the config";
+            : "SKIP: EnableMod is off in the config";
     }
 
     /// D-166: the slippers and their trolls are baked into the bundle prefab SlipperSkinParts: the prefab loads, its attach_skin has the skinned mesh with the player's 53 bones, and the item carries it.

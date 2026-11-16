@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.3
+
+- Changed: the menus of this mod take their text sizes, text colours and font from KydlCore. Needs KydlCore 1.1.1 or newer.
+_Not released yet (user, 2026-11-16): only the names of the switches changed, the code is the same as in 2.0.2, so no DrakesTestLab runs were made for it. It will be published together with the next real change._
+
+- Changed: the category switches in `[General]` are written with capital letters, like all KydlDev mods: `Enable Slippers`, `Enable Costume`, `Enable Trolls`, `Enable Troll Hub` and `Enable Riding` (were `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`). The values you had set are taken over.
+
 ## 2.0.2
 
 - Changed: all the **Enable** switches are now together in `[General]` and have new names: `Enable mod` (was `[General] EnableAll`), `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`. The values you had set are taken over; the old entries are removed from your config file. `[TrollHub] AutoAssign` stays in `[TrollHub]`.

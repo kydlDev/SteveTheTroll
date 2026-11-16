@@ -24,7 +24,7 @@
                   {
                       "do":  "setConfig",
                       "values":  {
-                                     "General/Enable slippers":  false
+                                     "General/Enable Slippers":  false
                                  }
                   },
                   {
@@ -69,7 +69,7 @@
                   {
                       "do":  "setConfig",
                       "values":  {
-                                     "General/Enable slippers":  true
+                                     "General/Enable Slippers":  true
                                  }
                   },
                   {
@@ -105,7 +105,7 @@
                   {
                       "do":  "setConfig",
                       "values":  {
-                                     "General/Enable trolls":  false
+                                     "General/Enable Trolls":  false
                                  }
                   },
                   {
@@ -168,7 +168,7 @@
                   {
                       "do":  "setConfig",
                       "values":  {
-                                     "General/Enable trolls":  true
+                                     "General/Enable Trolls":  true
                                  }
                   },
                   {

@@ -3,7 +3,7 @@ namespace SteveTheTroll.Configuration;
 /// <summary>
 ///     Which functionalities of SteveTheTroll are on (PROJECT_RULES 11, user 2026-10-30). Pure: no game types, unit
 ///     tested.
-///     A functionality works only when [General] EnableAll AND its own [Section] Enable are on. Off = it is not added to
+///     A functionality works only when [General] EnableMod AND its own [Section] Enable are on. Off = it is not added to
 ///     the game / not shown.
 ///     Functionalities: Slippers (the item and the mini trolls on the feet), Costume (head, suit, trousers, club, set
 ///     effects) and

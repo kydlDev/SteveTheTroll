@@ -8,7 +8,7 @@ using SteveTheTroll.Presentation.Hub.Registration;
 namespace SteveTheTroll.Features.Slippers.Infrastructure;
 
 /// <summary>
-///     The Fluffy Slippers (MIGRATION_DECISIONS A4). Gate: [General] EnableAll AND [Slippers] Enable, read live. The item
+///     The Fluffy Slippers (MIGRATION_DECISIONS A4). Gate: [General] EnableMod AND [Slippers] Enable, read live. The item
 ///     itself is added to the game at start
 ///     (Jotunn clones the prefab once, Plugin.Awake), so it exists only when the feature was on then; Start / Stop switch
 ///     what the feature contributes live:

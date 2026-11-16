@@ -35,7 +35,6 @@ internal sealed class TabBar
         {
             int index = i;
             var b = new Button(() => Select(index)) { text = names[i] };
-            b.style.fontSize = UiKit.ButtonSize;
             b.style.flexShrink = 0;
             b.style.marginLeft = 0;
             b.style.marginRight = 4;
@@ -101,7 +100,7 @@ internal sealed class TabBar
         Button b = _buttons[index];
         bool active = index == Selected;
         b.style.backgroundColor = active ? UiKit.PanelLight : hover ? UiKit.PanelHover : Color.clear;
-        b.style.color = active ? UiKit.Gold : hover ? UiKit.Text : UiKit.TextDim;
+        UiKit.TabText(b, active, hover);
         b.style.borderBottomColor = active ? UiKit.Gold : Color.clear;
     }
 }

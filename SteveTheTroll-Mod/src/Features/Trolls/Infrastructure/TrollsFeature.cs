@@ -8,7 +8,7 @@ namespace SteveTheTroll.Features.Trolls.Infrastructure;
 /// <summary>
 ///     Taming and farming of real trolls with the slippers, their backpack and depots, orders, map pins and extra trolls
 ///     near the bed (MIGRATION_DECISIONS A4).
-///     Gate: [General] EnableAll AND [Trolls] Enable, read live. The troll prefab changes (tameable, depot frame, level
+///     Gate: [General] EnableMod AND [Trolls] Enable, read live. The troll prefab changes (tameable, depot frame, level
 ///     op) are made at start (Plugin.Awake);
 ///     Start / Stop switch the troll ticks (<see cref="Running" />, read by Plugin.Update) and the My trolls / Troll work
 ///     / Trolls tabs live.

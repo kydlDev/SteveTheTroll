@@ -9,7 +9,7 @@ namespace SteveTheTroll.Features.Costume.Infrastructure;
 
 /// <summary>
 ///     The troll costume (head, suit, trousers), the Troll Club and the set effects (MIGRATION_DECISIONS A4). Gate:
-///     [General] EnableAll AND [Costume] Enable,
+///     [General] EnableMod AND [Costume] Enable,
 ///     read live. The items are added to the game at start (Plugin.Awake); Start / Stop switch the Costume tab and the
 ///     four KY-Items entries live.
 /// </summary>

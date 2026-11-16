@@ -9,7 +9,7 @@ using SteveTheTroll.Presentation.Hub.Registration;
 namespace SteveTheTroll.Features.Hubs.Infrastructure;
 
 /// <summary>
-///     The Troll Hub building (D-135, MIGRATION_DECISIONS A4). Gate: [General] EnableAll AND [Trolls] Enable AND
+///     The Troll Hub building (D-135, MIGRATION_DECISIONS A4). Gate: [General] EnableMod AND [Trolls] Enable AND
 ///     [TrollHub] Enable, read live (ModSettings.HubsOn,
 ///     which the hub code reads too). The piece is added to the game at start (Plugin.Awake); Start / Stop switch the
 ///     Troll Hub tab and the KY-Items entry
