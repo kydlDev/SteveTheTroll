@@ -9,6 +9,6 @@
     { "do": "hook", "name": "stt.rideMarkedByMe", "args": { "troll": "troll" }, "expect": true, "label": "the troll's ZDO says it is ridden by the player" },
     { "do": "hook", "name": "stt.rideMountFile", "expect": "stored", "label": "the mount file holds the ride" },
     { "do": "relog", "timeout": 120 },
-    { "do": "wait", "seconds": 3 }
+    { "do": "wait", "seconds": 8, "label": "settle after the relog: the lab finds the tagged troll again only once it is loaded (run 20261117-124601: a check 3 s after the relog saw no troll)" }
   ]
 }
