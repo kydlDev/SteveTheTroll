@@ -54,9 +54,23 @@ public class SettingsTests
     {
         var src = File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs"));
 
-        Assert.That(Regex.IsMatch(src, @"Bind\(\s*""General""\s*,\s*""Enable mod"""), Is.True, "[General] Enable mod (on by default) is the global switch of every mod");
+        Assert.That(Regex.IsMatch(src, @"Bind\(\s*""General""\s*,\s*""Enable Mod"""), Is.True, "[General] Enable Mod (on by default) is the global switch of every mod");
     }
 
+    [Test]
+    public void PlayerConfig_EnableModIsTheFirstSettingOfGeneral()
+    {
+        // user, 2026-11-17: [General] Enable Mod is the first setting of every mod in the F6 hub (the order the entries are bound in) and in the
+        // F1 configuration manager (the Order tag of ConfigOrder.First)
+        var src = File.ReadAllText(Path.Combine(TestPaths.Src, "Configuration", "ModSettings.cs"));
+
+        Match first = Regex.Match(src, @"\.Bind\(\s*""General""\s*,\s*""(?<k>[^""]+)""");
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(first.Success && first.Groups["k"].Value == "Enable Mod", Is.True, "the first [General] entry bound must be 'Enable Mod'");
+            Assert.That(Regex.IsMatch(src, @"""Enable Mod""\s*,\s*Old\([^)]*\)\s*,\s*ConfigOrder\.First\("), Is.True, "'Enable Mod' carries the F1 order tag (ConfigOrder.First)");
+        }
+    }
     [Test]
     public void PlayerConfig_EnableSwitchesLiveInGeneral()
     {

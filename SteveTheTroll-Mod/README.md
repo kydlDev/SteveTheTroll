@@ -206,7 +206,7 @@ Removing a hub with the hammer gives back what it cost.
 
 | Section  | Setting          | Default | What it does                                                                                                                                                                                         |
 |----------|------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| General  | Enable mod       | true    | Switches the whole mod on / off while playing                                                                                                                                                        |
+| General  | Enable Mod       | true    | Switches the whole mod on / off while playing                                                                                                                                                        |
 | General  | Enable Slippers  | true    | The Fluffy Slippers and the mini trolls on the feet. Off: the Slippers tab goes away at once; the item is added at game start, so turning it on needs a restart                                      |
 | General  | Enable Costume   | true    | The Troll Mascot costume, club and set power. Off: the Costume tab goes away at once; turning it on needs a restart                                                                                  |
 | General  | Enable Trolls    | true    | Taming and farming of real trolls, backpack, depots, map pins, extra trolls. Off: the troll tabs and the background troll work stop at once, the rest after a restart; turning it on needs a restart |

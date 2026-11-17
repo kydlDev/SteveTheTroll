@@ -6,9 +6,10 @@
 _Not released yet (user, 2026-11-16): only the names of the switches changed, the code is the same as in 2.0.2, so no DrakesTestLab runs were made for it. It will be published together with the next real change._
 
 - Changed: the category switches in `[General]` are written with capital letters, like all KydlDev mods: `Enable Slippers`, `Enable Costume`, `Enable Trolls`, `Enable Troll Hub` and `Enable Riding` (were `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`). The values you had set are taken over.
+- Changed: `Enable Mod` is now the first setting of `[General]`, in the F1 menu and in the F6 hub (your value is taken over).
 
 ### Testing
-- Unit tests: 1450 passed. Integration tests: 73 passed.
+- Unit tests: 1450 passed. Integration tests: 74 passed.
 - Property-based tests (FsCheck, included in the unit tests above): 27 property checks with generated inputs.
 - Coverage of the testable code: 99.4%. Mutation testing (Stryker): 92% of the mutants are caught by the tests.
 - Performance benchmarks (BenchmarkDotNet): 10.
@@ -17,7 +18,7 @@ _Not released yet (user, 2026-11-16): only the names of the switches changed, th
 
 ## 2.0.2
 
-- Changed: all the **Enable** switches are now together in `[General]` and have new names: `Enable mod` (was `[General] EnableAll`), `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`. The values you had set are taken over; the old entries are removed from your config file. `[TrollHub] AutoAssign` stays in `[TrollHub]`.
+- Changed: all the **Enable** switches are now together in `[General]` and have new names: `Enable Mod` (was `[General] EnableAll`), `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`. The values you had set are taken over; the old entries are removed from your config file. `[TrollHub] AutoAssign` stays in `[TrollHub]`.
 - New: `[Trolls] Two star trolls break fortress walls` (on by default) and `[Trolls] Trolls mine Petrified Gammeltroll` (on by default). Off: your trolls leave the Ashlands fortress walls / the Petrified Gammeltroll alone.
 - Changed: the developer console commands (`stt_...`) exist only when the developer's own KydlTools mod is loaded. The `[General] UnlockWord` setting and the `stt_unlock` command are gone; players do not see any of these commands.
 - Fixed: the name tag of the troll you ride stays on top of the troll instead of drifting around it.

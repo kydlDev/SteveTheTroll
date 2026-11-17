@@ -309,20 +309,20 @@ internal static class ModSettings
     public static readonly Tunable<float> RideLeashWidth = new("TrollRiding", "LeashWidth", 0.1f, 0.02f, 0.4f,
         "Width of the leather leash (m).");
 
-    /// Is the mod switched on ([General] Enable mod)? Off = inert: no effects, no menus; nothing built is removed.
+    /// Is the mod switched on ([General] Enable Mod)? Off = inert: no effects, no menus; nothing built is removed.
     public static bool On => EnableMod == null || EnableMod.Value;
 
-    /// A functionality is on only when Enable mod AND its own Enable are on (the rule itself is Functions.IsOn). Read live: the features (Bootstrap.ModInstaller)
+    /// A functionality is on only when Enable Mod AND its own Enable are on (the rule itself is Functions.IsOn). Read live: the features (Bootstrap.ModInstaller)
     /// start / stop their tabs, KY-Items entries and ticks at once. The prefabs of a part that was off at game start are not added, so switching it ON needs a restart.
     public static bool SlippersOn => Functions.IsOn(On, SlippersEnable == null || SlippersEnable.Value);
 
     public static bool CostumeOn => Functions.IsOn(On, CostumeEnable == null || CostumeEnable.Value);
     public static bool TrollsOn => Functions.IsOn(On, TrollsEnable == null || TrollsEnable.Value);
 
-    /// The rideable troll (T-213): [General] Enable mod AND Enable Trolls AND Enable Riding. Read live; the item needs a restart to appear.
+    /// The rideable troll (T-213): [General] Enable Mod AND Enable Trolls AND Enable Riding. Read live; the item needs a restart to appear.
     public static bool RidingOn => Functions.IsOn(TrollsOn, RidingEnable == null || RidingEnable.Value);
 
-    /// The Troll Hubs (D-135): [General] Enable mod AND Enable Trolls AND Enable Troll Hub. Read live like the others.
+    /// The Troll Hubs (D-135): [General] Enable Mod AND Enable Trolls AND Enable Troll Hub. Read live like the others.
     public static bool HubsOn => Functions.IsOn(TrollsOn, HubEnable == null || HubEnable.Value);
 
     /// 2-star tamed trolls break Ashlands fortress walls ([Trolls] Two star trolls break fortress walls).
@@ -363,8 +363,8 @@ internal static class ModSettings
 
         // 2026-11-15 (user): the Enable switches moved to [General] under new names; the player's old values are carried over (read from the
         // old entries before DropRemoved deletes them).
-        EnableMod = c.Bind("General", "Enable mod", Old(c, "General", "EnableAll"),
-            "Switches the whole mod on / off while playing. Off: no effects and no menus from this mod; things already built stay in the world.");
+        EnableMod = c.Bind("General", "Enable Mod", Old(c, "General", "Enable mod", "General", "EnableAll"),
+            ConfigOrder.First("Switches the whole mod on / off while playing. Off: no effects and no menus from this mod; things already built stay in the world."));
         SlippersEnable = c.Bind("General", "Enable Slippers", Old(c, "General", "Enable slippers", "Slippers", "Enable"),
             "The Fluffy Slippers with the little plush trolls on your feet. Off: their menu tab goes away at once; the item itself is added when the game starts, so switching this on needs a game restart.");
         CostumeEnable = c.Bind("General", "Enable Costume", Old(c, "General", "Enable costume", "Costume", "Enable"),
@@ -389,11 +389,11 @@ internal static class ModSettings
         ConfigTools.ApplyCommaFix(c, savedLines); // after every Bind: "3,5" typed by hand means 3.5, not 35
         ConfigTools.DropRemoved(c);
 
-        EnableMod.SettingChanged += (s, e) => ModLog.Info("Config: Enable mod = " + EnableMod.Value +
+        EnableMod.SettingChanged += (s, e) => ModLog.Info("Config: Enable Mod = " + EnableMod.Value +
                                                           (EnableMod.Value
                                                               ? ", the mod is on"
                                                               : ", the mod is inert (no effects or menus)"));
-        ModLog.Verbose("Config: bound (Enable mod " + EnableMod.Value + ", slippers " + SlippersOn + ", costume " +
+        ModLog.Verbose("Config: bound (Enable Mod " + EnableMod.Value + ", slippers " + SlippersOn + ", costume " +
                        CostumeOn + ", trolls " + TrollsOn + ", attack key " + AttackKey.Value + ", debug log " +
                        DebugLog.Value + ")");
         return EnableMod != null && SlippersEnable != null && CostumeEnable != null && TrollsEnable != null &&
