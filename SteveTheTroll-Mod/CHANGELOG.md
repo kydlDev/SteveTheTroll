@@ -7,10 +7,11 @@ _Not released yet: this version now also has a real change (the riding fix below
 
 - Changed: the category switches in `[General]` are written with capital letters, like all KydlDev mods: `Enable Slippers`, `Enable Costume`, `Enable Trolls`, `Enable Troll Hub` and `Enable Riding` (were `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`). The values you had set are taken over.
 - Changed: `Enable Mod` is now the first setting of `[General]`, in the F1 menu and in the F6 hub (your value is taken over).
+- Fixed: a short stutter for the host (or a single player) about 20 seconds after joining a world and then every 30 seconds: the mod looked through every saved object of the world in one frame to check its troll list (12 to 78 ms). It now does that in small slices in the background, so no single frame is held up.
 - Fixed: when the game closed (or you logged out) while riding a troll, the troll stayed marked as ridden by you, so other players could not mount it, and it did not go back to work. Now, when you log in again, that troll is freed once it is near: the marker is removed, it stops following and goes back to work from its hub. You start on foot; the Troll Halter and Seat was never taken from your inventory.
 
 ### Testing
-- Unit tests: 1457 passed. Integration tests: 74 passed.
+- Unit tests: 1465 passed. Integration tests: 74 passed.
 - Property-based tests (FsCheck, included in the unit tests above): 27 property checks with generated inputs.
 - Coverage of the testable code: 99.4%. Mutation testing (Stryker): 92% of the mutants are caught by the tests.
 - Performance benchmarks (BenchmarkDotNet): 10.

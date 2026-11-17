@@ -14,6 +14,39 @@ public class LedgerRulesTests
     static LedgerEntry E(string id, bool dead = false, bool missing = false, string since = "") =>
         new LedgerEntry { Id = id, Name = "Troll " + id, X = 10.5f, Y = 3f, Z = -20f, Health = 600f, Loaded = true, Dead = dead, Missing = missing, MissingSince = since };
 
+    // performance 2026-11-17: the world scan runs in the background - a pass is due on the server only, never twice at once, first at once, then every interval
+    [TestCase(true, false, 100f, -1f, 30f, true)]
+    [TestCase(true, false, 100f, 70f, 30f, true)]
+    [TestCase(true, false, 100f, 71f, 30f, false)]
+    [TestCase(true, true, 100f, -1f, 30f, false)]
+    [TestCase(false, false, 100f, -1f, 30f, false)]
+    public void ScanDue(bool isServer, bool scanning, float now, float lastDoneAt, float interval, bool expected)
+    { Assert.That(LedgerRules.ScanDue(isServer, scanning, now, lastDoneAt, interval), Is.EqualTo(expected)); }
+
+    [Test]
+    public void KnownIds_NoFinishedScan_IsNull_NothingFlagged()
+    { Assert.That(LedgerRules.KnownIds(null, new[] { "a" }), Is.Null); }
+
+    [Test]
+    public void KnownIds_AddsTheLoadedTrolls_ToAnOlderScan()
+    {
+        // the ledger-readback case: a troll spawned after the last scan must not be written as missing
+        HashSet<string> ids = LedgerRules.KnownIds(new HashSet<string> { "old" }, new[] { "new", "", null });
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(ids, Is.EquivalentTo(new[] { "old", "new" }));
+            Assert.That(LedgerRules.Merge(new List<LedgerEntry>(), new List<LedgerEntry> { E("new") }, ids, Now)[0].Missing, Is.False);
+        }
+    }
+
+    [Test]
+    public void KnownIds_DoesNotChangeTheScanSet()
+    {
+        var scanned = new HashSet<string> { "old" };
+        LedgerRules.KnownIds(scanned, new[] { "new" });
+        Assert.That(scanned, Is.EquivalentTo(new[] { "old" }));
+    }
+
     [TestCase("Valheim", 123L, "Valheim", 123L, true)]
     [TestCase("valheim", 123L, "VALHEIM", 123L, true)]
     // two worlds with the same name (user 2026-11-06): the uid decides

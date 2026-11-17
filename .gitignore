@@ -128,3 +128,6 @@ CLAUDE.md
 # BenchmarkDotNet output (PROJECT_RULES 30): numbers that matter go to tests/_quality/benchmarks.md
 **/BenchmarkDotNet.Artifacts/
 **/Benchmarks/bench*.log
+
+# BenchmarkDotNet output (rebuilt by every benchmark run)
+BenchmarkDotNet.Artifacts/

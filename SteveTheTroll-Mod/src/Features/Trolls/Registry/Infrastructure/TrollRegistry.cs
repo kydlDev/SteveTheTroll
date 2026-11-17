@@ -80,7 +80,13 @@ internal static partial class TrollRegistry
     /// Plugin.Update. Expected outcome: returns whether a refresh ran this frame.
     internal static bool Tick()
     {
-        if (Time.time < _next || Player.m_localPlayer == null || !ModSettings.On)
+        if (Player.m_localPlayer == null || !ModSettings.On)
+        {
+            return false;
+        }
+
+        TrollLedger.ScanStep(); // performance 2026-11-17: the ledger's world scan, one small slice per frame (it was one big scan in a single frame)
+        if (Time.time < _next)
         {
             return false;
         }

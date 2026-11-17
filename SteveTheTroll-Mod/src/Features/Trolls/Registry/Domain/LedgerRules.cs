@@ -24,6 +24,38 @@ internal static class LedgerRules
     internal const int KeepDays = 7;
     private const string StampFormat = "yyyy-MM-ddTHH:mm:ssZ";
 
+    /// Performance (user 2026-11-17: the host stuttered 12 - 78 ms in one frame ~20 s after joining and at the 30 s writes, because the whole world was scanned in one frame):
+    /// the troll ZDOs are now gathered by a background scan spread over frames. A new pass is due on the server only, when none is running and the last one is at least
+    /// `interval` seconds old (or there was none yet: `lastDoneAt` below 0). Expected outcome: true when a pass should start now.
+    internal static bool ScanDue(bool isServer, bool scanning, float now, float lastDoneAt, float interval)
+    {
+        return isServer && !scanning && (lastDoneAt < 0f || now - lastDoneAt >= interval);
+    }
+
+    /// The ids that count as existing when the file is written: the last finished world scan plus the trolls loaded right now (they exist, even when the scan is older than
+    /// their spawn). Null when no scan has finished yet (a client, or the first pass is still running): nothing is flagged missing then. Expected outcome: a new set or null.
+    internal static HashSet<string> KnownIds(ISet<string> scanned, IEnumerable<string> loaded)
+    {
+        if (scanned == null)
+        {
+            return null;
+        }
+
+        var ids = new HashSet<string>(scanned);
+        if (loaded != null)
+        {
+            foreach (string id in loaded)
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    ids.Add(id);
+                }
+            }
+        }
+
+        return ids;
+    }
+
     /// Does the file belong to this world? Expected outcome: true only when the world uid is known (not 0) and equal AND the names are equal (ignoring case).
     internal static bool Matches(string fileWorld, long fileUid, string world, long uid)
     {

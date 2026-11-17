@@ -66,7 +66,16 @@ internal static class TrollOrders
     {
         internal bool Pressed, Fake, Alive, Blocked, Camera, Steer, Sent, SentKnown;
         internal string Troll = "none", Owner = "-", Candidate = "none", Decision = "-", Now = "-";
+
+        /// Back to the start values (one record is reused every frame instead of a new object per frame - performance 2026-11-17).
+        internal void Reset()
+        {
+            Pressed = Fake = Alive = Blocked = Camera = Steer = Sent = SentKnown = false;
+            Troll = "none"; Owner = "-"; Candidate = "none"; Decision = "-"; Now = "-";
+        }
     }
+
+    private static readonly KeyRecord Record = new();
 
     private static bool _fakeThisFrame;
     private static string _lastRay = "";
@@ -78,7 +87,8 @@ internal static class TrollOrders
     internal static bool Tick()
     {
         Watch();
-        KeyRecord r = new();
+        KeyRecord r = Record;
+        r.Reset();
         bool result = TickCore(r);
         if (r.Pressed)
         {

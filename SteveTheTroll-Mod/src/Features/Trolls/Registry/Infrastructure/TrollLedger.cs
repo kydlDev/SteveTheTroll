@@ -23,6 +23,15 @@ namespace SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 internal static class TrollLedger
 {
     private const float WriteSeconds = 30f, ReconcileDelay = 20f;
+
+    // Performance (user 2026-11-17): the troll ZDOs of the world are gathered by a background scan, at most ScanBudgetMs per frame (ScanStep, called every frame by
+    // TrollRegistry.Tick), a new pass every WriteSeconds. Before, the whole world was scanned in ONE frame at the read-back and at every 30 s write: 12 - 78 ms hitches.
+    private const double ScanBudgetMs = 0.5;
+    private static readonly System.Diagnostics.Stopwatch ScanClock = new();
+    private static List<ZDO> _scan;
+    private static int _scanIndex;
+    private static HashSet<string> _scanIds;
+    private static float _scanDoneAt = -1f;
     private static float _next, _joinedAt = -1f;
     private static string _last = "", _worldKey = "";
     private static bool _reconciled, _read;
@@ -49,9 +58,13 @@ internal static class TrollLedger
             _read = false;
             _previous = new List<LedgerEntry>();
             _last = "";
+            _scan = null;
+            _scanIds = null;
+            _scanDoneAt = -1f;
         }
 
-        if (!_reconciled && Time.time - _joinedAt >= ReconcileDelay)
+        // the read-back waits for the first finished background scan on the server (a client never has one and skips the comparison as before)
+        if (!_reconciled && Time.time - _joinedAt >= ReconcileDelay && (_scanIds != null || !IsServer()))
         {
             Reconcile(false);
         }
@@ -139,10 +152,81 @@ internal static class TrollLedger
         }
     }
 
-    /// The ids of every troll ZDO of this world. Expected outcome: the set on the server / in single player; null on a client (it does not know every ZDO).
+    private static bool IsServer() => ZNet.instance != null && ZNet.instance.IsServer();
+
+    /// Every frame (TrollRegistry.Tick): one slice of the background world scan, at most ScanBudgetMs; a new pass starts when LedgerRules.ScanDue says so.
+    /// Expected outcome: true in the frame a pass finished (its ids are then the ones the read-back and the writer use).
+    internal static bool ScanStep()
+    {
+        bool server = IsServer();
+        if (_scan == null && LedgerRules.ScanDue(server, false, Time.time, _scanDoneAt, WriteSeconds))
+        {
+            _scan = new List<ZDO>();
+            _scanIndex = 0;
+        }
+
+        if (_scan == null)
+        {
+            return false;
+        }
+
+        if (!server || ZDOMan.instance == null)
+        {
+            _scan = null;   // the world was left (or this machine stopped being the server) during the pass
+            return false;
+        }
+
+        ScanClock.Restart();
+        bool done = false;
+        int slices = 0;
+        while (!done && ScanClock.Elapsed.TotalMilliseconds < ScanBudgetMs)
+        {
+            done = ZDOMan.instance.GetAllZDOsWithPrefabIterative(TrollTaming.TrollPrefab, _scan, ref _scanIndex);
+            slices++;
+        }
+
+        if (!done)
+        {
+            return false;
+        }
+
+        HashSet<string> ids = RememberScan(IdsOf(_scan));
+        ModLog.Every("TrollLedger.scan", 300d, "TrollLedger: background world scan finished - " + ids.Count + " troll ZDO(s) (last frame " + slices + " slice(s), " + ScanClock.Elapsed.TotalMilliseconds.ToString("0.00") + " ms)");
+        _scan = null;
+        return true;
+    }
+
+    private static HashSet<string> RememberScan(HashSet<string> ids)
+    {
+        if (ids != null)
+        {
+            _scanIds = ids;
+            _scanDoneAt = Time.time;
+        }
+
+        return ids;
+    }
+
+    private static HashSet<string> IdsOf(List<ZDO> zdos)
+    {
+        var ids = new HashSet<string>();
+        foreach (ZDO z in zdos)
+        {
+            string id = z.GetString(TrollRegistry.IdKey);
+            if (id.Length > 0)
+            {
+                ids.Add(id);
+            }
+        }
+
+        return ids;
+    }
+
+    /// The ids of every troll ZDO of this world, scanned NOW in one go (the forced read-back of the tests; the game uses the background scan). Expected outcome: the set on the
+    /// server / in single player; null on a client (it does not know every ZDO).
     internal static HashSet<string> ExistingIds()
     {
-        if (ZNet.instance == null || ZDOMan.instance == null || !ZNet.instance.IsServer())
+        if (!IsServer() || ZDOMan.instance == null)
         {
             return null;
         }
@@ -153,17 +237,7 @@ internal static class TrollLedger
         {
         }
 
-        var ids = new HashSet<string>();
-        foreach (ZDO z in all)
-        {
-            string id = z.GetString(TrollRegistry.IdKey);
-            if (id.Length > 0)
-            {
-                ids.Add(id);
-            }
-        }
-
-        return ids;
+        return IdsOf(all);
     }
 
     /// The read-back: the file against the world. `force` skips the join delay and the once-per-world rule (tests). Expected outcome: how many troll(s) of the file are missing; -1 = not due.
@@ -179,7 +253,8 @@ internal static class TrollLedger
         string why;
         List<LedgerEntry> file = ReadFile(out why);
         _read = true;
-        HashSet<string> ids = ExistingIds();
+        // forced (tests): scanned now and remembered; otherwise the last finished background scan
+        HashSet<string> ids = force ? RememberScan(ExistingIds()) : _scanIds;
         if (ids == null)
         {
             ModLog.Info("TrollLedger: read-back skipped - this client does not know every troll ZDO (the server is the truth); " + file.Count + " entr(ies) in the file" + (why.Length > 0 ? " (" + why + ")" : ""));
@@ -243,7 +318,16 @@ internal static class TrollLedger
             });
         }
 
-        List<LedgerEntry> all = LedgerRules.Merge(_previous, live, ExistingIds(), DateTime.UtcNow);
+        var loaded = new List<string>();
+        foreach (LedgerEntry e in live)
+        {
+            if (e.Loaded)
+            {
+                loaded.Add(e.Id);
+            }
+        }
+
+        List<LedgerEntry> all = LedgerRules.Merge(_previous, live, LedgerRules.KnownIds(_scanIds, loaded), DateTime.UtcNow);
         _previous = all;
         return LedgerRules.Format(ZNet.instance != null ? ZNet.instance.GetWorldName() : "", ZNet.instance != null ? ZNet.instance.GetWorldUID() : 0L,
                                   Player.m_localPlayer != null ? Player.m_localPlayer.GetPlayerID() : 0L, all);
