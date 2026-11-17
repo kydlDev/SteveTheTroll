@@ -38,15 +38,34 @@ public class ChairFitRulesTests
     [TestCase(0.019f, false)]     // 1 mm short of the limit
     [TestCase(0.02f, true)]
     [TestCase(0.05f, true)]
-    public void Recentre_At2cmInside(float into, bool again)
-    { Assert.That(ChairFitRules.NeedsRecentre(into), Is.EqualTo(again)); }
+    public void TooFarInside_At2cm(float into, bool inside)
+    { Assert.That(ChairFitRules.TooFarInside(into), Is.EqualTo(inside)); }
+
+    [TestCase(0.05f, 1, false)]   // one pose while the troll starts walking: not yet
+    [TestCase(0.05f, 2, false)]
+    [TestCase(0.05f, 3, true)]    // 0.75 s in a row
+    [TestCase(0.05f, 7, true)]
+    [TestCase(0.01f, 9, false)]   // in a row, but not 2 cm inside
+    public void Recentre_OnlyWhenItLasts(float into, int inARow, bool again)
+    { Assert.That(ChairFitRules.NeedsRecentre(into, inARow), Is.EqualTo(again)); }
+
+    [Test]
+    public void Recentre_KeepsTheSidewaysPlaceOfTheMount()
+    {
+        // repeat run rep-chair, rep02: a re-run that also corrected sideways at the start of a walk left the rider 14 cm off the middle line
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(ChairFitRules.SideErrorFor(true, -0.15f), Is.EqualTo(0f));
+            Assert.That(ChairFitRules.SideErrorFor(false, -0.15f), Is.EqualTo(-0.15f));
+        }
+    }
 
     [Test]
     public void Recentre_TheLabCaseOf2026_11_17()
     {
         // run 20261117-180708: centred (back on the face), then 2 cm inside 5 s later - now a new centring starts
         float gap = Hips - 0.02f;
-        Assert.That(ChairFitRules.NeedsRecentre(ChairFitRules.IntoBack(gap, Hips)), Is.True);
+        Assert.That(ChairFitRules.NeedsRecentre(ChairFitRules.IntoBack(gap, Hips), ChairFitRules.RecentreAfterChecks), Is.True);
     }
 
     [TestCase(0f, 0f, true)]

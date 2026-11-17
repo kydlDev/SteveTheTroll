@@ -57,6 +57,9 @@ internal sealed class HalterVisual : MonoBehaviour
     /// Lab / log: the centring is finished.
     internal bool Centred => _centring.Done;
 
+    /// How often the centring ran again during this ride (lab, diagnosis).
+    internal int Recentres => _centring.Recentres;
+
     /// Where the rider's pelvis goes (offset by the SeatX/Y/Z tunables).
     internal Transform SeatPoint => _seatPoint;
 

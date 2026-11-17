@@ -18,6 +18,7 @@ internal sealed class HalterCentring
     private Transform _hips;
     private int _settled;
     private float _runStart = -1f, _nextWatch;
+    private int _insideInARow;
 
     internal HalterCentring(Transform troll, Transform rider, Transform body, Transform seatAnchor)
     {
@@ -93,6 +94,7 @@ internal sealed class HalterCentring
 
         float ex, ez, into;
         Measure(out ex, out ez, out into);
+        ex = ChairFitRules.SideErrorFor(Recentres > 0, ex); // a re-run keeps the sideways place found when mounting
         _settled = ChairFitRules.Settled(ex, ez) ? _settled + 1 : 0;
         FixX -= ex * 0.4f;
         FixZ -= ez * 0.4f;
@@ -116,13 +118,20 @@ internal sealed class HalterCentring
         _nextWatch = since + ChairFitRules.WatchEverySeconds;
         float ex, ez, into;
         Measure(out ex, out ez, out into);
-        if (!ChairFitRules.NeedsRecentre(into))
+        _insideInARow = ChairFitRules.TooFarInside(into) ? _insideInARow + 1 : 0;
+        if (!ChairFitRules.NeedsRecentre(into, _insideInARow))
         {
+            if (_insideInARow > 0)
+            {
+                ModLog.Verbose($"HalterVisual: the rider's back is {into * 100f:F1} cm inside the chair back - check {_insideInARow} of {ChairFitRules.RecentreAfterChecks} in a row before a new centring");
+            }
+
             return;
         }
 
+        _insideInARow = 0;
         Recentres++;
-        ModLog.Info($"HalterVisual: the rider's back is {into * 100f:F1} cm inside the chair back (limit {ChairFitRules.RecentreAtM * 100f:F0} cm from its inside face) - centring again (re-run {Recentres} this ride)");
+        ModLog.Info($"HalterVisual: the rider's back is {into * 100f:F1} cm inside the chair back (limit {ChairFitRules.RecentreAtM * 100f:F0} cm from its inside face, {ChairFitRules.RecentreAfterChecks} checks in a row) - centring again, forward / back only (re-run {Recentres} this ride)");
         Done = false;
         _settled = 0;
         _runStart = -1f;

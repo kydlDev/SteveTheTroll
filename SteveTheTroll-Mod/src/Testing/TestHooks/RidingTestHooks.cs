@@ -181,7 +181,7 @@ internal static class RidingTestHooks
         }
 
         float back = v.HipsIntoBackCm();
-        ModLog.Info("RidingTestHooks: rideIntoBackCm - hips " + back.ToString("0.0") + " cm off the chair line front/back, " + v.HipsSideCm().ToString("0.0") + " cm sideways (live, after the one-time centring)");
+        ModLog.Info("RidingTestHooks: rideIntoBackCm - hips " + back.ToString("0.0") + " cm off the chair line front/back, " + v.HipsSideCm().ToString("0.0") + " cm sideways (live; re-centres this ride: " + v.Recentres + ")");
         return Mathf.RoundToInt(back);
     }
 

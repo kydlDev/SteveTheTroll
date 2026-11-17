@@ -12,7 +12,7 @@ _Not released yet: this version now also has a real change (the riding fix below
 - Fixed: while riding, the rider's back could sink a little into the back of the troll's chair after a while (the sitting animation moves the hips after the rider was centred when mounting). The rider's back is now kept just in front of the chair back, and if it still goes 2 cm into it, the rider is centred again.
 
 ### Testing
-- Unit tests: 1491 passed. Integration tests: 74 passed.
+- Unit tests: 1497 passed. Integration tests: 74 passed.
 - Property-based tests (FsCheck, included in the unit tests above): 27 property checks with generated inputs.
 - Coverage of the testable code: 99.4%. Mutation testing (Stryker): 92% of the mutants are caught by the tests.
 - Performance benchmarks (BenchmarkDotNet): 10.
