@@ -11,7 +11,7 @@ _Not released yet: this version now also has a real change (the riding fix below
 - Fixed: when the game closed (or you logged out) while riding a troll, the troll stayed marked as ridden by you, so other players could not mount it, and it did not go back to work. Now, when you log in again, that troll is freed once it is near: the marker is removed, it stops following and goes back to work from its hub. You start on foot; the Troll Halter and Seat was never taken from your inventory.
 
 ### Testing
-- Unit tests: 1465 passed. Integration tests: 74 passed.
+- Unit tests: 1476 passed. Integration tests: 74 passed.
 - Property-based tests (FsCheck, included in the unit tests above): 27 property checks with generated inputs.
 - Coverage of the testable code: 99.4%. Mutation testing (Stryker): 92% of the mutants are caught by the tests.
 - Performance benchmarks (BenchmarkDotNet): 10.
