@@ -130,6 +130,35 @@ public class RideRulesTests
         }
     }
 
+    [TestCase(true, true, false, 0L, LoginRecovery.YieldToNewRide)]
+    [TestCase(true, true, true, 7L, LoginRecovery.YieldToNewRide)]
+    [TestCase(false, true, false, 0L, LoginRecovery.None)]
+    [TestCase(true, false, true, 7L, LoginRecovery.ReleaseTroll)]
+    [TestCase(true, false, false, 0L, LoginRecovery.WaitForTroll)]
+    public void Login_WithANewRideRunning_YieldsToIt(bool fileNamesTroll, bool newRide, bool loaded, long rider, LoginRecovery step)
+    { Assert.That(RideRules.OnLogin(fileNamesTroll, newRide, loaded, rider, 7L), Is.EqualTo(step)); }
+
+    [TestCase(LoginRecovery.None, true)]
+    [TestCase(LoginRecovery.ReleaseTroll, true)]
+    [TestCase(LoginRecovery.LeaveToOtherRider, true)]
+    [TestCase(LoginRecovery.WaitForTroll, false)]
+    [TestCase(LoginRecovery.YieldToNewRide, false)]
+    public void MountFile_IsEmptiedOnlyOnceTheStoredRideIsSettled(LoginRecovery step, bool empties)
+    { Assert.That(RideRules.EmptiesMountFile(step), Is.EqualTo(empties)); }
+
+    [Test]
+    public void Login_StaleFileThenNewRide_KeepsTheNewRidesFile()
+    {
+        // the bug fixed 2026-11-17 (lab run 20261117-152354): a stale mount file of a gone troll, then a new ride - the recovery emptied the NEW
+        // ride's file, so the relog during that ride freed nothing and the troll stayed "ridden by me"
+        LoginRecovery step = RideRules.OnLogin(true, true, false, 0L, 7L);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(step, Is.EqualTo(LoginRecovery.YieldToNewRide));
+            Assert.That(RideRules.EmptiesMountFile(step), Is.False);
+        }
+    }
+
     [Test]
     public void Recipe_IsWhatTheUserAsked()
     {

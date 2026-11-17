@@ -103,6 +103,18 @@ internal static class RideRules
 
         return riderOnTroll != 0L && riderOnTroll != me ? LoginRecovery.LeaveToOtherRider : LoginRecovery.ReleaseTroll;
     }
+
+    /// The same with a ride already running: a new ride started before the stored troll was loaded -> YieldToNewRide (bug fixed 2026-11-17, lab run
+    /// 20261117-152354: the recovery then emptied the mount file the NEW ride had just written, so a relog during that ride freed nothing).
+    /// Expected outcome: the step to take now.
+    internal static LoginRecovery OnLogin(bool fileNamesTroll, bool newRide, bool trollLoaded, long riderOnTroll, long me)
+    {
+        return fileNamesTroll && newRide ? LoginRecovery.YieldToNewRide : OnLogin(fileNamesTroll, trollLoaded, riderOnTroll, me);
+    }
+
+    /// Whether the step empties the mount file. Expected outcome: true once the stored ride is settled (freed, ridden by another player, nothing stored);
+    /// false while waiting, and false for a new ride - that file is the new ride's own.
+    internal static bool EmptiesMountFile(LoginRecovery step) => step != LoginRecovery.WaitForTroll && step != LoginRecovery.YieldToNewRide;
 }
 
 public enum EndReason
@@ -125,5 +137,6 @@ public enum LoginRecovery
     None,
     WaitForTroll,
     ReleaseTroll,
-    LeaveToOtherRider
+    LeaveToOtherRider,
+    YieldToNewRide
 }

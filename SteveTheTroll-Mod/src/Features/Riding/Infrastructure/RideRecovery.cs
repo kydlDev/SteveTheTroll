@@ -51,15 +51,10 @@ internal static class RideRecovery
             return "";
         }
 
-        if (RideSession.Troll != null)
-        {
-            ModLog.Info($"RideRecovery: a new ride started before troll {_pending} was loaded - the new ride owns the mount file now");
-            return Done("new ride");
-        }
-
         long me = p.GetPlayerID();
-        Character troll = TrollRegistry.FindLoaded(_pending);
-        LoginRecovery step = RideRules.OnLogin(true, troll != null, troll != null ? RideSession.RiderOf(troll) : 0L, me);
+        bool newRide = RideSession.Troll != null;
+        Character troll = newRide ? null : TrollRegistry.FindLoaded(_pending);
+        LoginRecovery step = RideRules.OnLogin(true, newRide, troll != null, troll != null ? RideSession.RiderOf(troll) : 0L, me);
         return Apply(step, troll, me);
     }
 
@@ -71,21 +66,24 @@ internal static class RideRecovery
                 ModLog.Every("RideRecoveryWait", 60d, $"RideRecovery: troll {_pending} is not loaded yet (its zone is far away) - still waiting");
                 Last = "waiting";
                 return Last;
+            case LoginRecovery.YieldToNewRide:
+                ModLog.Info($"RideRecovery: a new ride started before troll {_pending} was loaded - the new ride owns the mount file now (kept)");
+                return Done("new ride", step);
             case LoginRecovery.LeaveToOtherRider:
                 ModLog.Info($"RideRecovery: troll {_pending} is ridden by another player now - only the mount file is emptied");
-                return Done("other rider");
+                return Done("other rider", step);
             case LoginRecovery.ReleaseTroll:
                 bool freed = RideSession.Release(troll, me);
                 TrollIdle.ResumeNow("troll freed after a relog during a ride");
-                return Done(freed ? "released" : "release failed");
+                return Done(freed ? "released" : "release failed", step);
             default:
-                return Done("");
+                return Done("", step);
         }
     }
 
-    private static string Done(string what)
+    private static string Done(string what, LoginRecovery step)
     {
-        bool cleared = RideSession.ClearMountFile();
+        bool cleared = RideRules.EmptiesMountFile(step) && RideSession.ClearMountFile();
         ModLog.Verbose($"RideRecovery: {(what.Length > 0 ? what : "nothing stored")}, mount file emptied {cleared}");
         _pending = "";
         Last = what;
