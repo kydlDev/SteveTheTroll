@@ -268,16 +268,34 @@ internal static class TrollLedger
         List<LedgerEntry> fresh = LedgerRules.NewlyMissing(missing);
         ModLog.Info("TrollLedger: read-back - " + file.Count + " troll(s) in the file, " + ids.Count + " troll ZDO(s) in the world, " + missing.Count + " missing: " + fresh.Count + " new, " +
                     (missing.Count - fresh.Count) + " already reported at an earlier visit" + (why.Length > 0 ? " (" + why + ")" : ""));
-        foreach (LedgerEntry e in fresh)
+        // performance 2026-11-17 (run 20261117-140105: 40 missing trolls = 40 log lines = 27 ms in ONE frame, ~0.65 ms per line): ONE line for the newly missing trolls and
+        // ONE debug line for the ones reported before, each listing them all (the file keeps every entry as evidence)
+        if (fresh.Count > 0)
         {
-            ModLog.Info("TrollLedger: " + e.Name + " [" + e.Id + "] last seen at " + e.X.ToString("0") + " / " + e.Z.ToString("0") + " is not in this world now (first time noticed)");
+            var text = new StringBuilder("TrollLedger: " + fresh.Count + " troll(s) of the file - each is not in this world now (first time noticed): ");
+            for (int i = 0; i < fresh.Count; i++)
+            {
+                LedgerEntry e = fresh[i];
+                text.Append(i == 0 ? "" : "; ").Append(e.Name).Append(" [").Append(e.Id).Append("] last seen at ").Append(e.X.ToString("0")).Append(" / ").Append(e.Z.ToString("0"));
+            }
+
+            ModLog.Info(text.ToString());
         }
 
-        foreach (LedgerEntry e in missing)
+        if (ModLog.DebugOn)
         {
-            if (e.Missing)
+            var still = new StringBuilder();
+            foreach (LedgerEntry e in missing)
             {
-                ModLog.Verbose("TrollLedger: " + e.Name + " [" + e.Id + "] still missing since " + e.MissingSince + " (reported before, kept as evidence)");
+                if (e.Missing)
+                {
+                    still.Append(still.Length == 0 ? "" : "; ").Append(e.Name).Append(" [").Append(e.Id).Append("] since ").Append(e.MissingSince);
+                }
+            }
+
+            if (still.Length > 0)
+            {
+                ModLog.Verbose("TrollLedger: still missing (reported before, kept as evidence): " + still);
             }
         }
 
