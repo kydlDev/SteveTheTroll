@@ -84,8 +84,25 @@ internal static class RideRules
     /// Why a ride ended. Expected outcome: the halter + seat return to the inventory, except after death (tombstone) and the troll is free again.
     internal static EndOutcome End(EndReason reason) => reason == EndReason.PlayerDied ? EndOutcome.ItemToTombstone : EndOutcome.ItemToInventory;
 
-    /// On login with a mount file: the item is back in the inventory, the troll is sent to its hub and behaves as normal. Expected outcome: the recovery to run.
-    internal static LoginRecovery OnLogin(int storedTroll) => storedTroll == 0 ? LoginRecovery.None : LoginRecovery.ItemBackAndTrollToHub;
+    /// T-213 relog recovery (user 2026-11-06: "on relog the halter+seat item returns to the player's inventory and the troll is sent to its hub
+    /// (normal behaviour)"; the item is never taken while riding, so only the troll needs it). After a login with a mount file of THIS player:
+    /// nothing stored -> None; the troll's zone not loaded yet -> WaitForTroll; the troll's rider marker names ANOTHER player (it was ridden
+    /// since) -> LeaveToOtherRider (only the file is emptied); otherwise -> ReleaseTroll (our marker cleared, follow order dropped, the troll
+    /// goes back to its own work at its hub). Expected outcome: the step to take now.
+    internal static LoginRecovery OnLogin(bool fileNamesTroll, bool trollLoaded, long riderOnTroll, long me)
+    {
+        if (!fileNamesTroll)
+        {
+            return LoginRecovery.None;
+        }
+
+        if (!trollLoaded)
+        {
+            return LoginRecovery.WaitForTroll;
+        }
+
+        return riderOnTroll != 0L && riderOnTroll != me ? LoginRecovery.LeaveToOtherRider : LoginRecovery.ReleaseTroll;
+    }
 }
 
 public enum EndReason
@@ -106,5 +123,7 @@ public enum EndOutcome
 public enum LoginRecovery
 {
     None,
-    ItemBackAndTrollToHub
+    WaitForTroll,
+    ReleaseTroll,
+    LeaveToOtherRider
 }

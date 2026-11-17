@@ -28,6 +28,26 @@ internal static class RidingTestHooks
     }
 
     /// Does the player carry the halter and seat?
+    /// T-213 relog recovery: does the troll's ZDO still say "ridden by the local player"? Expected outcome: true while riding, false after a dismount or the recovery.
+    [TestHook("stt.rideMarkedByMe")]
+    private static bool MarkedByMe(GameObject troll)
+    {
+        Character c = troll != null ? troll.GetComponent<Character>() : null;
+        return c != null && Player.m_localPlayer != null && RideSession.RiderOf(c) == Player.m_localPlayer.GetPlayerID();
+    }
+
+    /// T-213: the mount file as a word: "empty" (no ride stored), "stored" (a ride line) or "other" (anything else).
+    [TestHook("stt.rideMountFile")]
+    private static string MountFileState()
+    {
+        string t = RideSession.ReadMountFile().Trim();
+        return t.Length == 0 ? "empty" : t.Contains("troll=") ? "stored" : "other";
+    }
+
+    /// T-213: the relog recovery's last step ("released", "waiting", "other rider", "new ride", "") plus " (pending)" while a troll still waits.
+    [TestHook("stt.rideRecovery")]
+    private static string Recovery() => RideRecovery.Last + (RideRecovery.Pending.Length > 0 ? " (pending)" : "");
+
     [TestHook("stt.rideHasHalter")]
     private static bool HasHalter() => RideItem.InInventory(Player.m_localPlayer);
 

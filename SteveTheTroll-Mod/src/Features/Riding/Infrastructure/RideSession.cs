@@ -153,6 +153,53 @@ internal static class RideSession
         }
     }
 
+    /// Relog recovery (RideRecovery): the mount file's text, "" when there is none or it cannot be read (logged). Expected outcome: the text.
+    internal static string ReadMountFile()
+    {
+        string path = FilePath();
+        try
+        {
+            return File.Exists(path) ? File.ReadAllText(path) : "";
+        }
+        catch (IOException ex)
+        {
+            ModLog.Warn($"RideSession.ReadMountFile: {ex.GetType().FullName}: {ex.Message} while reading {MountFile.FileName} - no relog recovery this time");
+        }
+        catch (System.UnauthorizedAccessException ex)
+        {
+            ModLog.Warn($"RideSession.ReadMountFile: {ex.GetType().FullName}: {ex.Message} while reading {MountFile.FileName} - no read access to the config folder, no relog recovery");
+        }
+
+        return "";
+    }
+
+    /// Relog recovery: the stored ride is handled. Expected outcome: true when the file is empty afterwards.
+    internal static bool ClearMountFile() => WriteMountFile("");
+
+    /// Relog recovery (user 2026-11-06: "the troll is sent to its hub (normal behaviour)"): the troll this player rode when the game closed is
+    /// freed - its rider marker (ours) cleared, its follow order dropped, so TrollIdle sends it back to work from its hub. Takes the ownership
+    /// first, like Mount. Expected outcome: true when the troll carries no rider marker of this player any more.
+    internal static bool Release(Character troll, long me)
+    {
+        ZNetView view = troll != null ? troll.GetComponent<ZNetView>() : null;
+        if (view == null || !view.IsValid())
+        {
+            ModLog.Warn($"RideSession.Release: troll {(troll != null ? troll.name : "null")} has no valid ZNetView - its rider marker stays");
+            return false;
+        }
+
+        view.ClaimOwnership();
+        if (view.GetZDO().GetLong(RiderKey, 0L) == me)
+        {
+            view.GetZDO().Set(RiderKey, 0L);
+        }
+
+        TrollTaming.StopFollow(troll.GetComponent<MonsterAI>());
+        bool freed = view.GetZDO().GetLong(RiderKey, 0L) != me;
+        ModLog.Info($"RideSession: {troll.name} released after a relog - rider marker of this player {(freed ? "cleared" : "STILL THERE")}, follow order dropped");
+        return freed;
+    }
+
     /// Writes the mount file (relog recovery). Expected outcome: true when the file holds `text`; a failed write is logged and the ride goes on without the file.
     private static bool WriteMountFile(string text)
     {

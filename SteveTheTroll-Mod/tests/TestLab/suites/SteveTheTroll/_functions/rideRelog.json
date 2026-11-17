@@ -1,0 +1,14 @@
+{
+  "description": "T-213 relog recovery (2026-11-17): the arena with the hub BEHIND the player (hubDz -45, D-231), a tamed troll 16 m in front tagged `troll`, the player mounts it through the real alt-key path (rideMount), the ride is checked (ridden, the troll's ZDO marker names the player, the mount file holds the ride), then the player relogs WHILE riding - like the game closing during a ride. Used by ride-relog-recovery and its negative test meta-ride-relog-fails; both run LAST (relog, T-211).",
+  "steps": [
+    { "do": "use", "block": "start", "args": { "clearTrolls": true, "slippers": true, "hub": true, "hubDz": -45 } },
+    { "do": "hook", "name": "stt.spawnTroll", "args": { "dx": 0, "dz": 16 }, "as": "troll" },
+    { "do": "wait", "seconds": 1 },
+    { "do": "use", "block": "rideMount" },
+    { "do": "hook", "name": "stt.rideRidden", "args": { "troll": "troll" }, "expect": true, "label": "riding before the relog" },
+    { "do": "hook", "name": "stt.rideMarkedByMe", "args": { "troll": "troll" }, "expect": true, "label": "the troll's ZDO says it is ridden by the player" },
+    { "do": "hook", "name": "stt.rideMountFile", "expect": "stored", "label": "the mount file holds the ride" },
+    { "do": "relog", "timeout": 120 },
+    { "do": "wait", "seconds": 3 }
+  ]
+}

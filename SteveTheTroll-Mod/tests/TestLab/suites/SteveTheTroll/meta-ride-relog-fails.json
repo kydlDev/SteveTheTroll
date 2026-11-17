@@ -1,0 +1,12 @@
+{
+  "name": "meta-ride-relog-fails",
+  "description": "Negative test (must FAIL to pass): after a relog during a ride, expecting the troll to STILL carry the player's rider marker is caught - proves ride-relog-recovery can tell a freed troll from a stuck one. Runs LAST (relog).",
+  "expectFailure": true,
+  "timeout": 240,
+  "steps": [
+    { "do": "use", "block": "rideRelog" },
+    { "do": "wait", "seconds": 8 },
+    { "do": "hook", "name": "stt.rideMarkedByMe", "args": { "troll": "troll" }, "expect": true, "label": "the troll still says ridden by the player (WRONG on purpose: the recovery clears it)" }
+  ],
+  "asserts": [ { "check": "noErrors", "source": "SteveTheTroll" } ]
+}

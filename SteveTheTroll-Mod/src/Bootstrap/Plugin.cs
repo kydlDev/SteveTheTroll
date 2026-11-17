@@ -194,6 +194,7 @@ public class Plugin : BaseUnityPlugin
         Run("HubSpeed", () => HubSpeed.Tick()); // D-135: half-speed notice
         Run("HubSignMenu", () => HubSignMenu.Tick()); // D-135: Escape closes the sign editor
         Run("TrollIdle", () => TrollIdle.Tick()); // D-062: no job for 2 min -> farms on its own
+        Run("RideRecovery", () => RideRecovery.Tick()); // T-213: after a relog during a ride the troll is freed and sent back to work
     }
 
     private void OnDestroy()

@@ -1,0 +1,13 @@
+{
+  "name": "ride-relog-recovery",
+  "description": "T-213 relog recovery (user 2026-11-06, built 2026-11-17): the player relogs while riding. Afterwards the player is on foot, the troll's 'ridden by' marker is cleared (another player can mount it again), the recovery reports 'released' (the troll's follow order is dropped and it goes back to work from its hub) and the mount file is empty. Runs LAST (relog). Negative test: meta-ride-relog-fails.",
+  "timeout": 240,
+  "steps": [
+    { "do": "use", "block": "rideRelog" },
+    { "do": "wait", "until": { "check": "hook", "name": "stt.rideMarkedByMe", "args": { "troll": "troll" }, "expect": false }, "timeout": 30, "label": "the troll's rider marker is cleared after the relog" },
+    { "do": "hook", "name": "stt.rideRecovery", "contains": "released", "label": "the recovery freed the troll" },
+    { "do": "hook", "name": "stt.rideMountFile", "expect": "empty", "label": "the mount file is empty afterwards" },
+    { "do": "hook", "name": "stt.rideRidden", "args": { "troll": "troll" }, "expect": false, "label": "the player is on foot after the relog" }
+  ],
+  "asserts": [ { "check": "noErrors", "source": "SteveTheTroll" } ]
+}

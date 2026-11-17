@@ -106,13 +106,27 @@ public class RideRulesTests
     public void TheItemGoesBack_ExceptAfterDeath(EndReason why, EndOutcome outcome)
     { Assert.That(RideRules.End(why), Is.EqualTo(outcome)); }
 
+    [TestCase(false, false, 0L, LoginRecovery.None)]
+    [TestCase(false, true, 7L, LoginRecovery.None)]
+    [TestCase(true, false, 0L, LoginRecovery.WaitForTroll)]
+    [TestCase(true, false, 9L, LoginRecovery.WaitForTroll)]
+    [TestCase(true, true, 7L, LoginRecovery.ReleaseTroll)]
+    [TestCase(true, true, 0L, LoginRecovery.ReleaseTroll)]
+    [TestCase(true, true, 9L, LoginRecovery.LeaveToOtherRider)]
+    public void Login_RecoversTheStoredTroll_OnceLoaded_UnlessAnotherPlayerRidesIt(bool fileNamesTroll, bool loaded, long rider, LoginRecovery step)
+    { Assert.That(RideRules.OnLogin(fileNamesTroll, loaded, rider, 7L), Is.EqualTo(step)); }
+
     [Test]
-    public void Login_RecoversOnlyWhenAMountWasStored()
+    public void Login_AfterACrashWhileRiding_ReleasesOurOwnMarker()
     {
+        // the bug fixed 2026-11-17: the game closed while riding left "ridden by me" on the troll and nothing ever read the mount file
+        string text = MountFile.Write(7L, "abc123");
+        string troll;
+        bool stored = MountFile.TryRead(text, 7L, out troll);
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(RideRules.OnLogin(0), Is.EqualTo(LoginRecovery.None));
-            Assert.That(RideRules.OnLogin(5), Is.EqualTo(LoginRecovery.ItemBackAndTrollToHub));
+            Assert.That(stored && troll == "abc123", Is.True);
+            Assert.That(RideRules.OnLogin(stored, true, 7L, 7L), Is.EqualTo(LoginRecovery.ReleaseTroll));
         }
     }
 

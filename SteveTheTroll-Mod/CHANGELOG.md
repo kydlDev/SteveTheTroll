@@ -7,9 +7,10 @@ _Not released yet (user, 2026-11-16): only the names of the switches changed, th
 
 - Changed: the category switches in `[General]` are written with capital letters, like all KydlDev mods: `Enable Slippers`, `Enable Costume`, `Enable Trolls`, `Enable Troll Hub` and `Enable Riding` (were `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`). The values you had set are taken over.
 - Changed: `Enable Mod` is now the first setting of `[General]`, in the F1 menu and in the F6 hub (your value is taken over).
+- Fixed: when the game closed (or you logged out) while riding a troll, the troll stayed marked as ridden by you, so other players could not mount it, and it did not go back to work. Now, when you log in again, that troll is freed once it is near: the marker is removed, it stops following and goes back to work from its hub. You start on foot; the Troll Halter and Seat was never taken from your inventory.
 
 ### Testing
-- Unit tests: 1450 passed. Integration tests: 74 passed.
+- Unit tests: 1457 passed. Integration tests: 74 passed.
 - Property-based tests (FsCheck, included in the unit tests above): 27 property checks with generated inputs.
 - Coverage of the testable code: 99.4%. Mutation testing (Stryker): 92% of the mutants are caught by the tests.
 - Performance benchmarks (BenchmarkDotNet): 10.
