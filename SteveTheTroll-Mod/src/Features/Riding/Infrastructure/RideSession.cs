@@ -173,25 +173,4 @@ internal static class RideSession
         return File.Exists(path) && new FileInfo(path).Length == text.Length;
     }
 
-    /// On login: an old mount file means the client closed while riding; the file is cleared (the troll behaves as normal again since nothing holds the saddle).
-    /// Expected outcome: true when a stale ride was found and cleared.
-    internal static bool Recover(long playerId)
-    {
-        string path = FilePath();
-        if (!File.Exists(path))
-        {
-            return false;
-        }
-
-        string id;
-        bool stale = MountFile.TryRead(File.ReadAllText(path), playerId, out id);
-        if (RideRules.OnLogin(stale ? 1 : 0) == LoginRecovery.None)
-        {
-            return false;
-        }
-
-        File.WriteAllText(path, "");
-        ModLog.Info($"RideSession: stale mount file for troll {id} cleared on login - the troll stays under normal orders");
-        return true;
-    }
 }
