@@ -1,6 +1,7 @@
 using KydlCore.Common;
 using SteveTheTroll.Features.Riding.Domain;
 using SteveTheTroll.Features.Riding.Infrastructure;
+using SteveTheTroll.Features.Trolls.Registry.Infrastructure;
 using UnityEngine;
 
 namespace SteveTheTroll.Testing.TestHooks;
@@ -34,6 +35,37 @@ internal static class RidingTestHooks
     {
         Character c = troll != null ? troll.GetComponent<Character>() : null;
         return c != null && Player.m_localPlayer != null && RideSession.RiderOf(c) == Player.m_localPlayer.GetPlayerID();
+    }
+
+    // 2026-11-17 (runs 20261117-152354 and -195055): the lab re-finds a tag ONCE when the relog ends; the troll (moved near the bed at logout) was sometimes not
+    // loaded yet, the tag was lost for good and every later check said "'troll' not found" (the meta negative test then passed for the wrong reason).
+    // The test remembers the troll's own id before the relog and tags it again once it is loaded.
+    private static string _relogTrollId = "";
+
+    /// Remembers the troll's id (stt_id) before a relog. Expected outcome: the id, "" when the object is no tamed troll with an id.
+    [TestHook("stt.rememberTroll")]
+    private static string RememberTroll(GameObject troll)
+    {
+        Character c = troll != null ? troll.GetComponent<Character>() : null;
+        _relogTrollId = c != null ? TrollRegistry.IdOf(c) ?? "" : "";
+        ModLog.Info("RidingTestHooks: rememberTroll - " + (_relogTrollId.Length > 0 ? "troll " + _relogTrollId : "no troll id (object " + (troll != null ? troll.name : "null") + ")"));
+        return _relogTrollId;
+    }
+
+    /// Is the remembered troll loaded again (after the relog)? Expected outcome: true once its zone is loaded.
+    [TestHook("stt.rememberedTrollLoaded")]
+    private static bool RememberedTrollLoaded()
+    {
+        return _relogTrollId.Length > 0 && TrollRegistry.FindLoaded(_relogTrollId) != null;
+    }
+
+    /// The remembered troll, for `as` (tags it again after the relog). Expected outcome: its GameObject; null (logged) when it is not loaded.
+    [TestHook("stt.rememberedTroll")]
+    private static GameObject RememberedTroll()
+    {
+        Character c = _relogTrollId.Length > 0 ? TrollRegistry.FindLoaded(_relogTrollId) : null;
+        ModLog.Info("RidingTestHooks: rememberedTroll - troll " + (_relogTrollId.Length > 0 ? _relogTrollId : "(none remembered)") + (c != null ? " found at " + c.transform.position.ToString("F0") : " NOT loaded"));
+        return c != null ? c.gameObject : null;
     }
 
     /// T-213: the mount file as a word: "empty" (no ride stored), "stored" (a ride line) or "other" (anything else).

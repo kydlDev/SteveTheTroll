@@ -8,7 +8,9 @@
     { "do": "hook", "name": "stt.rideRidden", "args": { "troll": "troll" }, "expect": true, "label": "riding before the relog" },
     { "do": "hook", "name": "stt.rideMarkedByMe", "args": { "troll": "troll" }, "expect": true, "label": "the troll's ZDO says it is ridden by the player" },
     { "do": "hook", "name": "stt.rideMountFile", "expect": "stored", "label": "the mount file holds the ride" },
+    { "do": "hook", "name": "stt.rememberTroll", "args": { "troll": "troll" }, "notContains": "no troll id", "label": "remember the troll's own id before the relog" },
     { "do": "relog", "timeout": 120 },
-    { "do": "wait", "seconds": 8, "label": "settle after the relog: the lab finds the tagged troll again only once it is loaded (run 20261117-124601: a check 3 s after the relog saw no troll)" }
+    { "do": "wait", "until": { "check": "hook", "name": "stt.rememberedTrollLoaded", "expect": true }, "timeout": 30, "label": "the troll is loaded again after the relog (it was moved near the bed at logout)" },
+    { "do": "hook", "name": "stt.rememberedTroll", "as": "troll", "label": "tag the same troll again: the lab's own re-find runs once when the relog ends and missed a troll not loaded yet (runs 20261117-152354, -195055)" }
   ]
 }
