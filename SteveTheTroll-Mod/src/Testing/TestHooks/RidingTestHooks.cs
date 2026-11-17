@@ -168,11 +168,21 @@ internal static class RidingTestHooks
     }
 
     /// 2026-11-15 (user: the rider's back goes through the chair): how far (cm) the rider's hips still sit too far back, inside the chair back. Expected outcome: 0.
+    /// 2026-11-17 (run 20261117-180708 red: 2 cm against max 1, 5 s after a centring that left 0.0 cm): the hook logs the live numbers it returns - the
+    /// centring runs once, the sitting animation moves the hips by a few cm afterwards, so a failure must show both.
     [TestHook("stt.rideIntoBackCm")]
     private static int RideIntoBackCm(GameObject troll)
     {
         var v = troll.GetComponent<HalterVisual>();
-        return v == null ? -1 : Mathf.RoundToInt(v.HipsIntoBackCm());
+        if (v == null)
+        {
+            ModLog.Info("RidingTestHooks: rideIntoBackCm - no HalterVisual on " + troll.name + " (-1)");
+            return -1;
+        }
+
+        float back = v.HipsIntoBackCm();
+        ModLog.Info("RidingTestHooks: rideIntoBackCm - hips " + back.ToString("0.0") + " cm off the chair line front/back, " + v.HipsSideCm().ToString("0.0") + " cm sideways (live, after the one-time centring)");
+        return Mathf.RoundToInt(back);
     }
 
     /// 2026-11-15 (user: the name tag flies around): how far (cm) the name tag's anchor (what the game's EnemyHud reads) is from straight above the ridden troll's root. Expected outcome: 0.
