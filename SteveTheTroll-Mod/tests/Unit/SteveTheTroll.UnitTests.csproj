@@ -38,6 +38,7 @@
     <Compile Include="..\..\src\Features\Hubs\Application\*.cs" Link="Mod\Hubs\%(Filename)%(Extension)" />
     <Compile Include="..\..\src\Features\Trolls\Farming\Domain\IdleRules.cs" Link="Mod\IdleRules.cs" />
     <Compile Include="..\..\src\Features\Riding\Domain\RideRules.cs" Link="Mod\RideRules.cs" />
+    <Compile Include="..\..\src\Features\Riding\Domain\ChairFitRules.cs" Link="Mod\ChairFitRules.cs" />
     <Compile Include="..\..\src\Features\Riding\Domain\RideRecipe.cs" Link="Mod\RideRecipe.cs" />
     <Compile Include="..\..\src\Features\Riding\Domain\MountFile.cs" Link="Mod\MountFile.cs" />
     <Compile Include="..\..\src\Features\Riding\Domain\SeatFollow.cs" Link="Mod\SeatFollow.cs" />

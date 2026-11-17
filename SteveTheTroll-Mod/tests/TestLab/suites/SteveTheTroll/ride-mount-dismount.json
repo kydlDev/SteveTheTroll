@@ -101,8 +101,8 @@
             "args": {
                 "troll": "troll"
             },
-            "max": 3,
-            "label": "2.0.2: the rider back is not inside the chair back (cm; the bug was 20-30 cm, the sitting animation moves the hips 1-2 cm after the one-time centring - 2026-11-17 run 20261117-180708: 2 against max 1)"
+            "max": 1,
+            "label": "2.0.2: the rider back is not inside the chair back (cm from its INSIDE face; the back is glued 1.5 cm in front of it and re-centred at 2 cm inside - user 2026-11-17)"
         },
         {
             "check": "hook",
