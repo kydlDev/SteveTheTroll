@@ -3,8 +3,6 @@
 ## 2.0.3
 
 - Changed: the menus of this mod take their text sizes, text colours and font from KydlCore. Needs KydlCore 1.1.1 or newer.
-_Not released yet: this version now also has a real change (the riding fix below), so it is tested with the full DrakesTestLab suite before release._
-
 - Changed: the category switches in `[General]` are written with capital letters, like all KydlDev mods: `Enable Slippers`, `Enable Costume`, `Enable Trolls`, `Enable Troll Hub` and `Enable Riding` (were `Enable slippers`, `Enable costume`, `Enable trolls`, `Enable trollHub` and `Enable riding`). The values you had set are taken over.
 - Changed: `Enable Mod` is now the first setting of `[General]`, in the F1 menu and in the F6 hub (your value is taken over).
 - Fixed: a short stutter for the host (or a single player) about 20 seconds after joining a world and then every 30 seconds: the mod looked through every saved object of the world in one frame to check its troll list (12 to 78 ms). It now does that in small slices in the background, so no single frame is held up.
@@ -13,6 +11,7 @@ _Not released yet: this version now also has a real change (the riding fix below
 
 ### Testing
 - Unit tests: 1497 passed. Integration tests: 74 passed.
+- In game: the full DrakesTestLab suite (106 tests) passed three times in a row on the release build (2026-11-17).
 - Property-based tests (FsCheck, included in the unit tests above): 27 property checks with generated inputs.
 - Coverage of the testable code: 99.4%. Mutation testing (Stryker): 92% of the mutants are caught by the tests.
 - Performance benchmarks (BenchmarkDotNet): 10.
